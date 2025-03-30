@@ -13,16 +13,16 @@ interface FormFieldProps {
   password: string;
 }
 
-const Login: React.FC = () => {
+const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
 
   const { set: setToken } = useLocalStorage<string>("token", "");
 
-  const handleLogin = async (values: FormFieldProps) => {
+  const handleRegister = async (values: FormFieldProps) => {
     try {
-      const response = await apiService.post<User>("/login", values);
+      const response = await apiService.post<User>("/users", values);
 
       if (response.token) {
         setToken(response.token);
@@ -31,9 +31,9 @@ const Login: React.FC = () => {
       router.push("/main");
     } catch (error) {
       if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
+        alert(`Something went wrong during the register:\n${error.message}`);
       } else {
-        console.error("An unknown error occurred during login.");
+        console.error("An unknown error occurred during register.");
       }
     }
   };
@@ -42,13 +42,13 @@ const Login: React.FC = () => {
     <div className="login-container">
       <Form
         form={form}
-        name="login"
+        name="register"
         size="large"
-        onFinish={handleLogin}
+        onFinish={handleRegister}
         layout="vertical"
       >
         <Typography.Title style={{ textAlign: "center" }}>
-          Login Page
+          Register Page
         </Typography.Title>
 
         <Form.Item
@@ -70,10 +70,10 @@ const Login: React.FC = () => {
         <Form.Item >
           <div style={{ display: "flex", gap: "10px", width: "100%" }}>
             <Button type="primary" htmlType="submit" style={{ flex: 1 }}>
-              Login
+              Register
             </Button>
-            <Button type="default" onClick={() => router.push("/register")} style={{ flex: 1 }}>
-              Go to Register
+            <Button type="default" onClick={() => router.push("/login")} style={{ flex: 1 }}>
+              Go to Login
             </Button>
           </div>
         </Form.Item>
@@ -83,4 +83,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Register;

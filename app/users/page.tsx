@@ -20,11 +20,6 @@ const columns: TableProps<User>["columns"] = [
     key: "username",
   },
   {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
     title: "Id",
     dataIndex: "id",
     key: "id",
@@ -76,7 +71,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="card-container">
       <Card
-        title="Get all users from secure endpoint:"
+        title="Search page"
         loading={!users}
         className="dashboard-container"
       >
