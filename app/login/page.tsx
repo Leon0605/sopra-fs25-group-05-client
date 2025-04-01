@@ -1,4 +1,5 @@
 "use client";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -18,7 +19,8 @@ const Login: React.FC = () => {
   const apiService = useApi();
   const [form] = Form.useForm();
 
-  const { set: setToken } = useLocalStorage<string>("token", "");
+    const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
+    const { set: setUserId, clear: clearUserId } = useLocalStorage<string>("userId", "");
 
   const handleLogin = async (values: FormFieldProps) => {
     try {
@@ -27,6 +29,12 @@ const Login: React.FC = () => {
       if (response.token) {
         setToken(response.token);
       }
+
+      if (response.id) {
+        setUserId(String(response.id));
+      }
+      console.log("Logged in user ID:", response.id);
+
 
       router.push("/main");
     } catch (error) {
@@ -37,6 +45,12 @@ const Login: React.FC = () => {
       }
     }
   };
+
+  useEffect(() => {
+    clearToken();
+    clearUserId();
+  }, []);
+  
 
   return (
     <div className="login-container">

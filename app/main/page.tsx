@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Card, Typography } from "antd";
+import { Button, Card, Typography, Spin } from "antd";
 //import styles from "@/styles/page.module.css";
 
 const { Text } = Typography;
@@ -14,13 +14,32 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const { clear: clearToken } = useLocalStorage<string>("token", "");
+  const [hasMounted, setHasMounted] = useState(false);
+  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
+  const { clear: clearUserId, value: userId } = useLocalStorage<string>("userId", "");
+
 
   const handleLogout = (): void => {
     clearToken();
+    clearUserId();
     router.push("/login");
   };
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !token) {
+      router.push("/login");
+    }
+    
+  }, [hasMounted, token, router]);
+
+  
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -28,6 +47,13 @@ const Dashboard: React.FC = () => {
         const users: User[] = await apiService.get<User[]>("/users");
         setUsers(users);
         console.log("Fetched users:", users);
+
+        const matchedUser = users.find(user => String(user.id) === userId);
+        if (matchedUser) {
+          setCurrentUser(matchedUser);
+        }
+        console.log("Matched current user:", matchedUser);
+        
       } catch (error) {
         if (error instanceof Error) {
           alert(`Something went wrong while fetching users:\n${error.message}`);
@@ -38,10 +64,23 @@ const Dashboard: React.FC = () => {
     };
 
     fetchUsers();
-  }, [apiService]);
+  }, [apiService, userId]);
+
+  if (!hasMounted || !token || !users) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "20px" }}>
+
+      <div style={{ marginBottom: 16, textAlign: "center" }}>
+        {currentUser && <h2>Welcome, {currentUser.username}</h2>}
+      </div>
+      
       <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
         <h1>Users</h1>
         <Button onClick={handleLogout} type="primary">Logout</Button>

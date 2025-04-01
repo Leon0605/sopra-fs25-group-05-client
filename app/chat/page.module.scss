@@ -1,0 +1,83 @@
+/* filepath: /home/ctraill/SoPra/sopra-fs25-group-05-client/app/chat/page.module.scss */
+
+/* General Page Styling */
+#chat-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    background: linear-gradient(135deg, #6a5acd, #9370db);
+    color: white;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .chat-header {
+    padding: 10px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .messageArea {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+  }
+  
+  // .message.sent {
+  //   align-self: flex-end;
+  //   background-color: #4caf50;
+  //   color: white;
+  // }
+  
+  .message.received {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: black;
+  }
+  
+  .input-group {
+    display: flex;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .form-control {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    margin-right: 10px;
+  }
+  
+  .btn-primary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .btn-primary:hover {
+    background-color: #45a049;
+  }
