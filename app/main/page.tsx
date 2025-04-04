@@ -33,9 +33,9 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (hasMounted && !token) {
+      console.log("No token : redirected");
       router.push("/login");
     }
-    
   }, [hasMounted, token, router]);
 
   
@@ -77,13 +77,16 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ padding: "20px" }}>
 
-      <div style={{ marginBottom: 16, textAlign: "center" }}>
+      <div style={{ marginBottom: 16, textAlign: "left" }}>
         {currentUser && <h2>Welcome, {currentUser.username}</h2>}
       </div>
       
-      <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
+      <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between"}}>
         <h1>Users</h1>
-        <Button onClick={handleLogout} type="primary">Logout</Button>
+        <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", width: "35%" }}>
+          <Button onClick={() => router.push("/users")} type="primary">Go to User List</Button>
+          <Button onClick={handleLogout} type="primary">Logout</Button>
+        </div>
       </div>
 
       <div

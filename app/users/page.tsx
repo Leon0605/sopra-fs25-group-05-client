@@ -1,6 +1,4 @@
-// this code is part of S2 to display a list of all registered users
-// clicking on a user in this list will display /app/users/[id]/page.tsx
-"use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
+"use client"; 
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,11 +6,8 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Card, Table } from "antd";
-import type { TableProps } from "antd"; // antd component library allows imports of types
-// Optionally, you can import a CSS module or file for additional styling:
-// import "@/styles/views/Dashboard.scss";
+import type { TableProps } from "antd"; 
 
-// Columns for the antd table of User objects
 const columns: TableProps<User>["columns"] = [
   {
     title: "Username",
@@ -30,18 +25,14 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
-  // useLocalStorage hook example use
-  // The hook returns an object with the value and two functions
-  // Simply choose what you need from the hook:
-  const {
-    // value: token, // is commented out because we dont need to know the token value for logout
-    // set: setToken, // is commented out because we dont need to set or update the token value
-    clear: clearToken, // all we need in this scenario is a method to clear the token
-  } = useLocalStorage<string>("token", ""); // if you wanted to select a different token, i.e "lobby", useLocalStorage<string>("lobby", "");
+
+  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
+  const { clear: clearUserId, value: userId } = useLocalStorage<string>("userId", "");
+  
 
   const handleLogout = (): void => {
-    // Clear token using the returned function 'clear' from the hook
     clearToken();
+    clearUserId();
     router.push("/login");
   };
 
@@ -87,9 +78,10 @@ const Dashboard: React.FC = () => {
                 style: { cursor: "pointer" },
               })}
             />
-            <Button onClick={handleLogout} type="primary">
-              Logout
-            </Button>
+            <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", width: "103%" }}>
+              <Button onClick={handleLogout} type="primary">Logout</Button>
+              <Button onClick={() => router.push("/main")} type="primary">Go to Main page</Button>
+            </div>
           </>
         )}
       </Card>
