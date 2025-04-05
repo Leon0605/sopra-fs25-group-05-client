@@ -11,11 +11,11 @@ import styles from "./page.module.scss";
 
 const ChatPage: React.FC = () => {
   interface Message {
-    //messageId: string;
+    messageId: string;
     chatId: string;
     userId: number;
     content: string;
-    //timestamp: string;
+    timestamp: string;
   }
   
   const router = useRouter();
@@ -91,50 +91,23 @@ const ChatPage: React.FC = () => {
 
   const sendMessage = (content: string) => {
     // Retrieve the userId from localStorage
-    const Id = localStorage.getItem("id") ?? "defaultId";
-    const stompClient = stompClientRef.current;
-    console.log("Stomp client:", stompClient);
-    console.log("Stomp client in sendMessage:", stompClientRef.current);
-    console.log("User ID in sendMessage:", Id);
-    if (!stompClient || !stompClient.connected) {
-      console.error("WebSocket is not connected at line 101");
-      return;
-    }
-    if (stompClient && stompClient.connected) {
+    const userId = localStorage.getItem("id");
+    if (stompClientRef.current && stompClientRef.current.connected) {
       const message = {
-        // messageId: crypto.randomUUID(),
-        // chatId: "1d9316ac-2409-45dc-a66f-718b7166b57e", // Replace with the actual chatId
-        //userId: Number(userId), // Replace with the actual userId
+        messageId: crypto.randomUUID(),
+        chatId: "1d9316ac-2409-45dc-a66f-718b7166b57e", // Replace with the actual chatId
+        userId: Number(userId), // Replace with the actual userId
         content,
-        // timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
       };
       // Log the message object to the console
       console.log("Message to be sent:", message);
 
-      stompClient.publish({
-        
-      //   destination: "/app/chat/1d9316ac-2409-45dc-a66f-718b7166b57e/message", // Replace with your backend destination
-      //   body: JSON.stringify(message),
-      //   headers: {
-      //     // add content-type: application/json
-      //     "content-type": "application/json",
-      //     userId: 2,
-      //     chatId: "1d9316ac-2409-45dc-a66f-718b7166b57e" // Replace with the actual chatId
-      //   }
-      // });
-        destination: '/app/ff1731b4-4cb3-4f1d-bdbf-b8751e6b2647',
-        body: JSON.stringify({
-        content: content,
-        chatId: 'ff1731b4-4cb3-4f1d-bdbf-b8751e6b2647',
-        }),
-        headers: {
-          'userId': Id,
-          'chatId': 'ff1731b4-4cb3-4f1d-bdbf-b8751e6b2647',
-          'content-type': 'application/json',
-      },
-    });
-
-      //setMessages((prevMessages) => [...prevMessages, message]); // Optimistically update the UI
+      stompClientRef.current.publish({
+        destination: "/app/chat/1/message", // Replace with your backend destination
+        body: JSON.stringify(message),
+      });
+      setMessages((prevMessages) => [...prevMessages, message]); // Optimistically update the UI
     } else {
       console.error("WebSocket is not connected");
     }
@@ -334,23 +307,23 @@ const ChatPage: React.FC = () => {
 
   
 
-  // useEffect(() => {
-  //   const fetchMessages = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:8080/chat/1d9316ac-2409-45dc-a66f-718b7166b57e");
-  //       if (!response.ok) {
-  //         throw new Error(`Failed to fetch messages: ${response.statusText}`);
-  //       }
-  //       const data = await response.json();
-  //       console.log("Fetched messages:", data);
-  //       setMessages(data);
-  //     } catch (error) {
-  //       console.error("Error fetching messages:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/chat/1d9316ac-2409-45dc-a66f-718b7166b57e");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch messages: ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log("Fetched messages:", data);
+        setMessages(data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
 
-  //   fetchMessages();
-  // }, []);
+    fetchMessages();
+  }, []);
 
   // WebSocket setup
   useEffect(() => {
@@ -363,13 +336,12 @@ const ChatPage: React.FC = () => {
         alert("WebSocket is connected");
         console.log("Connected to WebSocket");
         setIsConnected(true);
-        stompClientRef.current = stompClient; // Ensure the ref is updated
       
 
-      const chatId = 'ff1731b4-4cb3-4f1d-bdbf-b8751e6b2647';
-      //stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
-      stompClient.subscribe(`/topic/${chatId}/messages`, (message) => {
-        console.log('Received message from Websocket:', message.body);
+        // Subscribe to a topic
+
+      const chatId = '1d9316ac-2409-45dc-a66f-718b7166b57e';
+      stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
         const chatMessage = JSON.parse(message.body);
         console.log('Received message:', chatMessage);
         console.log('Received message:', JSON.parse(message.body));
