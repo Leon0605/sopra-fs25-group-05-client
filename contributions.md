@@ -41,9 +41,9 @@ reason).
 |                      | 29.03.2025 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/773052cb28f37574be36f50bb7be22f2e217a481| https://github.com/users/Leon0605/projects/4/views/1?pane=issue&itemId=103071074&issue=Leon0605%7Csopra-fs25-group-05-server%7C34                                  | Allows user to logout                                |
 | @ctraill             | 30.03.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/aee78bba5d1015bf22809cbbf0a93fbae6270664 | https://github.com/users/Leon0605/projects/4/views/1?pane=issue&itemId=103065965&issue=Leon0605%7Csopra-fs25-group-05-client%7C5 | Allows users to have chat pages                      |
 |                      |     |  |https://github.com/Leon0605/sopra-fs25-group-05-client/issues/13 | Allows Users to have chats                           |
-|                      |30.03.20225|https://github.com/Leon0605/sopra-fs25-group-05-server/commit/0b8df331d4c241d5d4fc35447a782b4dd6f0560a|| Testing Implementation                               |
-| **[@githubUser4]**   | [date]     | [Link to Commit 1] | [Brief description of the task]                                 | [Why this contribution is relevant]                  |
-|                      | [date]     | [Link to Commit 2] | [Brief description of the task]                                 | [Why this contribution is relevant]                  |
+|                      |30.03.2025|https://github.com/Leon0605/sopra-fs25-group-05-server/commit/0b8df331d4c241d5d4fc35447a782b4dd6f0560a|| Testing Implementation                               |
+| @adevantery          | 29.03.2025     | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/6334934db16680c2fcd44a25e2b2086265c5295e | https://github.com/users/Leon0605/projects/4/views/1?pane=issue&itemId=103059851&issue=Leon0605%7Csopra-fs25-group-05-server%7C6                                 | User can register an account (frontend)                  |
+|                      |      |  | https://github.com/users/Leon0605/projects/4/views/1?pane=issue&itemId=103060276&issue=Leon0605%7Csopra-fs25-group-05-server%7C7                                 | User can login with existing account (frontend)                  |
 
 ---
 
@@ -57,8 +57,8 @@ reason).
 |                      |            || https://github.com/Leon0605/sopra-fs25-group-05-server/issues/43| Translating messsges in backend and mapping it to user languages |
 | @ctraill             | 07.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/a20ca8f572b09cc656b0a585526071fd7b848869| https://github.com/Leon0605/sopra-fs25-group-05-client/issues/16 | More integration and functionallity for websockets in frontend   |
 |                      | 07.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/d12840e4a25b243d1d4d8bef5835d8da79f2f54b| https://github.com/Leon0605/sopra-fs25-group-05-client/issues/11 | User can change user attributes]                                 |
-| **[@githubUser4]**   | [date]     | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant]                              |
-|                      | [date]     | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant]                              |
+| @adevantery   | 01.04.2025     | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/ad18355fff0ce21656dd9dc92233794c3ef8e08f | Redirects user if not logged in + we remember the user that just logged-in in the local storage | Protected routes  + Persistent login                            |
+|                      | 04.04.2025     | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/3e40c6cc3e282e4883221032115305d9e0d6a9d7 | https://github.com/users/Leon0605/projects/4/views/1?pane=issue&itemId=103060289&issue=Leon0605%7Csopra-fs25-group-05-server%7C12 | Basic user profil functionality                           |
 
 ---
 
