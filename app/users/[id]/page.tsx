@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
-import { User } from "@/types/user";
+// import { User } from "@/types/user";
 import { Card, Typography, Select, Spin, Button, message, DatePicker, Modal, Input, Form } from "antd";
 import dayjs from "dayjs";
 
@@ -12,9 +12,11 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 
 interface User {
-  id: string;
+  id: number;
   username: string;
   name: string;
+  token: string | null;
+  status: string | null;
   photo?: string; // Optional field for the user's photo URL
   birthday?: string; // Optional field for the user's birthday in ISO 8601 format
   email: string;
@@ -35,7 +37,7 @@ const UserProfile: React.FC = () => {
   const [form] = Form.useForm();
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<string>("userId", "");
+  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,7 +59,7 @@ const UserProfile: React.FC = () => {
   }, [apiService, id]);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || String(user.id) !== userId) return;
+    if (!user || user.id !== userId) return;
   
     const file = event.target.files?.[0];
     if (!file) return;
@@ -98,7 +100,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleLanguageChange = async (newLanguage: string) => {
-    if (!user || String(user.id) !== userId) return;
+    if (!user || user.id !== userId) return;
     setLanguage(newLanguage);
     try {
       await apiService.put(`/users/${id}`, { language: newLanguage });
@@ -111,7 +113,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleLearningLanguageChange = async (newLearningLanguage: string) => {
-    if (!user || String(user.id) !== userId) return;
+    if (!user || user.id !== userId) return;
     try {
       await apiService.put(`/users/${id}`, { learningLanguage: newLearningLanguage });
       message.success("Learning language updated successfully");
@@ -126,7 +128,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handlePrivacyChange = async (newPrivacy: "private" | "open") => {
-    if (!user || String(user.id) !== userId) return; // Ensure the logged-in user is updating their own profile
+    if (!user || user.id !== userId) return; // Ensure the logged-in user is updating their own profile
     try {
       await apiService.put(`/users/${id}`, { privacy: newPrivacy });
       message.success("Privacy setting updated successfully");
@@ -162,7 +164,7 @@ const UserProfile: React.FC = () => {
   };
 
   const handleBirthdayChange = async (date: dayjs.Dayjs | null) => {
-    if (!user || String(user.id) !== userId) return;
+    if (!user || user.id !== userId) return;
   
     try {
       const newBirthday = date ? date.format("YYYY-MM-DD") : null; // Format the date as YYYY-MM-DD
@@ -316,7 +318,7 @@ const UserProfile: React.FC = () => {
             </div>
           )}
 
-          {String(user.id) === userId && (
+          {user.id === userId && (
             <input
               type="file"
               accept="image/*"
@@ -338,7 +340,7 @@ const UserProfile: React.FC = () => {
           }}
         >
           <Text strong style={{ color: "white" }}>Birthday:</Text>
-          {String(user.id) === userId ? (
+          {user.id === userId ? (
             <DatePicker
               value={user.birthday ? dayjs(user.birthday, "YYYY-MM-DD") : null}
               onChange={handleBirthdayChange}
@@ -373,7 +375,7 @@ const UserProfile: React.FC = () => {
           <Select
             value={language}
             onChange={handleLanguageChange}
-            disabled={String(user.id) !== userId}
+            disabled={user.id !== userId}
             style={{
               width: 200,
               backgroundColor: "white",
@@ -403,7 +405,7 @@ const UserProfile: React.FC = () => {
           }}
         >
           <Text strong style={{ color: "white" }}>Learning Language:</Text>
-          {String(user.id) === userId ? (
+          {user.id === userId ? (
             <Select
               value={user.learningLanguage || "en"}
               onChange={handleLearningLanguageChange}
@@ -440,7 +442,7 @@ const UserProfile: React.FC = () => {
           }}
         >
           <Text strong style={{ color: "white" }}>Privacy:</Text>
-          {String(user.id) === userId ? (
+          {user.id === userId ? (
             <Select
               value={user.privacy}
               onChange={handlePrivacyChange}
@@ -473,7 +475,7 @@ const UserProfile: React.FC = () => {
             marginTop: "20px", // Add some space above the buttons
           }}
         >
-          {String(user.id) === userId && (
+          {user.id === userId && (
             <Button
               type="primary"
               onClick={showModal}
@@ -523,7 +525,7 @@ const UserProfile: React.FC = () => {
             </Form>
           </Modal>
 
-          {String(user.id) !== userId && (
+          {user.id !== userId && (
             <Button
               type="primary"
               onClick={handleSendFriendRequest}

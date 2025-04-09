@@ -19,8 +19,8 @@ const Login: React.FC = () => {
   const apiService = useApi();
   const [form] = Form.useForm();
 
-    const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
-    const { set: setUserId, clear: clearUserId } = useLocalStorage<string>("userId", "");
+  const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
+  const { set: setUserId, clear: clearUserId } = useLocalStorage<number>("userId", 0);
 
   const handleLogin = async (values: FormFieldProps) => {
     try {
@@ -31,7 +31,7 @@ const Login: React.FC = () => {
       }
 
       if (response.id) {
-        setUserId(String(response.id));
+        setUserId(Number(response.id));
       }
       console.log("Logged in user ID:", response.id);
 

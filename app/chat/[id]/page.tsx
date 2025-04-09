@@ -13,6 +13,8 @@ interface Message {
   chatId: string;
   userId: number;
   content: string;
+  originalMessage: string;
+  translatedMessage: string;
   timestamp: string;
 }
 
@@ -44,7 +46,7 @@ const ChatPage: React.FC = () => {
 
   // Send a message
   const sendMessage = (content: string) => {
-    const userId = localStorage.getItem("id") ?? "defaultId";
+    const userId = localStorage.getItem("userId") ?? "defaultId";
     if (!stompClientRef.current || !stompClientRef.current.connected) {
       console.error("WebSocket is not connected");
       return;
@@ -64,13 +66,13 @@ const ChatPage: React.FC = () => {
         "content-type": "application/json",
       },
     });
-    
   };
 
   // Handle incoming WebSocket messages
   const handleIncomingMessage = (message: string) => {
     try {
       const parsedMessage = JSON.parse(message) as Message;
+      console.log("Parsed incoming message:", parsedMessage);
       setMessages((prev) => [...prev, parsedMessage]);
     } catch (error) {
       console.error("Failed to parse message:", error);
@@ -81,6 +83,7 @@ const ChatPage: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const users: User[] = await apiService.get<User[]>("/users");
+      console.log("Fetched users:", users);
       setUsers(users);
     } catch (error) {
       console.error("Failed to fetch users:", error);
@@ -131,7 +134,9 @@ const ChatPage: React.FC = () => {
         <div id="chat-messages" className={styles.chatMessages}>
           <ul id="messageArea" className={styles.messageArea}>
             {messages.map((message) => {
-              const user = users?.find((user) => message.userId !== null && Number(message.userId));
+              console.log("Rendering message:", message); // Log each message being rendered
+              const user = users?.find((user) => user.id === message.userId);
+              //const user = users?.find((user) => message.userId !== null && Number(message.userId));
               const userColor = getUserColor(message.userId);
               return (
                 <li key={message.messageId} className={styles.messageItem}>
@@ -142,7 +147,7 @@ const ChatPage: React.FC = () => {
                     {user?.username}
                   </span>
                   <span className={styles.messageContent}>
-                    {message.content}
+                    {message.originalMessage}
                   </span>
                 </li>
               );
