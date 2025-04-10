@@ -20,7 +20,7 @@ const Register: React.FC = () => {
   const [form] = Form.useForm();
 
   const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
-  const { set: setUserId, clear: clearUserId } = useLocalStorage<string>("userId", "");
+  const { set: setUserId, clear: clearUserId } = useLocalStorage<number>("userId", 0);
 
   const handleRegister = async (values: FormFieldProps) => {
     try {
@@ -31,7 +31,7 @@ const Register: React.FC = () => {
       }
 
       if (response.id) {
-        setUserId(String(response.id)); // convert to string for storage
+        setUserId(response.id); // convert to string for storage
       }
 
       router.push("/main");
