@@ -62,9 +62,11 @@ reason).
 
 ---
 
-## Contributions Week 3 - [Begin Date] to [End Date]
-
-_Continue with the same table format as above._
+## Contributions Week 3 - 08.04.2025 to 15.04.2025
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @nikola-pavlovic-git | 11.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/f405204e1d7cf6babe5530db713e774db7b3cdad| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/39 | User can change Profile settings and these changes persist                                 |
+| @nikola-pavlovic-git | 12.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/882a3a39af99df5ec1232ccf83ece1315dc62147| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/36| User can find others users and can send/receive friendrequest to/from them and also accept friendrequest -> users become friends and can chat together                     |
 
 ---
 
