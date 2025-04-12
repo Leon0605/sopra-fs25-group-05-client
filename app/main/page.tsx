@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
         setUsers(users);
         console.log("Fetched users:", users);
 
-        const matchedUser = users.find(user => String(user.id) === userId);
+        const matchedUser = users.find(user => user.id === Number(userId));
         if (matchedUser) {
           setCurrentUser(matchedUser);
         }
