@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 // import { User } from "@/types/user";
-import { Card, Typography, Select, Spin, Button, message, DatePicker, Modal, Input, Form } from "antd";
-import dayjs from "dayjs";
+import { Card, Typography, Select, Spin, Button, message, Modal, Input, Form } from "antd";
+import "bootstrap/dist/css/bootstrap.min.css";
+import dayjs, { Dayjs } from "dayjs";
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+  integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
+  crossOrigin="anonymous"></script>
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -38,6 +44,10 @@ const UserProfile: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
+  const [showPopup, setShowPopup] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
+  const datePickerRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -58,23 +68,43 @@ const UserProfile: React.FC = () => {
     }
   }, [apiService, id]);
 
+  const showAlert = (message: string, type: "success" | "danger") => {
+    setAlertMessage(message);
+    setAlertType(type);
+
+    // Automatically dismiss the alert after 3 seconds
+    setTimeout(() => {
+      setAlertMessage(null);
+      setAlertType(null);
+    }, 3000);
+  };
+
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || user.id !== userId) return;
   
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Log the file type for debugging
+    console.log("File type:", file.type);
   
     // Check if the file is a PNG
     if (file.type !== "image/png") {
-      message.error("Only PNG files are allowed.");
+      showAlert("Profile pictures must be of a PNG format", "danger");
       return;
     }
   
     const formData = new FormData();
     formData.append("photo", file);
+
+    // Log the file and FormData before sending
+    console.log("Uploading photo for user:", user.id);
+    console.log("File details:", file);
+    console.log("Posting data to:", `/users/${id}/photo`);
+    console.log("FormData contents:", formData.get("photo"));
   
     try {
-      const response = await fetch(`/users/${id}/photo`, {
+      const response = await fetch(`http://localhost:8080/users/${id}/photo`, {
         method: "POST",
         body: formData,
       });
@@ -83,7 +113,7 @@ const UserProfile: React.FC = () => {
         throw new Error("Failed to upload photo");
       }
   
-      message.success("Profile photo updated successfully");
+      showAlert("Profile picture successfully updated", "success");
   
       // Fetch the updated user data to display the new photo
       const updatedUser = await fetch(`/users/${id}`);
@@ -93,9 +123,11 @@ const UserProfile: React.FC = () => {
   
       const userData = await updatedUser.json();
       setUser(userData);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
       console.error("Failed to upload photo:", error);
-      message.error("Failed to upload profile photo");
+      showAlert("Failed to upload profile photo", "danger");
     }
   };
 
@@ -116,14 +148,14 @@ const UserProfile: React.FC = () => {
     if (!user || user.id !== userId) return;
     try {
       await apiService.put(`/users/${id}`, { learningLanguage: newLearningLanguage });
-      message.success("Learning language updated successfully");
+      showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update learning language:", err);
-      message.error("Failed to update learning language");
+      showAlert("Failed to update learning language", "danger");
     }
   };
 
@@ -131,14 +163,14 @@ const UserProfile: React.FC = () => {
     if (!user || user.id !== userId) return; // Ensure the logged-in user is updating their own profile
     try {
       await apiService.put(`/users/${id}`, { privacy: newPrivacy });
-      message.success("Privacy setting updated successfully");
+      showAlert(`Privacy updated to ${newPrivacy}`, "success");
   
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
-      message.error("Failed to update privacy setting");
+      showAlert("Failed to update privacy setting", "danger");
     }
   };
 
@@ -163,30 +195,30 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const handleBirthdayChange = async (date: dayjs.Dayjs | null) => {
+  const handleBirthdayChange = async (date: Date | null) => {
     if (!user || user.id !== userId) return;
   
     try {
-      const newBirthday = date ? date.format("YYYY-MM-DD") : null; // Format the date as YYYY-MM-DD
+      const newBirthday = date ? dayjs(date).format("YYYY-MM-DD") : null; // Convert Date to Dayjs and format
+      console.log("Selected date:", newBirthday);
+    
       await apiService.put(`/users/${id}`, { birthday: newBirthday });
-      message.success("Birthday updated successfully");
+      // Show a success alert
+      showAlert("Birthday updated successfully!", "success");
   
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
+
+      // Remove focus from the date picker
+      if (datePickerRef.current && datePickerRef.current.input) {
+        datePickerRef.current.input.blur(); // Access the input element and call blur()
+      }
     } catch (error) {
       console.error("Failed to update birthday:", error);
-      message.error("Failed to update birthday");
+      // Show an error alert
+      showAlert("Failed to update birthday.", "danger");
     }
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    form.resetFields(); // Reset the form fields when the modal is closed
   };
 
   const handlePasswordChange = async () => {
@@ -201,11 +233,11 @@ const UserProfile: React.FC = () => {
       setLoading(true);
 
       // Call the API to change the password
-      const response = await fetch(`/users/${id}/change-password`, {
+      const response = await fetch(`http://localhost:8080/users/${id}/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token for authentication
+          Authorization: `${token}`, // Include the token for authentication
         },
         body: JSON.stringify({ oldPassword, newPassword }),
       });
@@ -245,6 +277,29 @@ const UserProfile: React.FC = () => {
   }
 
   return (
+    <div>
+      {alertMessage && (
+        <div
+          className={`bubble-message ${alertType}`}
+          style={{
+            position: "fixed",
+            top: "20px", // Adjust this to position the bubble
+            left: "50%",
+            transform: "translateX(-50%)", // Center horizontally
+            backgroundColor: alertType === "success" ? "#4caf50" : "#f44336", // Green for success, red for danger
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "20px",
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+            zIndex: 1050, // Ensure it appears above other elements
+            textAlign: "center",
+            maxWidth: "80%", // Optional: Limit the width of the bubble
+          }}
+        >
+          {alertMessage}
+        </div>
+      )}
+    
     <div className="card-container">
       <Card
         title={
@@ -254,6 +309,7 @@ const UserProfile: React.FC = () => {
         }
         style={{ backgroundColor: "#1f1f1f", color: "white" }}
       >
+    
         <p>
           <Text strong style={{ color: "white" }}>Username:</Text> {user.username}
         </p>
@@ -289,9 +345,27 @@ const UserProfile: React.FC = () => {
             marginBottom: "30px",
           }}
         >
+          {showPopup && (
+            <div
+              style={{
+                position: "fixed",
+                top: "20px",
+                right: "20px",
+                backgroundColor: "#4caf50",
+                color: "white",
+                padding: "10px 20px",
+                borderRadius: "5px",
+                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+                zIndex: 1000,
+              }}
+            >
+              Your profile picture was successfully changed!
+            </div>
+          )}
+
           {user.photo ? (
             <img
-              src={user.photo}
+              src={user.photo} 
               alt={`${user.username}'s profile`}
               style={{
                 width: "150px",
@@ -302,20 +376,17 @@ const UserProfile: React.FC = () => {
               }}
             />
           ) : (
-            <div
+            <img
+              src="/images/default-user.png" // Path to the generic user image
+              alt="Default user profile"
               style={{
                 width: "150px",
                 height: "150px",
                 borderRadius: "50%",
-                backgroundColor: "#ccc",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+                objectFit: "cover",
                 marginBottom: "10px",
               }}
-            >
-              <span style={{ color: "#fff" }}>No Photo</span>
-            </div>
+            />
           )}
 
           {user.id === userId && (
@@ -340,26 +411,20 @@ const UserProfile: React.FC = () => {
           }}
         >
           <Text strong style={{ color: "white" }}>Birthday:</Text>
-          {user.id === userId ? (
-            <DatePicker
-              value={user.birthday ? dayjs(user.birthday, "YYYY-MM-DD") : null}
-              onChange={handleBirthdayChange}
-              format="YYYY-MM-DD"
-              style={{
-                width: 200,
-                backgroundColor: "lightgray",
-                color: "black",
-                borderRadius: "8px",
-              }}
-              popupStyle={{
-                backgroundColor: "darkgray",
-              }}
-            />
-          ) : (
-            <Text style={{ color: "white" }}>
-              {user.birthday ? dayjs(user.birthday).format("YYYY-MM-DD") : "Not specified"}
-            </Text>
-          )}
+          {
+            user.id === userId ? (
+              <ReactDatePicker
+                ref={datePickerRef}
+                selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
+                onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
+                dateFormat="dd-MMM-yyyy"
+                className="custom-date-picker"
+              />
+            ) : (
+              <Text style={{ color: "white" }}>
+                {user.birthday ? dayjs(user.birthday).format("YYYY-MM-DD") : "Not specified"}
+              </Text>
+            )}
         </div>
 
         <div
@@ -478,7 +543,7 @@ const UserProfile: React.FC = () => {
           {user.id === userId && (
             <Button
               type="primary"
-              onClick={showModal}
+              //onClick={showModal}
               style={{
                 backgroundColor: "#4caf50", // Green button
                 borderColor: "#4caf50",
@@ -491,9 +556,9 @@ const UserProfile: React.FC = () => {
           {/* Password Change Modal */}
           <Modal
             title="Change Password"
-            visible={isModalVisible}
+            open={isModalVisible}
             onOk={handlePasswordChange}
-            onCancel={handleCancel}
+            //onCancel={handleCancel}
             confirmLoading={loading}
             okText="Change Password"
             cancelText="Cancel"
@@ -543,6 +608,7 @@ const UserProfile: React.FC = () => {
           </Button>
         </div>
       </Card>
+    </div>
     </div>
   );
 };
