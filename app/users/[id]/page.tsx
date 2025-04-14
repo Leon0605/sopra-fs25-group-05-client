@@ -7,9 +7,10 @@ import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 // import { User } from "@/types/user";
-import { Card, Typography, Select, Spin, Button, message, Modal, Input, Form } from "antd";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Card, Typography, Select, Spin, Button, Form } from "antd";
 import dayjs, { Dayjs } from "dayjs";
+import "bootstrap/dist/css/bootstrap.min.css";
+//import "bootstrap/dist/js/bootstrap.bundle.min.js";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
   crossOrigin="anonymous"></script>
@@ -49,7 +50,21 @@ const UserProfile: React.FC = () => {
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<any>(null);
 
+  const languageMap: { [key: string]: string } = {
+    en: "English",
+    fr: "French",
+    de: "German",
+    es: "Spanish",
+  };
+
   useEffect(() => {
+    // Dynamically import Bootstrap JavaScript
+    import("bootstrap/dist/js/bootstrap.bundle.min.js")
+      .then(() => {
+        console.log("Bootstrap JavaScript loaded successfully");
+      })
+      .catch((error) => console.error("Failed to load Bootstrap JavaScript:", error));
+
     const fetchUser = async () => {
       try {
         const userData = await apiService.get<User>(`/users/${id}`);
@@ -57,7 +72,7 @@ const UserProfile: React.FC = () => {
         setLanguage(userData.language || "en");
       } catch (error) {
         console.error("Failed to fetch user:", error);
-        message.error("Failed to fetch user data from server.");
+        showAlert("Failed to fetch user data from server.", "danger");
       } finally {
         setLoading(false);
       }
@@ -116,15 +131,13 @@ const UserProfile: React.FC = () => {
       showAlert("Profile picture successfully updated", "success");
   
       // Fetch the updated user data to display the new photo
-      const updatedUser = await fetch(`/users/${id}`);
+      const updatedUser = await fetch(`http://localhost:8080/users/${id}`);
       if (!updatedUser.ok) {
         throw new Error("Failed to fetch updated user data");
       }
   
       const userData = await updatedUser.json();
       setUser(userData);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
       console.error("Failed to upload photo:", error);
       showAlert("Failed to upload profile photo", "danger");
@@ -136,11 +149,11 @@ const UserProfile: React.FC = () => {
     setLanguage(newLanguage);
     try {
       await apiService.put(`/users/${id}`, { language: newLanguage });
-      message.success("Language updated successfully");
+      showAlert(`Language updated successfully.`, "success");
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
     } catch (err) {
-      message.error("Failed to update language");
+      showAlert("Failed to update language", "danger");
     } 
   };
 
@@ -176,22 +189,28 @@ const UserProfile: React.FC = () => {
 
   const handleSendFriendRequest = async () => {
     try {
-      const response = await fetch(`/users/${id}/friend-request`, {
+      const response = await fetch(`http://localhost:8080/users/${id}/friend-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token for authentication
+          Authorization: `${token}`, // Include the token for authentication
         },
       });
+
+      if (response.status === 409) {
+        // Handle the conflict (friend request already sent)
+        showAlert("You have already sent a friend request to this person!", "danger");
+        return;
+      }
   
       if (!response.ok) {
         throw new Error("Failed to send friend request");
       }
   
-      message.success("Friend request sent successfully!");
+      showAlert("Friend request sent successfully!", "success");
     } catch (error) {
       console.error("Failed to send friend request:", error);
-      message.error("Failed to send friend request");
+      showAlert("Failed to send friend request", "danger");
     }
   };
 
@@ -223,15 +242,17 @@ const UserProfile: React.FC = () => {
 
   const handlePasswordChange = async () => {
     try {
-      const values = await form.validateFields(); // Validate the form fields
-      const { oldPassword, newPassword, confirmPassword } = values;
-
+      const oldPassword = (document.getElementById("oldPassword") as HTMLInputElement).value;
+      const newPassword = (document.getElementById("newPassword") as HTMLInputElement).value;
+      const confirmPassword = (document.getElementById("confirmPassword") as HTMLInputElement).value;
+  
       if (newPassword !== confirmPassword) {
-        return message.error("New passwords do not match!");
+        showAlert("New passwords do not match!", "danger");
+        return;
       }
-
+  
       setLoading(true);
-
+  
       // Call the API to change the password
       const response = await fetch(`http://localhost:8080/users/${id}/change-password`, {
         method: "POST",
@@ -241,21 +262,62 @@ const UserProfile: React.FC = () => {
         },
         body: JSON.stringify({ oldPassword, newPassword }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to change password");
       }
-
-      message.success("Password changed successfully!");
-      setIsModalVisible(false);
-      form.resetFields(); // Reset the form fields after successful submission
+  
+      showAlert("Password changed successfully!", "success");
+  
+      // Close the modal
+      const modalElement = document.getElementById("changePasswordModal");
+      if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        modal?.hide();
+      }
     } catch (error) {
       console.error("Failed to change password:", error);
-      message.error("Failed to change password");
+      showAlert("Failed to change password", "danger");
     } finally {
       setLoading(false);
     }
   };
+
+  // const handlePasswordChange = async () => {
+  //   try {
+  //     const values = await form.validateFields(); // Validate the form fields
+  //     const { oldPassword, newPassword, confirmPassword } = values;
+
+  //     if (newPassword !== confirmPassword) {
+  //       return message.error("New passwords do not match!");
+  //     }
+
+  //     setLoading(true);
+
+  //     // Call the API to change the password
+  //     const response = await fetch(`http://localhost:8080/users/${id}/change-password`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `${token}`, // Include the token for authentication
+  //       },
+  //       body: JSON.stringify({ oldPassword, newPassword }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to change password");
+  //     }
+
+  //     message.success("Password changed successfully!");
+  //     setIsModalVisible(false);
+  //     form.resetFields(); // Reset the form fields after successful submission
+  //   } catch (error) {
+  //     console.error("Failed to change password:", error);
+  //     message.error("Failed to change password");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -422,7 +484,7 @@ const UserProfile: React.FC = () => {
               />
             ) : (
               <Text style={{ color: "white" }}>
-                {user.birthday ? dayjs(user.birthday).format("YYYY-MM-DD") : "Not specified"}
+                {user.birthday ? dayjs(user.birthday).format("D-MMMM-YY") : "Not specified"}
               </Text>
             )}
         </div>
@@ -437,26 +499,33 @@ const UserProfile: React.FC = () => {
           }}
         >
           <Text strong style={{ color: "white" }}>Language:</Text>
-          <Select
-            value={language}
-            onChange={handleLanguageChange}
-            disabled={user.id !== userId}
-            style={{
-              width: 200,
-              backgroundColor: "white",
-              color: "black",
-              borderRadius: "8px",
-            }}
-            dropdownStyle={{
-              backgroundColor: "white", // White dropdown background
-              color: "black",           // Black text
-            }}
-            popupClassName="custom-dropdown" // Additional class for more control
-          >
-            <Option value="en" style={{ color: "black" }}>English</Option>
-            <Option value="fr" style={{ color: "black" }}>French</Option>
-            <Option value="de" style={{ color: "black" }}>German</Option>
-          </Select>
+          {user.id === userId ? (
+            <Select
+              value={language}
+              onChange={handleLanguageChange}
+              disabled={user.id !== userId}
+              style={{
+                width: 200,
+                backgroundColor: "white",
+                color: "black",
+                borderRadius: "8px",
+              }}
+              dropdownStyle={{
+                backgroundColor: "white", // White dropdown background
+                color: "black",           // Black text
+              }}
+              popupClassName="custom-dropdown" // Additional class for more control
+            >
+              <Option value="en" style={{ color: "black" }}>English</Option>
+              <Option value="fr" style={{ color: "black" }}>French</Option>
+              <Option value="de" style={{ color: "black" }}>German</Option>
+            </Select>
+          ) : (
+            <Text style={{ color: "white" }}>
+              {user.language ? languageMap[user.language] : "Not specified"}
+            </Text>
+          )}
+          
         </div>
         
 
@@ -492,7 +561,7 @@ const UserProfile: React.FC = () => {
             </Select>
           ) : (
             <Text style={{ color: "white" }}>
-              {user.learningLanguage || "Not specified"}
+              {user.learningLanguage ? languageMap[user.learningLanguage] : "Not specified"}
             </Text>
           )}
         </div>
@@ -541,20 +610,112 @@ const UserProfile: React.FC = () => {
           }}
         >
           {user.id === userId && (
-            <Button
-              type="primary"
-              //onClick={showModal}
+            <button
+              type="button"
+              className="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#changePasswordModal"
               style={{
                 backgroundColor: "#4caf50", // Green button
                 borderColor: "#4caf50",
               }}
             >
               Change Password
-            </Button>
+            </button>
+            // <Button
+            //   type="primary"
+            //   //onClick={showModal}
+            //   style={{
+            //     backgroundColor: "#4caf50", // Green button
+            //     borderColor: "#4caf50",
+            //   }}
+            // >
+            //   Change Password
+            // </Button>
           )}
 
           {/* Password Change Modal */}
-          <Modal
+          {/* Bootstrap Modal */}
+  <div
+    className="modal fade"
+    id="changePasswordModal"
+    tabIndex={-1}
+    aria-labelledby="changePasswordModalLabel"
+    aria-hidden="true"
+  >
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title" id="changePasswordModalLabel">
+            Change Password
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div className="modal-body">
+          <form id="changePasswordForm">
+            <div className="mb-3">
+              <label htmlFor="oldPassword" className="form-label">
+                Old Password
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                id="oldPassword"
+                placeholder="Enter old password"
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="newPassword" className="form-label">
+                New Password
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                id="newPassword"
+                placeholder="Enter new password"
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                id="confirmPassword"
+                placeholder="Confirm new password"
+                required
+              />
+            </div>
+          </form>
+        </div>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handlePasswordChange}
+          >
+            Change Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+          {/* <Modal
             title="Change Password"
             open={isModalVisible}
             onOk={handlePasswordChange}
@@ -588,7 +749,7 @@ const UserProfile: React.FC = () => {
                 <Input.Password placeholder="Confirm new password" />
               </Form.Item>
             </Form>
-          </Modal>
+          </Modal> */}
 
           {user.id !== userId && (
             <Button
