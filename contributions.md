@@ -67,6 +67,8 @@ reason).
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
 | @nikola-pavlovic-git | 11.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/f405204e1d7cf6babe5530db713e774db7b3cdad| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/39 | User can change Profile settings and these changes persist                                 |
 | @nikola-pavlovic-git | 12.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/882a3a39af99df5ec1232ccf83ece1315dc62147| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/36| User can find others users and can send/receive friendrequest to/from them and also accept friendrequest -> users become friends and can chat together                     |
+| @Leon0605 | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/5e615479d4f9f2da220795a3be34a53b2f46842d | | Added testing for the RestChatController |
+| @Leon0605 | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/3cdbe6af2ee5daff931969f43096e0e65ecc9922 | | Added testing for the UserService |
 
 ---
 
