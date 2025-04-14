@@ -4,4 +4,7 @@ export interface User {
   token: string | null;
   status: string | null;
   language: string | null;
+  sentFriendRequestsList?: number[];
+  receivedFriendRequestsList?: number[];
+  friendsList?: number[];
 }

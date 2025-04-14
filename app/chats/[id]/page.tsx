@@ -137,7 +137,7 @@ const ChatPage: React.FC = () => {
   return (
       <div id="chat-page" className={styles.chatPage}>
         <div className={styles.chatHeader}>
-          <h1>Hablaaaa! Chat</h1>
+          <h1>Habla! Chat</h1>
           <button onClick={createChatManually} className={styles.btnPrimary}>
             Create Chat 1 Manually with UserId 1 and 2
           </button>

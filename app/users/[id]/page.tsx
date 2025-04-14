@@ -30,6 +30,9 @@ interface User {
   learningLanguage?: string; // Optional property
   privacy: "private" | "open"; // Privacy setting
   online: boolean; // New property to indicate online status
+  sentFriendRequestsList?: number[];
+  receivedFriendRequestsList?: number[];
+  friendsList?: number[];
 }
 
 const UserProfile: React.FC = () => {
@@ -48,12 +51,18 @@ const UserProfile: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<any>(null);
+  const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
+
+
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const userData = await apiService.get<User>(`/users/${id}`);
         setUser(userData);
+        setFriendRequestSent(userData.receivedFriendRequestsList?.includes(Number(userId)) || false);
+        setIsFriend(userData.friendsList?.includes(Number(userId)) || false);
         setLanguage(userData.language || "en");
       } catch (error) {
         console.error("Failed to fetch user:", error);
@@ -176,24 +185,27 @@ const UserProfile: React.FC = () => {
 
   const handleSendFriendRequest = async () => {
     try {
-      const response = await fetch(`/users/${id}/friend-request`, {
+      const response = await fetch(`http://localhost:8080/users/${id}/friend-request`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token for authentication
+          Authorization: `${token}`,
         },
       });
   
       if (!response.ok) {
+        console.error("Token: ", token);
         throw new Error("Failed to send friend request");
       }
-  
+      setFriendRequestSent(true);
       message.success("Friend request sent successfully!");
     } catch (error) {
       console.error("Failed to send friend request:", error);
       message.error("Failed to send friend request");
     }
   };
+  
+  
 
   const handleBirthdayChange = async (date: Date | null) => {
     if (!user || user.id !== userId) return;
@@ -593,18 +605,24 @@ const UserProfile: React.FC = () => {
           {user.id !== userId && (
             <Button
               type="primary"
-              onClick={handleSendFriendRequest}
+              disabled={friendRequestSent || isFriend}
+              onClick={handleSendFriendRequest} // ✅ THIS WAS MISSING
               style={{
-                backgroundColor: "#87CEEB", // Light blue color
-                borderColor: "#87CEEB",
+                backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
               }}
             >
-              Send Friend Request
+              {isFriend
+                ? "Already Friends"
+                : friendRequestSent
+                ? "Friend Request Sent"
+                : "Send Friend Request"}
             </Button>
           )}
 
-          <Button onClick={() => router.push("/users")}>
-            Back to User Overview
+
+          <Button onClick={() => router.back()}>
+            Back
           </Button>
         </div>
       </Card>
