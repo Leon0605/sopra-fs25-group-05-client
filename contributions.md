@@ -69,6 +69,9 @@ reason).
 | @nikola-pavlovic-git | 12.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/882a3a39af99df5ec1232ccf83ece1315dc62147| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/36| User can find others users and can send/receive friendrequest to/from them and also accept friendrequest -> users become friends and can chat together                     |
 | @Leon0605 | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/5e615479d4f9f2da220795a3be34a53b2f46842d | | Added testing for the RestChatController |
 | @Leon0605 | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/3cdbe6af2ee5daff931969f43096e0e65ecc9922 | | Added testing for the UserService |
+| @ctraill  | 09.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/21e9c1cc022e7a53e0de616b04388889a2e7dd0f | | Update chat interface: userId, login, types  |
+| @ctraill  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/7f04f982f9c0e475ff97275b1b9a41bceefa8ca3 | | Profile page functionality / backend integration |
+| @ctraill  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/678d826899f876bd830915f9422b820b83be5104 | | Timestamp & translation integration for chat interface |
 
 ---
 
