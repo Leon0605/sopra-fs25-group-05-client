@@ -72,6 +72,8 @@ reason).
 | @ctraill  | 09.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/21e9c1cc022e7a53e0de616b04388889a2e7dd0f | | Update chat interface: userId, login, types  |
 | @ctraill  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/7f04f982f9c0e475ff97275b1b9a41bceefa8ca3 | | Profile page functionality / backend integration |
 | @ctraill  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/678d826899f876bd830915f9422b820b83be5104 | | Timestamp & translation integration for chat interface |
+| @adevantery  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/864cb753bb7c2015f4f9ce18add9cff6bee36201 | | testing chat with manual creation of it + main fix page |
+| @adevantery  | 14.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/ced305159bf059a50ba1a6883bd7b6a00aca8e80 | | Friend system frontend |
 
 ---
 
