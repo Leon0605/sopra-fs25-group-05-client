@@ -3,10 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
-import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
-import styles from "./page.module.scss";
+import styles from "./page.module.css";
 
 interface Message {
   messageId: string;
@@ -17,8 +16,6 @@ interface Message {
   translatedMessage: string;
   timestamp: string;
 }
-
-// const chatId = "4ab5c803-fe62-424a-ad6e-eca4aa976896" // example chatId
 
 const ChatPage: React.FC = () => {
   const router = useRouter();
@@ -31,8 +28,8 @@ const ChatPage: React.FC = () => {
   const stompClientRef = useRef<Client | null>(null);
 
   const colours = [
-    "#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF",
-    "#33FFA1", "#FFA133", "#FF33FF", "#A1FF33", "#33A1FF",
+    '#2196F3', '#32c787', '#00BCD4', '#ff5652',
+    '#ffc107', '#ff85af', '#FF9800', '#39bbb0', "#A1FF33", "#33A1FF",
   ];
   const userColors: { [key: string]: string } = {};
 
@@ -60,7 +57,7 @@ const ChatPage: React.FC = () => {
 
     console.log("Message to be sent:", message);
     stompClientRef.current.publish({
-      destination: `/app/${chatId}`,
+      destination: `/app/MessageHandler`,
       body: JSON.stringify(message),
       headers: {
         "content-type": "application/json",
@@ -101,7 +98,7 @@ const ChatPage: React.FC = () => {
         setIsConnected(true);
         stompClientRef.current = stompClient;
 
-        stompClient.subscribe(`/topic/${chatId}/messages`, (message) => {
+        stompClient.subscribe(`/topic/en/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
         });
       },
@@ -115,15 +112,35 @@ const ChatPage: React.FC = () => {
     return () => stompClient.deactivate();
   };
 
+  // Fetch previously sent messages from the API
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const fetchedMessages: Message[] = await apiService.get<Message[]>(`/chats/${chatId}/${token}`);
+      setMessages(fetchedMessages);
+      console.log("Fetched messages:", fetchedMessages);
+    } catch (error: any) {
+      console.error("Failed to fetch messages:", error);
+      if (error.response && error.response.status === 404) {
+        alert("Chat not found. Redirecting to the main page...");
+        router.push("/main");
+      }
+    }
+  };
+
   // Consolidated useEffect
   useEffect(() => {
     fetchUsers();
     const cleanupWebSocket = setupWebSocket();
 
+    if (chatId) {
+      fetchMessages();
+    }
+
     return () => {
       cleanupWebSocket();
     };
-  }, []);
+  }, [chatId, apiService]);
 
   const createChatManually = async () => {
     try {
@@ -135,83 +152,98 @@ const ChatPage: React.FC = () => {
   };
   
   return (
-      <div id="chat-page" className={styles.chatPage}>
-        <div className={styles.chatHeader}>
-          <h1>Habla! Chat</h1>
-          <button onClick={createChatManually} className={styles.btnPrimary}>
-            Create Chat 1 Manually with UserId 1 and 2
-          </button>
+      <div id="chat-page" className={styles["chat-page"]}>
+        <div className={styles["chat-container"]}>
+          <div className={styles["chat-header"]}>
+            <h1>Habla! Chat</h1>
+            <button onClick={createChatManually} className={styles.btnPrimary}>
+              Create Chat 1 Manually with UserId 1 and 2
+            </button>
+          </div>
+        <div id="chat-area">
+          <div id="chat-messages" className={styles["chat-messages"]}>
+            <ul id="message-area">
+              {messages.map((message) => {
+                console.log("Rendering message:", message); // Log each message being rendered
+                const user = users?.find((user) => user.id === message.userId);
+                const userColor = getUserColor(message.userId);
+                return (
+                  <li key={message.messageId} className={styles["chat-message"]}>
+                    <i
+                      //className={styles["chat-message-i"]}
+                      style={{ backgroundColor: userColor }}
+                    >
+                      {user?.username?.[0] || "?"}
+                    </i>
+                    <p>
+                      {user?.username}
+                    </p>
+                    <span
+                      //className={styles["chat-message-span"]}
+                      //style={{ backgroundColor: userColor }}
+                    >
+                      <p>
+                        {message.originalMessage}
+                      </p>
+                      <p className={styles["translation"]}>
+                        {message.translatedMessage}
+                      </p>
+                    </span>
+                    <p className={styles["timestamp"]}>
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
-      <div id="chat-area" className={styles.chatContainer}>
-        <div id="chat-messages" className={styles.chatMessages}>
-          <ul id="messageArea" className={styles.messageArea}>
-            {messages.map((message) => {
-              console.log("Rendering message:", message); // Log each message being rendered
-              const user = users?.find((user) => user.id === message.userId);
-              //const user = users?.find((user) => message.userId !== null && Number(message.userId));
-              const userColor = getUserColor(message.userId);
-              return (
-                <li key={message.messageId} className={styles.messageItem}>
-                  <span
-                    className={styles.userName}
-                    style={{ backgroundColor: userColor }}
-                  >
-                    {user?.username}
-                  </span>
-                  <span className={styles.messageContent}>
-                    {message.originalMessage}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
-      <form
-        id="messageForm"
-        className={styles.inputGroup}
-        onSubmit={(e) => {
-          e.preventDefault();
-          const messageInput = document.querySelector<HTMLInputElement>("#message");
-          if (messageInput && messageInput.value.trim() !== "") {
-            sendMessage(messageInput.value.trim());
-            messageInput.value = "";
-          }
-        }}
-      >
-        <input
-          type="text"
-          id="message"
-          placeholder="Type your message here..."
-          className={styles.formControl}
-        />
-        <button type="submit" className={styles.btnPrimary}>
-          Send
-        </button>
-      </form>
-      <button
-        onClick={() => {
-          if (stompClientRef.current && stompClientRef.current.connected) {
-            alert("WebSocket is connected");
-          } else {
-            alert("WebSocket is not connected");
-          }
-        }}
-      >
-        Test WebSocket Connection
-      </button>
-      <div>
-        <span
-          style={{
-            display: "inline-block",
-            width: "10px",
-            height: "10px",
-            borderRadius: "50%",
-            backgroundColor: isConnected ? "green" : "red",
-            marginRight: "10px",
+        <form
+          id="messageForm"
+          className={styles["message-form"]}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const messageInput = document.querySelector<HTMLInputElement>("#message");
+            if (messageInput && messageInput.value.trim() !== "") {
+              sendMessage(messageInput.value.trim());
+              messageInput.value = "";
+            }
           }}
-        ></span>
-        {isConnected ? "Connected" : "Disconnected"}
+        >
+          <input
+            type="text"
+            id="message"
+            placeholder="Type your message here..."
+            className={styles.formControl}
+          />
+          <button type="submit" className={styles["btn-primary"]}>
+            Send
+          </button>
+        </form>
+        <button
+          onClick={() => {
+            if (stompClientRef.current && stompClientRef.current.connected) {
+              alert("WebSocket is connected");
+            } else {
+              alert("WebSocket is not connected");
+            }
+          }}
+        >
+          Test WebSocket Connection
+        </button>
+        <div>
+          <span
+            style={{
+              display: "inline-block",
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              backgroundColor: isConnected ? "green" : "red",
+              marginRight: "10px",
+            }}
+          ></span>
+          {isConnected ? "Connected" : "Disconnected"}
+        </div>
       </div>
     </div>
   );

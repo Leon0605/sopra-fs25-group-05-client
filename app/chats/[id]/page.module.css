@@ -1,0 +1,146 @@
+.chat-page {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #8375B8;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Chat Card */
+  .chat-container {
+    position: relative; /* Required for child absolute positioning */
+    width: 60%;
+    max-width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27);
+    margin-top: 30px;
+    height: calc(100% - 60px);
+    max-height: 1000px;
+    position: relative;
+  }
+  
+  /* Header */
+  .chat-header {
+    padding: 16px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    background-color: #4f568a;
+    color: #ddd;
+  }
+  
+  .chat-header h2 {
+    margin: 0;
+  }
+  
+  #chat-page ul {
+    list-style-type: none;
+    background-color: #FFF;
+    margin: 0;
+    overflow: auto;
+    overflow-y: scroll;
+    padding: 0 20px 0px 20px;
+    height: calc(100% - 150px);
+    }
+
+    #chat-page #messageForm {
+        padding: 20px;
+    }
+
+    #chat-page ul li {
+        line-height: 1.5rem;
+        padding: 10px 20px;
+        margin: 0;
+        border-bottom: 1px solid #888;
+    }
+  
+  .connecting {
+    padding: 10px;
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  
+  /* Message List */
+  #message-area {
+    list-style: none;
+    padding: 16px;
+    margin: 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  /* Chat Message Item */
+  .chat-message {
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px; /* Add some spacing below each message */
+    margin-bottom: 10px; /* Add spacing between messages */
+    border-bottom: 1px solid lightgrey;
+  }
+  
+  /* Avatar */
+  .chat-message i {
+    width: 40px;
+    height: 40px;
+    background-color: #aaa;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+  
+  /* Username */
+  .chat-message span {
+    font-weight: bold;
+    margin-right: 6px;
+  }
+  
+  /* Message Text */
+  .chat-message p {
+    font-weight: bold;
+    margin-right: 6px;
+  }
+
+  .chat-message span p {
+    font-weight: normal;
+    margin-right: 6px;
+  }
+
+  .translation {
+    font-weight: normal;
+    font-style: italic;
+    margin-right: 6px;
+  }
+
+  .timestamp { 
+    font-size: small;  
+    color: gray;
+    font-weight: normal;
+    font-style: italic;
+    margin-left: auto;
+    margin-right: 10px;
+    text-align: right;
+  }
+
+  .message-form {
+    position: absolute; /* Position the form relative to the parent container */
+    bottom: 20px; /* Move the form 20px up from the bottom of the container */
+    left: 0; /* Align the form to the left edge */
+    width: 100%; /* Ensure the form spans the full width of the container */
+    display: flex; /* Use flexbox for input and button alignment */
+    padding: 10px; /* Add some padding around the form */
+    background-color: #f9f9f9; /* Optional: Add a background color */
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for separation */
+  }
