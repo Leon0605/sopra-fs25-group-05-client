@@ -77,9 +77,12 @@ reason).
 
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
+## Contributions Week 4 - 15.04.2025 to 22.04.2025
 
-_Continue with the same table format as above._
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @Leon0605 | 17.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/d6bbbf02d241b0ef4bc500b4f76325cfe8edc827 ||Added testing for WebSocketController|
+@Leon0605 | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/9cfdb7240129ac69584d26ce42fecb47735e223f | | Added testing for the ChatService and UserController |
 
 ---
 
