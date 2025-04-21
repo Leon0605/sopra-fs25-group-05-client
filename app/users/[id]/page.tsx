@@ -5,9 +5,10 @@ import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import Navbar from "../../components/Navbar";
 import { useApi } from "@/hooks/useApi";
 // import { User } from "@/types/user";
-import { Card, Typography, Select, Spin, Button, message, Modal, Input, Form } from "antd";
+import { Card, Typography, Select, Spin, Button, message, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import dayjs, { Dayjs } from "dayjs";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
@@ -42,7 +43,6 @@ const UserProfile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [language, setLanguage] = useState<string>("en");
   const [loading, setLoading] = useState<boolean>(true);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
@@ -53,7 +53,8 @@ const UserProfile: React.FC = () => {
   const datePickerRef = useRef<any>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
-
+  const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
+  const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
 
 
   useEffect(() => {
@@ -66,7 +67,7 @@ const UserProfile: React.FC = () => {
         setLanguage(userData.language || "en");
       } catch (error) {
         console.error("Failed to fetch user:", error);
-        message.error("Failed to fetch user data from server.");
+        showAlert("Failed to fetch user data from server.", "danger");
       } finally {
         setLoading(false);
       }
@@ -86,6 +87,11 @@ const UserProfile: React.FC = () => {
       setAlertMessage(null);
       setAlertType(null);
     }, 3000);
+  };
+
+  const handleNotificationsToggle = (checked: boolean) => {
+    setNotificationsEnabled(checked);
+    showAlert(`Notifications ${checked ? "enabled" : "disabled"}`, "success");
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,11 +151,11 @@ const UserProfile: React.FC = () => {
     setLanguage(newLanguage);
     try {
       await apiService.put(`/users/${id}`, { language: newLanguage });
-      message.success("Language updated successfully");
+      showAlert("Language updated successfully", "success");
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
     } catch (err) {
-      message.error("Failed to update language");
+      showAlert("Failed to update language", "danger");
     } 
   };
 
@@ -198,10 +204,10 @@ const UserProfile: React.FC = () => {
         throw new Error("Failed to send friend request");
       }
       setFriendRequestSent(true);
-      message.success("Friend request sent successfully!");
+      showAlert("Friend request sent successfully!", "success");
     } catch (error) {
       console.error("Failed to send friend request:", error);
-      message.error("Failed to send friend request");
+      showAlert("Failed to send friend request", "danger");
     }
   };
   
@@ -239,13 +245,13 @@ const UserProfile: React.FC = () => {
       const { oldPassword, newPassword, confirmPassword } = values;
 
       if (newPassword !== confirmPassword) {
-        return message.error("New passwords do not match!");
+        return showAlert("New passwords do not match!", "danger");
       }
 
       setLoading(true);
 
       // Call the API to change the password
-      const response = await fetch(`http://localhost:8080/users/${id}/change-password`, {
+      const response: Response = await apiService.put(`/users/${id}/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -258,12 +264,11 @@ const UserProfile: React.FC = () => {
         throw new Error("Failed to change password");
       }
 
-      message.success("Password changed successfully!");
-      setIsModalVisible(false);
+      showAlert("Password changed successfully!", "success");
       form.resetFields(); // Reset the form fields after successful submission
     } catch (error) {
       console.error("Failed to change password:", error);
-      message.error("Failed to change password");
+      showAlert("Failed to change password", "danger");
     } finally {
       setLoading(false);
     }
@@ -311,8 +316,8 @@ const UserProfile: React.FC = () => {
           {alertMessage}
         </div>
       )}
-    
-    <div className="card-container">
+    <Navbar/>
+    <div className="card-container" style={{ display: "flex", position: "relative" }}>
       <Card
         title={
           <Title level={3} style={{ color: "white" }}>
@@ -322,9 +327,30 @@ const UserProfile: React.FC = () => {
         style={{ backgroundColor: "#1f1f1f", color: "white" }}
       >
     
-        <p>
-          <Text strong style={{ color: "white" }}>Username:</Text> {user.username}
-        </p>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between", // Pushes the switch to the right
+        alignItems: "center", // Vertically aligns the text and switch
+        marginBottom: "20px", // Optional: Add spacing below the row
+      }}
+    >
+      <p style={{ margin: 0 }}>
+        <Text strong style={{ color: "white" }}>Username:</Text> {user.username}
+      </p>
+      <div className="form-check form-switch">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          id="notificationsSwitch"
+          checked={notificationsEnabled}
+          onChange={(e) => handleNotificationsToggle(e.target.checked)}
+        />
+        <label className="form-check-label" htmlFor="notificationsSwitch" style={{ color: "white" }}>
+          Receive Notifications
+        </label>
+      </div>
+    </div>
 
         <div
           style={{
@@ -555,52 +581,56 @@ const UserProfile: React.FC = () => {
           {user.id === userId && (
             <Button
               type="primary"
-              //onClick={showModal}
+              onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} // Toggle visibility
               style={{
                 backgroundColor: "#4caf50", // Green button
                 borderColor: "#4caf50",
               }}
             >
-              Change Password
+              {isPasswordFormVisible ? "Cancel" : "Change Password"}
             </Button>
           )}
 
-          {/* Password Change Modal */}
-          <Modal
-            title="Change Password"
-            open={isModalVisible}
-            onOk={handlePasswordChange}
-            //onCancel={handleCancel}
-            confirmLoading={loading}
-            okText="Change Password"
-            cancelText="Cancel"
-          >
-            <Form form={form} layout="vertical">
-              <Form.Item
-                label="Old Password"
-                name="oldPassword"
-                rules={[{ required: true, message: "Please enter your old password!" }]}
-              >
-                <Input.Password placeholder="Enter old password" />
-              </Form.Item>
+          {isPasswordFormVisible && (
+            <div className="passwordChange">
+              <Form form={form} layout="vertical">
+                <Form.Item
+                  label="Old Password"
+                  name="oldPassword"
+                  rules={[{ required: true, message: "Please enter your old password!" }]}
+                >
+                  <Input.Password placeholder="Enter old password" />
+                </Form.Item>
 
-              <Form.Item
-                label="New Password"
-                name="newPassword"
-                rules={[{ required: true, message: "Please enter your new password!" }]}
-              >
-                <Input.Password placeholder="Enter new password" />
-              </Form.Item>
+                <Form.Item
+                  label="New Password"
+                  name="newPassword"
+                  rules={[{ required: true, message: "Please enter your new password!" }]}
+                >
+                  <Input.Password placeholder="Enter new password" />
+                </Form.Item>
 
-              <Form.Item
-                label="Confirm New Password"
-                name="confirmPassword"
-                rules={[{ required: true, message: "Please confirm your new password!" }]}
-              >
-                <Input.Password placeholder="Confirm new password" />
-              </Form.Item>
-            </Form>
-          </Modal>
+                <Form.Item
+                  label="Confirm New Password"
+                  name="confirmPassword"
+                  rules={[{ required: true, message: "Please confirm your new password!" }]}
+                >
+                  <Input.Password placeholder="Confirm new password" />
+                </Form.Item>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                  <Button
+                    type="primary"
+                    onClick={handlePasswordChange} // Call the password change logic
+                    loading={loading}
+                  >
+                    Change Password
+                  </Button>
+                  <Button onClick={() => setIsPasswordFormVisible(false)}>Cancel</Button>
+                </div>
+              </Form>
+            </div>
+          )}
 
           {user.id !== userId && (
             <Button

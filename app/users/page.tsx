@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
-
+  
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<string>("userId", "");
   
@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
     clearUserId();
     router.push("/login");
   };
-
+    
   useEffect(() => {
     const fetchUsers = async () => {
       try {
