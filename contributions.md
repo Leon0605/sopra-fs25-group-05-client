@@ -87,6 +87,7 @@ reason).
 | @ctraill | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/3e4540ecec9a3066338ecbfe773ed195a16366bc | |Changes to chats/id page for translation functionality and css formatting, removal of redundant fields|
 | @nikola-pavlovic-git | 17.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/8353c30bbf25a9a6453bb23df76609567c4d4861|  https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 |users can create flashcards and retrieve them + adding timestamp to messages|
 | @adevantery | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/2d6485b9b4348695786cddf7a11b0d16c11d817d | |Formating style and changing antd to bootstrap|
+| @adevantery | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/2024a2d1bb74cd1d228482c257bad3af9d4d1f4b https://github.com/Leon0605/sopra-fs25-group-05-server/commit/6724e65916cf09e476ddb3ce92205788088b0620 | |Fixed friend system and chat router|
 
 ---
 
