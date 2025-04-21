@@ -141,24 +141,12 @@ const ChatPage: React.FC = () => {
       cleanupWebSocket();
     };
   }, [chatId, apiService]);
-
-  const createChatManually = async () => {
-    try {
-      const chatId = await apiService.post("/chat", [1, 2]);
-      console.log("✅ Chat manually created with ID:", chatId);
-    } catch (error) {
-      console.error("❌ Failed to manually create chat:", error);
-    }
-  };
   
   return (
       <div id="chat-page" className={styles["chat-page"]}>
         <div className={styles["chat-container"]}>
           <div className={styles["chat-header"]}>
             <h1>Habla! Chat</h1>
-            <button onClick={createChatManually} className={styles.btnPrimary}>
-              Create Chat 1 Manually with UserId 1 and 2
-            </button>
           </div>
         <div id="chat-area">
           <div id="chat-messages" className={styles["chat-messages"]}>

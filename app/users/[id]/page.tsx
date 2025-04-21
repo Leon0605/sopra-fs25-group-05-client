@@ -58,13 +58,16 @@ const UserProfile: React.FC = () => {
 
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       try {
-        const userData = await apiService.get<User>(`/users/${id}`);
-        setUser(userData);
-        setFriendRequestSent(userData.receivedFriendRequestsList?.includes(Number(userId)) || false);
-        setIsFriend(userData.friendsList?.includes(Number(userId)) || false);
-        setLanguage(userData.language || "en");
+        const profileUserData = await apiService.get<User>(`/users/${id}`);
+        const currentUserData = await apiService.get<User>(`/users/${userId}`);
+        
+        setUser(profileUserData);
+        setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
+        setFriendRequestSent(currentUserData.sentFriendRequestsList?.includes(profileUserData.id) || false);
+        setLanguage(profileUserData.language || "en");
+  
       } catch (error) {
         console.error("Failed to fetch user:", error);
         showAlert("Failed to fetch user data from server.", "danger");
@@ -72,11 +75,12 @@ const UserProfile: React.FC = () => {
         setLoading(false);
       }
     };
-
-    if (id) {
-      fetchUser();
+  
+    if (id && userId) {
+      fetchUserData();
     }
-  }, [apiService, id]);
+  }, [apiService, id, userId]);
+  
 
   const showAlert = (message: string, type: "success" | "danger") => {
     setAlertMessage(message);

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
+import { Chat } from "@/types/chat";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Dashboard: React.FC = () => {
@@ -37,10 +38,12 @@ const Dashboard: React.FC = () => {
     const fetchUsers = async () => {
       try {
         const users: User[] = await apiService.get<User[]>("/users");
-
-        if (!users || users.length === 0) { router.push("/login"); return;}
-
+        if (!users || users.length === 0) {
+          router.push("/login");
+          return;
+        }
         setUsers(users);
+
         const matchedUser = users.find((user) => user.id === Number(userId));
         if (matchedUser) {
           setCurrentUser(matchedUser);
@@ -54,6 +57,40 @@ const Dashboard: React.FC = () => {
     fetchUsers();
   }, [apiService, userId]);
 
+  const handleUserClick = async (clickedUser: User) => {
+    if (clickedUser.id === userId) {
+      router.push(`/users/${userId}`);
+      return;
+    }
+
+    try {
+      const userChats = await apiService.get<Chat[]>("/chats", {
+        headers: { userId: String(userId) },
+      });
+      console.log("userChats:", userChats);
+
+      if (clickedUser.id == null || userId == null) return;
+
+      const privateChat = userChats.find((chat) => {
+        const userIds = chat.userIds || [];
+        return (
+          userIds.length === 2 &&
+          userIds.includes(clickedUser.id!) &&
+          userIds.includes(userId!)
+        );
+      });
+      
+      if (privateChat) {
+        router.push(`/chats/${privateChat.chatId}`);
+      } else {
+        alert("No private chat found with this user.");
+      }
+    } catch (err) {
+      console.error("Failed to fetch chats:", err);
+      alert("Error checking chat.");
+    }
+  };
+
   if (!hasMounted || !token || !users) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -63,12 +100,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div
-      className="container-fluid min-vh-100 py-4 px-5"
-      style={{
-        color: "white",
-      }}
-    >
+    <div className="container-fluid min-vh-100 py-4 px-5" style={{ color: "white" }}>
       <div className="mb-4">
         {currentUser && <h2>Welcome, {currentUser.username}</h2>}
       </div>
@@ -82,7 +114,7 @@ const Dashboard: React.FC = () => {
           <button className="btn-primary" onClick={() => router.push("/friends")}>
             Go to Friend List
           </button>
-          <button className="btn-secondary  " onClick={handleLogout}>
+          <button className="btn-secondary" onClick={handleLogout}>
             Logout
           </button>
         </div>
@@ -99,7 +131,7 @@ const Dashboard: React.FC = () => {
                 cursor: "pointer",
                 transition: "transform 0.2s ease",
               }}
-              onClick={() => router.push(`/chats/${user.id}`)}
+              onClick={() => handleUserClick(user)}
               onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
