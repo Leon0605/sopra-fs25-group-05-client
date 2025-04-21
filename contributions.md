@@ -85,6 +85,7 @@ reason).
 @Leon0605 | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/9cfdb7240129ac69584d26ce42fecb47735e223f | | Added testing for the ChatService and UserController |
 | @ctraill | 20.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/0b7e41fbd3e4cdecf1c4e498d0578e772f0a5ee2 | |Custom WebSocket and Navbar for use across all pages|
 | @ctraill | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/3e4540ecec9a3066338ecbfe773ed195a16366bc | |Changes to chats/id page for translation functionality and css formatting, removal of redundant fields|
+| @nikola-pavlovic-git | 17.04.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/8353c30bbf25a9a6453bb23df76609567c4d4861|  https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 |users can create flashcards and retrieve them|
 
 ---
 
