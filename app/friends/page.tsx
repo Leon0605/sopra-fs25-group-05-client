@@ -56,6 +56,7 @@ const FriendsPage: React.FC = () => {
           Authorization: token,
           senderUserId: senderId.toString(),
         },
+      
       });
 
       const acceptedUser = incomingRequests.find((u) => u.id === senderId);
@@ -72,41 +73,34 @@ const FriendsPage: React.FC = () => {
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-start vh-100 bg-light">
-      <div className="card p-4 shadow" style={{ width: '100%', maxWidth: '1000px' }}>
-        <h2 className="mb-4">Your Friends</h2>
-        <div className="row row-cols-1 row-cols-md-3 g-3 mb-4">
+    <div className="card-container">
+      <div className="auth-card" style={{ maxWidth: "900px", width: "100%", marginTop: "1rem" }}>
+        <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Friends</h2>
+  
+        <h4 style={{ color: "#5A639C" }}>Your Friends</h4>
+        <div className="mb-4">
           {friends.length > 0 ? (
-            friends.map((user) => (
-              <div key={user.id} className="col">
-                <div className="card text-center h-100">
-                  <div className="card-body">
-                    <h5 className="card-title">{user.username}</h5>
-                  </div>
-                </div>
-              </div>
-            ))
+            <ul style={{ listStyle: "none", paddingLeft: 0 }}>
+              {friends.map((user) => (
+                <li key={user.id} style={{ marginBottom: "0.75rem", color: "#5A639C", fontWeight: "bold" }}>
+                  👤 {user.username}
+                </li>
+              ))}
+            </ul>
           ) : (
             <p className="text-muted">You have no friends yet.</p>
           )}
         </div>
   
-        <h3 className="mt-5">Incoming Friend Requests</h3>
-        <div className="row row-cols-1 row-cols-md-2 g-3 mb-4">
+        <h4 style={{ color: "#5A639C" }}>Incoming Friend Requests</h4>
+        <div className="mb-4">
           {incomingRequests.length > 0 ? (
             incomingRequests.map((user) => (
-              <div key={user.id} className="col">
-                <div className="card h-100 text-center">
-                  <div className="card-body">
-                    <h5 className="card-title">{user.username}</h5>
-                    <button
-                      className="btn btn-success"
-                      onClick={() => acceptRequest(user.id!)}
-                    >
-                      Accept
-                    </button>
-                  </div>
-                </div>
+              <div key={user.id} className="d-flex justify-content-between align-items-center mb-2">
+                <span style={{ color: "#5A639C", fontWeight: "bold" }}>{user.username}</span>
+                <button className="btn btn-primary" onClick={() => acceptRequest(user.id!)}>
+                  Accept
+                </button>
               </div>
             ))
           ) : (
@@ -114,17 +108,13 @@ const FriendsPage: React.FC = () => {
           )}
         </div>
   
-        <h3 className="mt-5">Pending Friend Requests</h3>
-        <div className="row row-cols-1 row-cols-md-2 g-3">
+        <h4 style={{ color: "#5A639C" }}>Pending Friend Requests</h4>
+        <div className="mb-4">
           {pendingRequests.length > 0 ? (
             pendingRequests.map((user) => (
-              <div key={user.id} className="col">
-                <div className="card h-100 text-center">
-                  <div className="card-body">
-                    <h5 className="card-title">{user.username}</h5>
-                    <span className="badge bg-warning text-dark">Pending</span>
-                  </div>
-                </div>
+              <div key={user.id} className="d-flex justify-content-between align-items-center mb-2">
+                <span style={{ color: "#5A639C", fontWeight: "bold" }}>{user.username}</span>
+                <span className="badge bg-warning text-dark">Pending</span>
               </div>
             ))
           ) : (
@@ -132,7 +122,7 @@ const FriendsPage: React.FC = () => {
           )}
         </div>
   
-        <div className="text-center mt-4">
+        <div className="auth-buttons">
           <button className="btn btn-secondary" onClick={() => router.push("/main")}>
             Back to Dashboard
           </button>

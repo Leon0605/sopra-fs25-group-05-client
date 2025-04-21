@@ -1,97 +1,66 @@
 "use client";
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input, Typography } from "antd";
-// import styles from "@/styles/page.module.css";
-
-const { Title } = Typography;
-
-interface FormFieldProps {
-  name: string;
-  password: string;
-}
 
 const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
-  const [form] = Form.useForm();
 
   const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
   const { set: setUserId, clear: clearUserId } = useLocalStorage<number>("userId", 0);
-
-  const handleLogin = async (values: FormFieldProps) => {
-    try {
-      const response = await apiService.post<User>("/login", values);
-
-      if (response.token) {
-        setToken(response.token);
-      }
-
-      if (response.id) {
-        setUserId(Number(response.id));
-      }
-      console.log("Logged in user ID:", response.id);
-
-
-      router.push("/main");
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during login.");
-      }
-    }
-  };
 
   useEffect(() => {
     clearToken();
     clearUserId();
   }, []);
-  
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const values = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await apiService.post<User>("/login", values);
+      if (response.token) setToken(response.token);
+      if (response.id) setUserId(Number(response.id));
+      router.push("/main");
+    } catch (error) {
+      alert("Login failed");
+    }
+  };
 
   return (
-    <div className="login-container">
-      <Form
-        form={form}
-        name="login"
-        size="large"
-        onFinish={handleLogin}
-        layout="vertical"
-      >
-        <Typography.Title style={{ textAlign: "center" }}>
-          Login Page
-        </Typography.Title>
-
-        <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-
-        <Form.Item
-          name="password"
-          label="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input placeholder="Enter password" />
-        </Form.Item>
-
-        <Form.Item >
-          <div style={{ display: "flex", gap: "10px", width: "100%" }}>
-            <Button type="primary" htmlType="submit" style={{ flex: 1 }}>
-              Login
-            </Button>
-            <Button type="default" onClick={() => router.push("/register")} style={{ flex: 1 }}>
-              Go to Register
-            </Button>
-          </div>
-        </Form.Item>
-      </Form>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 2,
+      position: "relative"
+    }}>
+      <form onSubmit={handleLogin} className="auth-card">
+        <h2>Login Page</h2>
+    
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input type="text" name="username" required placeholder="Enter username" />
+        </div>
+    
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input type="password" name="password" required placeholder="Enter password" />
+        </div>
+    
+        <div className="auth-buttons">
+          <button type="submit" className="btn-primary">Login</button>
+          <button type="button" className="btn-secondary" onClick={() => router.push("/register")}> Go to register </button>
+        </div>
+        
+      </form>
     </div>
     
   );

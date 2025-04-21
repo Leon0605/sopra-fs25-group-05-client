@@ -37,6 +37,9 @@ const Dashboard: React.FC = () => {
     const fetchUsers = async () => {
       try {
         const users: User[] = await apiService.get<User[]>("/users");
+
+        if (!users || users.length === 0) { router.push("/login"); return;}
+
         setUsers(users);
         const matchedUser = users.find((user) => user.id === Number(userId));
         if (matchedUser) {
@@ -44,6 +47,7 @@ const Dashboard: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching users:", error);
+        router.push("/login");
       }
     };
 
@@ -61,7 +65,9 @@ const Dashboard: React.FC = () => {
   return (
     <div
       className="container-fluid min-vh-100 py-4 px-5"
-      style={{ backgroundColor: "#7776B3", color: "#e8e7e8" }}
+      style={{
+        color: "white",
+      }}
     >
       <div className="mb-4">
         {currentUser && <h2>Welcome, {currentUser.username}</h2>}
@@ -70,13 +76,13 @@ const Dashboard: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Users</h1>
         <div className="d-flex gap-2">
-          <button className="btn btn-light" onClick={() => router.push("/users")}>
+          <button className="btn-primary" onClick={() => router.push("/users")}>
             Go to User List
           </button>
-          <button className="btn btn-light" onClick={() => router.push("/friends")}>
+          <button className="btn-primary" onClick={() => router.push("/friends")}>
             Go to Friend List
           </button>
-          <button className="btn btn-outline-light" onClick={handleLogout}>
+          <button className="btn-secondary  " onClick={handleLogout}>
             Logout
           </button>
         </div>

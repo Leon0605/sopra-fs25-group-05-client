@@ -61,32 +61,44 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="card-container">
-      <Card
-        title="Search page"
-        loading={!users}
-        className="dashboard-container"
-      >
+      <div className="auth-card" style={{ maxWidth: "700px", width: "100%", marginTop: "1rem" }}>
+        <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Search Page</h2>
+  
         {users && (
           <>
-            {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
-            <Table<User>
-              columns={columns}
-              dataSource={users}
-              rowKey="id"
-              onRow={(row) => ({
-                onClick: () => router.push(`/users/${row.id}`),
-                style: { cursor: "pointer" },
-              })}
-            />
-            <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", width: "103%" }}>
-              <Button onClick={handleLogout} type="primary">Logout</Button>
-              <Button onClick={() => router.push("/main")} type="primary">Go to Main page</Button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {users.map((user) => (
+                <div
+                  key={user.id}
+                  onClick={() => router.push(`/users/${user.id}`)}
+                  style={{
+                    backgroundColor: "#E2BBE9",
+                    border: "3px solid #9B86BD",
+                    borderRadius: "1rem",
+                    padding: "1rem 1.5rem",
+                    color: "#5A639C",
+                    fontWeight: "bold",
+                    fontSize: "1.1rem",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d9a8e0")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#E2BBE9")}
+                >
+                  👤 {user.username} <span style={{ fontWeight: "normal", fontSize: "0.9rem" }}>(ID: {user.id})</span>
+                </div>
+              ))}
+            </div>
+  
+            <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
+              <button onClick={handleLogout} className="btn-primary">Logout</button>
+              <button onClick={() => router.push("/main")} className="btn-secondary">Go to Main Page</button>
             </div>
           </>
         )}
-      </Card>
+      </div>
     </div>
-  );
+  );  
 };
 
 export default Dashboard;
