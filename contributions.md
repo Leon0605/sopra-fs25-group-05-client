@@ -83,6 +83,8 @@ reason).
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
 | @Leon0605 | 17.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/d6bbbf02d241b0ef4bc500b4f76325cfe8edc827 ||Added testing for WebSocketController|
 @Leon0605 | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/9cfdb7240129ac69584d26ce42fecb47735e223f | | Added testing for the ChatService and UserController |
+| @ctraill | 20.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/0b7e41fbd3e4cdecf1c4e498d0578e772f0a5ee2 | |Custom WebSocket and Navbar for use across all pages|
+| @ctraill | 21.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/3e4540ecec9a3066338ecbfe773ed195a16366bc | |Changes to chats/id page for translation functionality and css formatting, removal of redundant fields|
 
 ---
 
