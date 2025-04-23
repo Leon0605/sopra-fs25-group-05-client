@@ -43,7 +43,7 @@ const FriendsPage: React.FC = () => {
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, apiService]);
 
   const acceptRequest = async (senderId: number) => {
     if (!userId) return;

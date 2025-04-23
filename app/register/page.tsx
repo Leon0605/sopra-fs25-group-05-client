@@ -5,11 +5,6 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 
-interface FormFieldProps {
-  name: string;
-  password: string;
-}
-
 const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
@@ -20,7 +15,7 @@ const Register: React.FC = () => {
   useEffect(() => {
     clearToken();
     clearUserId();
-  }, []);
+  }, [clearToken, clearUserId]);
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

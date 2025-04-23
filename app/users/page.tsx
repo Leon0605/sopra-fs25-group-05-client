@@ -5,29 +5,15 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Card, Table } from "antd";
-import type { TableProps } from "antd"; 
 
-const columns: TableProps<User>["columns"] = [
-  {
-    title: "Username",
-    dataIndex: "username",
-    key: "username",
-  },
-  {
-    title: "Id",
-    dataIndex: "id",
-    key: "id",
-  },
-];
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
   
-  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<string>("userId", "");
+  const { clear: clearToken } = useLocalStorage<string>("token", "");
+  const { clear: clearUserId } = useLocalStorage<string>("userId", "");
   
 
   const handleLogout = (): void => {

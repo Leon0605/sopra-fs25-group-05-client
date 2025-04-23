@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
+import SockJS from 'sockjs-client';
 import styles from "./page.module.css";
 
 interface Message {
@@ -89,7 +90,7 @@ const ChatPage: React.FC = () => {
 
   // Setup WebSocket connection
   const setupWebSocket = () => {
-    const socket = new WebSocket("ws://localhost:8080/ws");
+    const socket = new SockJS("http://localhost:8080/ws");
     const stompClient = new Client({
       webSocketFactory: () => socket,
       debug: (str) => console.log(str),
@@ -119,13 +120,18 @@ const ChatPage: React.FC = () => {
       const fetchedMessages: Message[] = await apiService.get<Message[]>(`/chats/${chatId}/${token}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
-      if (error.response && error.response.status === 404) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as any).response?.status === 404
+      ) {
         alert("Chat not found. Redirecting to the main page...");
         router.push("/main");
       }
-    }
+    }    
   };
 
   // Consolidated useEffect

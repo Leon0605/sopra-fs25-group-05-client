@@ -16,7 +16,7 @@ const Login: React.FC = () => {
   useEffect(() => {
     clearToken();
     clearUserId();
-  }, []);
+  }, [clearToken, clearUserId]);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,8 +29,10 @@ const Login: React.FC = () => {
       if (response.id) setUserId(Number(response.id));
       router.push("/main");
     } catch (error) {
+      console.error("Login failed:", error);
       alert("Login failed");
     }
+    
   };
 
   return (

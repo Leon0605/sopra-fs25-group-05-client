@@ -10,7 +10,7 @@ import { useApi } from "@/hooks/useApi";
 // import { User } from "@/types/user";
 import { Card, Typography, Select, Spin, Button, message, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
   crossOrigin="anonymous"></script>

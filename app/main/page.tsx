@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchUsers();
-  }, [apiService, userId]);
+  }, [apiService, userId, router]);
 
   const handleUserClick = async (clickedUser: User) => {
     if (clickedUser.id === userId) {

@@ -1,8 +1,5 @@
 "use client";
 
-import styles from "@/styles/page.module.css";
-
-
 import React from "react";
 
 const Home = () => {

@@ -2,8 +2,18 @@
 
 import React, { useEffect, useState } from "react";
 
-const generateStars = (count: number) => {
-  const stars = [];
+interface Star {
+  id: number;
+  top: string;
+  left: string;
+  size: string;
+  animationDelay: string;
+  animationDuration: string;
+}
+
+
+const generateStars = (count: number): Star[] => {
+  const stars: Star[] = [];
   for (let i = 0; i < count; i++) {
     stars.push({
       id: i,
@@ -18,7 +28,7 @@ const generateStars = (count: number) => {
 };
 
 const Background = () => {
-  const [stars, setStars] = useState<any[]>([]);
+  const [stars, setStars] = useState<Star[]>([]);
 
   useEffect(() => {
     setStars(generateStars(500));

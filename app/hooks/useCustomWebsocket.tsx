@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
 type Notification = {
