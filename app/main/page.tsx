@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import useLogout from "@/hooks/useLogout";
 import { User } from "@/types/user";
 import { Chat } from "@/types/chat";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -18,11 +19,7 @@ const Dashboard: React.FC = () => {
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
 
-  const handleLogout = (): void => {
-    clearToken();
-    clearUserId();
-    router.push("/login");
-  };
+  const logout = useLogout();
 
   useEffect(() => {
     setHasMounted(true);
@@ -32,7 +29,7 @@ const Dashboard: React.FC = () => {
     if (hasMounted && !token) {
       router.push("/login");
     }
-  }, [hasMounted, token, router]);
+  }, [hasMounted, token]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -114,7 +111,7 @@ const Dashboard: React.FC = () => {
           <button className="btn-primary" onClick={() => router.push("/friends")}>
             Go to Friend List
           </button>
-          <button className="btn-secondary" onClick={handleLogout}>
+          <button className="btn-secondary" onClick={logout}>
             Logout
           </button>
         </div>

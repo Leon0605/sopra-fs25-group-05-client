@@ -12,11 +12,14 @@ const Login: React.FC = () => {
 
   const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
   const { set: setUserId, clear: clearUserId } = useLocalStorage<number>("userId", 0);
+  const { clear: clearNotificationsEnabled} = useLocalStorage<boolean>("notificationsEnabled", false);
+  
 
   useEffect(() => {
     clearToken();
     clearUserId();
-  }, [clearToken, clearUserId]);
+    clearNotificationsEnabled();
+  }, []);
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,10 +32,8 @@ const Login: React.FC = () => {
       if (response.id) setUserId(Number(response.id));
       router.push("/main");
     } catch (error) {
-      console.error("Login failed:", error);
       alert("Login failed");
     }
-    
   };
 
   return (

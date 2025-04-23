@@ -11,11 +11,13 @@ const Register: React.FC = () => {
 
   const { set: setToken, clear: clearToken } = useLocalStorage<string>("token", "");
   const { set: setUserId, clear: clearUserId } = useLocalStorage<number>("userId", 0);
-
+  const { clear: clearNotificationsEnabled} = useLocalStorage<boolean>("notificationsEnabled", false);
+  
   useEffect(() => {
     clearToken();
     clearUserId();
-  }, [clearToken, clearUserId]);
+    clearNotificationsEnabled();
+  }, []);
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

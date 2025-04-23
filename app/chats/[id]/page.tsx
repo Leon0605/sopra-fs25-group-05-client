@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import styles from "./page.module.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 interface Message {
   messageId: string;
@@ -23,6 +25,9 @@ const ChatPage: React.FC = () => {
   const params = useParams();
   const chatId = params.id;
   const apiService = useApi();
+  const { value: userId } = useLocalStorage<number>("userId", 0);
+  const { value: token } = useLocalStorage<string>("token", "");
+  const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -33,6 +38,16 @@ const ChatPage: React.FC = () => {
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0', "#A1FF33", "#33A1FF",
   ];
   const userColors: { [key: string]: string } = {};
+
+      useEffect(() => {
+        setHasMounted(true);
+      }, []);
+    
+      useEffect(() => {
+        if (hasMounted && !token) {
+          router.push("/login");
+        }
+      }, [hasMounted, token]);
 
   // Assign a color to a user
   const getUserColor = (userId: number): string => {
@@ -147,6 +162,14 @@ const ChatPage: React.FC = () => {
       cleanupWebSocket();
     };
   }, [chatId, apiService]);
+
+  if (!hasMounted || !token || !users) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
+    );
+  }
   
   return (
       <div id="chat-page" className={styles["chat-page"]}>

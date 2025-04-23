@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 
 const Dashboard: React.FC = () => {
@@ -12,15 +13,20 @@ const Dashboard: React.FC = () => {
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
   
-  const { clear: clearToken } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+  const [hasMounted, setHasMounted] = useState(false);
+  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
+  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
   
 
-  const handleLogout = (): void => {
-    clearToken();
-    clearUserId();
-    router.push("/login");
-  };
+    useEffect(() => {
+      setHasMounted(true);
+    }, []);
+  
+    useEffect(() => {
+      if (hasMounted && !token) {
+        router.push("/login");
+      }
+    }, [hasMounted, token]);
     
   useEffect(() => {
     const fetchUsers = async () => {
@@ -44,6 +50,14 @@ const Dashboard: React.FC = () => {
   // if the dependency array is left empty, the useEffect will trigger exactly once
   // if the dependency array is left away, the useEffect will run on every state change. Since we do a state change to users in the useEffect, this results in an infinite loop.
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
+
+  if (!hasMounted || !token || !users) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
+    );
+  }
 
   return (
     <div className="card-container">
@@ -77,8 +91,7 @@ const Dashboard: React.FC = () => {
             </div>
   
             <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
-              <button onClick={handleLogout} className="btn-primary">Logout</button>
-              <button onClick={() => router.push("/main")} className="btn-secondary">Go to Main Page</button>
+              <button onClick={() => router.back()} className="btn-secondary">Go to Main Page</button>
             </div>
           </>
         )}

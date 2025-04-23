@@ -45,8 +45,9 @@ const UserProfile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [form] = Form.useForm();
   const [hasMounted, setHasMounted] = useState(false);
-  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
+  const { value: token } = useLocalStorage<string>("token", "");
+  const { value: userId } = useLocalStorage<number>("userId", 0);
+  const [users, setUsers] = useState<User[] | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
@@ -56,12 +57,28 @@ const UserProfile: React.FC = () => {
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
 
+    useEffect(() => {
+      setHasMounted(true);
+    }, []);
+  
+    useEffect(() => {
+      if (hasMounted && !token) {
+        router.push("/login");
+      }
+    }, [hasMounted, token]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const profileUserData = await apiService.get<User>(`/users/${id}`);
         const currentUserData = await apiService.get<User>(`/users/${userId}`);
+        const users: User[] = await apiService.get<User[]>("/users");
+        if (!users || users.length === 0) {
+          router.push("/login");
+          return;
+        }
+        setUsers(users);
+
         
         setUser(profileUserData);
         setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
@@ -278,17 +295,10 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (!hasMounted || !token || !users) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end", // Aligns the Select to the right
-          height: "100vh",
-        }}
-      >
-        <Spin size="large" />
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
       </div>
     );
   }
@@ -656,7 +666,7 @@ const UserProfile: React.FC = () => {
 
 
           <Button onClick={() => router.back()}>
-            Back
+            Go back
           </Button>
         </div>
       </Card>

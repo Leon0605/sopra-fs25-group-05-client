@@ -5,17 +5,29 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const FriendsPage: React.FC = () => {
   const apiService = useApi();
   const router = useRouter();
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const { value: token } = useLocalStorage<string>("token", "");
-
+  const [hasMounted, setHasMounted] = useState(false);
+  const [users, setUsers] = useState<User[] | null>(null);
   const [friends, setFriends] = useState<User[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+      setHasMounted(true);
+    }, []);
+  
+    useEffect(() => {
+      if (hasMounted && !token) {
+        router.push("/login");
+      }
+    }, [hasMounted, token]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +44,7 @@ const FriendsPage: React.FC = () => {
         const pendingIds = currentUser?.sentFriendRequestsList || [];
         const pending = users.filter((u) => pendingIds.includes(u.id || 0));
 
+        setUsers(users);
         setFriends(friendsData);
         setIncomingRequests(incomingData);
         setPendingRequests(pending);
@@ -68,8 +81,12 @@ const FriendsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-center mt-5">Loading...</div>;
+  if (!hasMounted || !token || !users) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
+    );
   }
 
   return (
@@ -123,8 +140,8 @@ const FriendsPage: React.FC = () => {
         </div>
   
         <div className="auth-buttons">
-          <button className="btn btn-secondary" onClick={() => router.push("/main")}>
-            Back to Dashboard
+          <button className="btn-secondary" onClick={() => router.push("/main")}>
+            Go to Main Page
           </button>
         </div>
       </div>
