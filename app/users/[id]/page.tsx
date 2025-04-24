@@ -265,7 +265,7 @@ const UserProfile: React.FC = () => {
       setLoading(true);
 
       const response: Response = await apiService.post(
-        `/users/${id}/change-password`,
+        `users/${id}/change-password`,
         { oldPassword, newPassword },
         {
           headers: {
