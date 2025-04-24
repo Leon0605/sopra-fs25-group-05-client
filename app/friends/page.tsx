@@ -59,7 +59,7 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-      await fetch(`http://localhost:8080/users/${userId}/friend-request`, {
+      await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users//${userId}/friend-request`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
