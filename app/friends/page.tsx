@@ -34,9 +34,9 @@ const FriendsPage: React.FC = () => {
         if (userId === null) return;
 
         const [friendsData, incomingData, users] = await Promise.all([
-          apiService.get<User[]>(`/users/${userId}/friends`),
-          apiService.get<User[]>(`/users/${userId}/friend-request`),
-          apiService.get<User[]>(`/users`),
+          apiService.get<User[]>(`users/${userId}/friends`),
+          apiService.get<User[]>(`users/${userId}/friend-request`),
+          apiService.get<User[]>(`users`),
         ]);
 
         const currentUser = users.find((u) => u.id === userId);
@@ -59,7 +59,7 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-      await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users//${userId}/friend-request`, {
+      await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users/${userId}/friend-request`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
