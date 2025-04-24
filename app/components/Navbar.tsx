@@ -1,76 +1,99 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useCustomWebsocket } from "@/hooks/useCustomWebsocket";
-
-type Notification = {
-  type: "message" | "friend_request";
-  content: string;
-  fromUserId: string;
-};
+import styles from "./Navbar.module.css";
 
 const Navbar = () => {
-  const { notifications, onlineUsers } = useCustomWebsocket();
-  const [setNotifications] = useState([]);
-  const [open, setOpen] = useState(false);
+  const { messages, incomingRequests, onlineUsers } = useCustomWebsocket();
+  const [openRequests, setOpenRequests] = useState(false);
+  const [openMessages, setOpenMessages] = useState(false);
+
+  console.log("Incoming requests:", incomingRequests);
+  console.log("Messages:", messages);
+  console.log("Online Users:", onlineUsers);
 
   // useEffect(() => {
   //   socket.on("getNotification", (data) => {
   //     setNotifications((prev) => [...prev, data]);
   //   });
   // }, [socket]);
-  const userMap = {
-    "1": "Alice",
-    "2": "Bob",
-    "3": "Charlie",
-  };
 
-  const displayNotification = ({ fromUserId, type, content }: Notification) => {
-    let action;
+  // const displayNotification = ({ fromUserId, type, content }: Notification) => {
+  //   let action;
   
-    if (type === "message") {
-      action = "sent you a message";
-    } else if (type === "friend_request") {
-      action = "sent you a friend request";
-    } else {
-      action = "performed an action";
-    }
+  //   if (type === "message") {
+  //     action = "sent you a message";
+  //   } else if (type === "friend_request") {
+  //     action = "sent you a friend request";
+  //   } else {
+  //     action = "performed an action";
+  //   }
   
-    return (
-      <span className="notification">{`User ${fromUserId} ${action}: ${content}`}</span>
-    );
-  };
-
-  const handleRead = () => {
-    //setNotifications([]);
-    setOpen(false);
-  };
+  //   return (
+  //     <span className="notification">{`User ${fromUserId} ${action}: ${content}`}</span>
+  //   );
+  // };
 
   return (
     <div className="navbar">
       <span className="logo">Habla! Chat App</span>
-      <div className="icons">
-        <div className="icon" onClick={() => setOpen(!open)}>
+      <div className={styles.icons}>
+        {/* Incoming Requests Icon */}
+        <div
+          className={styles.icon}
+          onClick={() => {
+            setOpenRequests(!openRequests);
+            setOpenMessages(false); // Close notifications dropdown if open
+          }}
+        >
           <img src="/icons/notification.svg" className="iconImg" alt="" />
-          {
-            notifications.length >0 &&
-            <div className="counter">{notifications.length}</div>
-          }
+          {incomingRequests.length > 0 && (
+            <div className="counter">{incomingRequests.length}</div>
+          )}
         </div>
-        <div className="icon" onClick={() => setOpen(!open)}>
+
+        {/* Notifications Icon */}
+        <div
+          className={styles.icon}
+          onClick={() => {
+            setOpenMessages(!openMessages);
+            setOpenRequests(false); // Close incoming requests dropdown if open
+          }}
+        >
           <img src="/icons/message.svg" className="iconImg" alt="" />
-        </div>
-        <div className="icon" onClick={() => setOpen(!open)}>
-          <img src="/icons/settings.svg" className="iconImg" alt="" />
+          {messages.length > 0 && (
+            <div className="counter">{messages.length}</div>
+          )}
         </div>
       </div>
-      {open && (
-        <div className="notifications">
-          {notifications.map((notification, index) => (
-            <div key={index}>{displayNotification(notification)}</div>
+
+      {/* Incoming Requests Dropdown */}
+      {openRequests && (
+        <div className={styles.notifications}>
+          <p>Incoming Friend Requests</p>
+          {incomingRequests.map((request, index) => (
+            <div key={index}>
+              <span>{request.username}</span>
+            </div>
           ))}
-          <button className="nButton" onClick={handleRead}>
-            Mark as read
+          <button className={styles.nButton} onClick={() => setOpenRequests(false)}>
+            Close
+          </button>
+        </div>
+      )}
+
+      {/* Messages Dropdown */}
+      {openMessages && (
+        <div className={styles.notifications}>
+          <p>Messages</p>
+          {messages.map((message, index) => (
+            <div key={index}>
+              <span>{message.userId} wrote: {message.originalMessage}</span>
+            </div>
+          ))}
+          <button className={styles.nButton} onClick={() => setOpenMessages(false)}>
+            Close
           </button>
         </div>
       )}

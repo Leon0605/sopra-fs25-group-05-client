@@ -21,10 +21,10 @@ interface Message {
 }
 
 const ChatPage: React.FC = () => {
-  const router = useRouter();
   const params = useParams();
   const chatId = params.id;
   const apiService = useApi();
+  const router = useRouter();
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
@@ -105,7 +105,7 @@ const ChatPage: React.FC = () => {
 
   // Setup WebSocket connection
   const setupWebSocket = () => {
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new WebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
     const stompClient = new Client({
       webSocketFactory: () => socket,
       debug: (str) => console.log(str),
@@ -114,7 +114,12 @@ const ChatPage: React.FC = () => {
         setIsConnected(true);
         stompClientRef.current = stompClient;
 
-        stompClient.subscribe(`/topic/en/${chatId}`, (message) => {
+        // Retrieve the user's language preference
+        const userId = localStorage.getItem("userId");
+        const currentUser = users?.find((user) => user.id === Number(userId));
+        const userLanguage = currentUser?.language || "en"; // Default to "en"
+
+        stompClient.subscribe(`/topic/${userLanguage}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
         });
       },
@@ -137,14 +142,10 @@ const ChatPage: React.FC = () => {
       console.log("Fetched messages:", fetchedMessages);
     } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        (error as any).response?.status === 404
-      ) {
-        alert("Chat not found. Redirecting to the main page...");
-        router.push("/main");
+      if (error instanceof Error) {
+        console.error("Failed to fetch messages:", error.message);
+      } else {
+        console.error("An unknown error occurred:", error);
       }
     }    
   };
