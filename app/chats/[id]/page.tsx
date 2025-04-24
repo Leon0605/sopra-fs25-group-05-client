@@ -6,7 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
-//import SockJS from 'sockjs-client';
+import SockJS from 'sockjs-client';
 import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -104,30 +104,31 @@ const ChatPage: React.FC = () => {
 
   // Setup WebSocket connection
   const setupWebSocket = () => {
-    const socket = new WebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
+    // Use SockJS for the WebSocket connection
+    const socket = new SockJS("https://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
     const stompClient = new Client({
-      webSocketFactory: () => socket,
+      webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
       debug: (str) => console.log(str),
       onConnect: () => {
         console.log("Connected to WebSocket");
         setIsConnected(true);
         stompClientRef.current = stompClient;
-
+  
         // Retrieve the user's language preference
         const userId = localStorage.getItem("userId");
         const currentUser = users?.find((user) => user.id === Number(userId));
         const userLanguage = currentUser?.language || "en"; // Default to "en"
-
+  
         stompClient.subscribe(`/topic/${userLanguage}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
-        });
+        });        
       },
       onDisconnect: () => {
         console.log("Disconnected from WebSocket");
         setIsConnected(false);
       },
     });
-
+  
     stompClient.activate();
     return () => stompClient.deactivate();
   };
