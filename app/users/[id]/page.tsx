@@ -46,7 +46,7 @@ const UserProfile: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   const { value: userId } = useLocalStorage<number>("userId", 0);
-  const [users] = useState<User[] | null>(null);
+  const [users, setUsers] = useState<User[] | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<ReactDatePicker | null>(null);
@@ -69,12 +69,17 @@ const UserProfile: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const profileUserData = await apiService.get<User>(`/users/${id}`);
+        console.log("Fetched user data:", profileUserData);
+
         const currentUserData = await apiService.get<User>(`/users/${userId}`);
         const users: User[] = await apiService.get<User[]>("/users");
         if (!users || users.length === 0) {
           router.push("/login");
           return;
         }
+        setUsers(users);
+
+        
         setUser(profileUserData);
         setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
         setFriendRequestSent(currentUserData.sentFriendRequestsList?.includes(profileUserData.id) || false);
