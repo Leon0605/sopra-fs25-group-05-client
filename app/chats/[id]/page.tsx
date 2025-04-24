@@ -25,7 +25,6 @@ const ChatPage: React.FC = () => {
   const chatId = params.id;
   const apiService = useApi();
   const router = useRouter();
-  const { value: userId } = useLocalStorage<number>("userId", 0);
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);

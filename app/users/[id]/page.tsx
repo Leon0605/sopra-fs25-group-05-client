@@ -46,7 +46,7 @@ const UserProfile: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   const { value: userId } = useLocalStorage<number>("userId", 0);
-  const [users, setUsers] = useState<User[] | null>(null);
+  const [users] = useState<User[] | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<ReactDatePicker | null>(null);

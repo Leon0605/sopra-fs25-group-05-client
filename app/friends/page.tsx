@@ -17,7 +17,6 @@ const FriendsPage: React.FC = () => {
   const [friends, setFriends] = useState<User[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
       setHasMounted(true);
@@ -50,9 +49,7 @@ const FriendsPage: React.FC = () => {
         setPendingRequests(pending);
       } catch (err) {
         console.error("Error fetching friends/requests", err);
-      } finally {
-        setLoading(false);
-      }
+      } 
     };
 
     fetchData();
