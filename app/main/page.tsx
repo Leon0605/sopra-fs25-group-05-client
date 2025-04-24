@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import useLogout from "@/hooks/useLogout";
 import { User } from "@/types/user";
 import { Chat } from "@/types/chat";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -18,8 +17,31 @@ const Dashboard: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
+  const { clear: clearNotificationsEnabled} = useLocalStorage<boolean>("notificationsEnabled", false);
+  
 
-  const logout = useLogout();
+  const handleLogout = async () => {
+    try {
+      if (userId && userId !== 0) {
+        await apiService.post<void>("/logout", null, {
+          headers: {
+            userId: String(userId),
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Logout failed");
+    } finally {
+      clearToken();
+      clearUserId();
+      clearNotificationsEnabled();
+      router.push("/login");
+    }
+  };
+  
+  
+  
 
   useEffect(() => {
     setHasMounted(true);
@@ -111,7 +133,7 @@ const Dashboard: React.FC = () => {
           <button className="btn-primary" onClick={() => router.push("/friends")}>
             Go to Friend List
           </button>
-          <button className="btn-secondary" onClick={logout}>
+          <button className="btn-secondary" onClick={handleLogout}>
             Logout
           </button>
         </div>
