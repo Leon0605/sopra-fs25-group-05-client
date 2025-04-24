@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
@@ -18,7 +18,6 @@ interface Message {
 }
 
 const ChatPage: React.FC = () => {
-  const router = useRouter();
   const params = useParams();
   const chatId = params.id;
   const apiService = useApi();
@@ -89,7 +88,7 @@ const ChatPage: React.FC = () => {
 
   // Setup WebSocket connection
   const setupWebSocket = () => {
-    const socket = new WebSocket("ws://localhost:8080/ws");
+    const socket = new WebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
     const stompClient = new Client({
       webSocketFactory: () => socket,
       debug: (str) => console.log(str),
@@ -124,11 +123,12 @@ const ChatPage: React.FC = () => {
       const fetchedMessages: Message[] = await apiService.get<Message[]>(`/chats/${chatId}/${token}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
-      if (error.response && error.response.status === 404) {
-        alert("Chat not found. Redirecting to the main page...");
-        router.push("/main");
+      if (error instanceof Error) {
+        console.error("Failed to fetch messages:", error.message);
+      } else {
+        console.error("An unknown error occurred:", error);
       }
     }
   };

@@ -10,9 +10,9 @@ import { useApi } from "@/hooks/useApi";
 import { Card, Typography, Select, Spin, Button, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import dayjs from "dayjs";
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+{/* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
-  crossOrigin="anonymous"></script>
+  crossOrigin="anonymous"></script> */}
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -47,7 +47,7 @@ const UserProfile: React.FC = () => {
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
-  const datePickerRef = useRef<any>(null);
+  const datePickerRef = useRef<ReactDatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
@@ -117,7 +117,7 @@ const UserProfile: React.FC = () => {
     console.log("FormData contents:", formData.get("photo"));
   
     try {
-      const response = await fetch(`http://localhost:8080/users/${id}/photo`, {
+      const response = await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users/${id}/photo`, {
         method: "POST",
         body: formData,
       });
@@ -150,7 +150,7 @@ const UserProfile: React.FC = () => {
       const updatedUser = await apiService.get<User>(`/users/${id}`);
       setUser(updatedUser);
     } catch (err) {
-      showAlert("Failed to update language", "danger");
+      showAlert(`Failed to update language: ${err}`, "danger");
     } 
   };
 

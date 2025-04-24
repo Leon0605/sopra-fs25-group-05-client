@@ -1,25 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 
-type Notification = {
-  type: "message" | "friend_request";
-  content: string;
-  userId: number;
-};
-
 interface Message {
-  messageId: string;
-  chatId: string;
+  messageId?: string;
+  chatId?: string;
   userId: number;
   content: string;
   originalMessage: string;
-  translatedMessage: string;
-  timestamp: string;
+  translatedMessage?: string | null;
+  timestamp?: string;
 }
 
 // type CustomWebsocketContextType = {
@@ -30,8 +24,7 @@ interface Message {
 // };
 
 export const useCustomWebsocket = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers] = useState<string[]>([]); // add set onlineUsers in Milestone 4 for live updates
   const [messages, setMessages] = useState<Message[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]); 
   const [chatIds, setChatIds] = useState<string[]>([]); // Store all chat IDs for the user
@@ -39,19 +32,22 @@ export const useCustomWebsocket = () => {
   const router = useRouter();
 
   // Use react-use-websocket to manage the WebSocket connection
-  const { sendMessage, lastMessage, readyState } = useWebSocket("ws://localhost:8080/ws", {
+  const { sendMessage, lastMessage, readyState } = useWebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws", {
     onOpen: () => console.log("WebSocket connection opened"),
     onClose: () => console.log("WebSocket connection closed"),
     shouldReconnect: () => true, // Automatically reconnect on disconnection
   });
 
   const handleIncomingMessage = (messageBody: string) => {
-    const message = JSON.parse(messageBody);
-    console.log("New message received:", message);
-
-    // Handle the message (e.g., update state or notify the user)
-    setNotifications((prev) => [...prev, { type: "message", content: message.content, userId: message.userId }]);
+    try { 
+      const parsedMessage = JSON.parse(messageBody) as Message;
+      console.log("Parsed incoming message:", parsedMessage);
+      setMessages((prev) => [...prev, parsedMessage]);
+      } catch (error) {
+      console.error("Failed to parse message:", error);
+      }
   };
+  
 
   const fetchRequests = async () => {   
     try {
@@ -75,7 +71,7 @@ export const useCustomWebsocket = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/chats", {
+      const response = await fetch("/chats", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -119,11 +115,15 @@ export const useCustomWebsocket = () => {
       // Update the state with all the messages
       setMessages(allMessages);
       console.log("All fetched messages:", allMessages);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
-      if (error.response && error.response.status === 404) {
-        alert("Chat not found. Redirecting to the main page...");
-        router.push("/main");
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const response = (error as { response: { status: number } }).response;
+    
+        if (response.status === 404) {
+          alert("Chat not found. Redirecting to the main page...");
+          router.push("/main");
+        }
       }
     }
   };
