@@ -32,8 +32,9 @@ const Login: React.FC = () => {
       if (response.id) setUserId(Number(response.id));
       router.push("/main");
     } catch (error) {
+      console.error("Login failed:", error);
       alert("Login failed");
-    }
+    }    
   };
 
   return (
