@@ -7,10 +7,9 @@ import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "../../components/Navbar";
 import { useApi } from "@/hooks/useApi";
-// import { User } from "@/types/user";
-import { Card, Typography, Select, Spin, Button, message, Input, Form } from "antd";
+import { Card, Typography, Select, Spin, Button, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
   crossOrigin="anonymous"></script>
@@ -44,10 +43,8 @@ const UserProfile: React.FC = () => {
   const [language, setLanguage] = useState<string>("en");
   const [loading, setLoading] = useState<boolean>(true);
   const [form] = Form.useForm();
-  const [hasMounted, setHasMounted] = useState(false);
-  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
-  const [showPopup, setShowPopup] = useState(false);
+  const { value: token } = useLocalStorage<string>("token", "");
+  const { value: userId } = useLocalStorage<number>("userId", 0);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<any>(null);
@@ -61,6 +58,7 @@ const UserProfile: React.FC = () => {
     const fetchUser = async () => {
       try {
         const userData = await apiService.get<User>(`/users/${id}`);
+        console.log("Fetched user data:", userData);
         setUser(userData);
         setFriendRequestSent(userData.receivedFriendRequestsList?.includes(Number(userId)) || false);
         setIsFriend(userData.friendsList?.includes(Number(userId)) || false);
@@ -131,15 +129,12 @@ const UserProfile: React.FC = () => {
       showAlert("Profile picture successfully updated", "success");
   
       // Fetch the updated user data to display the new photo
-      const updatedUser = await fetch(`/users/${id}`);
-      if (!updatedUser.ok) {
+      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
   
-      const userData = await updatedUser.json();
-      setUser(userData);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
+      setUser(updatedUser);
     } catch (error) {
       console.error("Failed to upload photo:", error);
       showAlert("Failed to upload profile photo", "danger");
@@ -191,10 +186,8 @@ const UserProfile: React.FC = () => {
 
   const handleSendFriendRequest = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/users/${id}/friend-request`, {
-        method: "POST",
+      const response: Response = await apiService.post(`/users/${id}/friend-request`, {}, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `${token}`,
         },
       });
@@ -211,8 +204,6 @@ const UserProfile: React.FC = () => {
     }
   };
   
-  
-
   const handleBirthdayChange = async (date: Date | null) => {
     if (!user || user.id !== userId) return;
   
@@ -250,15 +241,15 @@ const UserProfile: React.FC = () => {
 
       setLoading(true);
 
-      // Call the API to change the password
-      const response: Response = await apiService.put(`/users/${id}/change-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${token}`, // Include the token for authentication
-        },
-        body: JSON.stringify({ oldPassword, newPassword }),
-      });
+      const response: Response = await apiService.post(
+        `/users/${id}/change-password`,
+        { oldPassword, newPassword },
+        {
+          headers: {
+            Authorization: `${token}`, // Include the token in the Authorization header
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to change password");
@@ -266,6 +257,7 @@ const UserProfile: React.FC = () => {
 
       showAlert("Password changed successfully!", "success");
       form.resetFields(); // Reset the form fields after successful submission
+      setIsPasswordFormVisible(false);
     } catch (error) {
       console.error("Failed to change password:", error);
       showAlert("Failed to change password", "danger");
@@ -338,6 +330,7 @@ const UserProfile: React.FC = () => {
       <p style={{ margin: 0 }}>
         <Text strong style={{ color: "white" }}>Username:</Text> {user.username}
       </p>
+      {user.id === userId && (
       <div className="form-check form-switch">
         <input
           className="form-check-input"
@@ -350,6 +343,7 @@ const UserProfile: React.FC = () => {
           Receive Notifications
         </label>
       </div>
+      )}
     </div>
 
         <div
@@ -357,23 +351,10 @@ const UserProfile: React.FC = () => {
             width: "15px",
             height: "15px",
             borderRadius: "50%",
-            backgroundColor: user.online ? "green" : "yellow", // Green if online, yellow if offline
+            backgroundColor: user.status === "ONLINE" ? "green" : "yellow", // Green if online, yellow if offline
             border: "2px solid white", // Optional border for better visibility
         }}
       ></div>
-
-        <div
-          style={{
-            position: "absolute",
-            bottom: "10px",
-            right: "10px",
-            width: "15px",
-            height: "15px",
-            borderRadius: "50%",
-            backgroundColor: user.online ? "green" : "yellow", // Green if online, yellow if offline
-            border: "2px solid white", // Optional border for better visibility
-          }}
-        ></div>
 
         <div
           style={{
@@ -383,24 +364,6 @@ const UserProfile: React.FC = () => {
             marginBottom: "30px",
           }}
         >
-          {showPopup && (
-            <div
-              style={{
-                position: "fixed",
-                top: "20px",
-                right: "20px",
-                backgroundColor: "#4caf50",
-                color: "white",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-                zIndex: 1000,
-              }}
-            >
-              Your profile picture was successfully changed!
-            </div>
-          )}
-
           {user.photo ? (
             <img
               src={user.photo} 

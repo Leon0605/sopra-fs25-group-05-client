@@ -98,7 +98,12 @@ const ChatPage: React.FC = () => {
         setIsConnected(true);
         stompClientRef.current = stompClient;
 
-        stompClient.subscribe(`/topic/en/${chatId}`, (message) => {
+        // Retrieve the user's language preference
+        const userId = localStorage.getItem("userId");
+        const currentUser = users?.find((user) => user.id === Number(userId));
+        const userLanguage = currentUser?.language || "en"; // Default to "en"
+
+        stompClient.subscribe(`/topic/${userLanguage}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
         });
       },
