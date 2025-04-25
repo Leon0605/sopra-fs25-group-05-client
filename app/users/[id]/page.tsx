@@ -474,6 +474,7 @@ const UserProfile: React.FC = () => {
             <Option value="en" style={{ color: "black" }}>English</Option>
             <Option value="fr" style={{ color: "black" }}>French</Option>
             <Option value="de" style={{ color: "black" }}>German</Option>
+            <Option value="es" style={{ color: "black" }}>Spanish</Option>
           </Select>
         </div>
         
