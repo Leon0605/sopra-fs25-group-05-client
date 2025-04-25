@@ -44,7 +44,7 @@ const ChatPage: React.FC = () => {
     
       useEffect(() => {
         if (hasMounted && !token) {
-          router.push("/login");
+          //router.push("/login");
         }
       }, [hasMounted, token]);
 
@@ -164,6 +164,7 @@ const ChatPage: React.FC = () => {
     };
   }, [chatId, apiService]);
 
+  
   if (!hasMounted || !token || !users) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -172,99 +173,109 @@ const ChatPage: React.FC = () => {
     );
   }
   
-  return (
+    return (
       <div id="chat-page" className={styles["chat-page"]}>
+        {/* Floating title top-left */}
+        <h1 className={styles["chat-title"]}>Habla! Chat</h1>
+
+        <button
+          className={styles["main-nav-button"]}
+          onClick={() => router.push("/main")}
+        >
+          Go to Main Page
+        </button>
+    
+        {/* Chat Card */}
         <div className={styles["chat-container"]}>
-          <div className={styles["chat-header"]}>
-            <h1>Habla! Chat</h1>
-          </div>
-        <div id="chat-area">
-          <div id="chat-messages" className={styles["chat-messages"]}>
-            <ul id="message-area">
+    
+          {/* Scrollable Message Area */}
+          <div className={styles["chat-messages-container"]}>
+            <ul className={styles["message-area"]}>
               {messages.map((message) => {
-                console.log("Rendering message:", message); // Log each message being rendered
                 const user = users?.find((user) => user.id === message.userId);
                 const userColor = getUserColor(message.userId);
                 return (
                   <li key={message.messageId} className={styles["chat-message"]}>
-                    <i
-                      //className={styles["chat-message-i"]}
-                      style={{ backgroundColor: userColor }}
-                    >
-                      {user?.username?.[0] || "?"}
-                    </i>
-                    <p>
-                      {user?.username}
-                    </p>
-                    <span
-                      //className={styles["chat-message-span"]}
-                      //style={{ backgroundColor: userColor }}
-                    >
-                      <p>
-                        {message.originalMessage}
-                      </p>
-                      <p className={styles["translation"]}>
-                        {message.translatedMessage}
-                      </p>
-                    </span>
+                    <div className={styles["avatar-username"]}>
+                      <i style={{ backgroundColor: userColor }}>
+                        {user?.username?.[0] || "?"}
+                      </i>
+                      <span className={styles["username"]}>
+                        {user?.username || "Anonymous"}
+                      </span>
+                    </div>
+                    <div className={styles["message-block"]}>
+                      <p className={styles["original"]}>{message.originalMessage}</p>
+                      <p className={styles["translation"]}>{message.translatedMessage}</p>
+                    </div>
                     <p className={styles["timestamp"]}>
-                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </li>
                 );
               })}
             </ul>
           </div>
-        </div>
-        <form
-          id="messageForm"
-          className={styles["message-form"]}
-          onSubmit={(e) => {
-            e.preventDefault();
-            const messageInput = document.querySelector<HTMLInputElement>("#message");
-            if (messageInput && messageInput.value.trim() !== "") {
-              sendMessage(messageInput.value.trim());
-              messageInput.value = "";
-            }
-          }}
-        >
-          <input
-            type="text"
-            id="message"
-            placeholder="Type your message here..."
-            className={styles.formControl}
-          />
-          <button type="submit" className={styles["btn-primary"]}>
-            Send
-          </button>
-        </form>
-        <button
-          onClick={() => {
-            if (stompClientRef.current && stompClientRef.current.connected) {
-              alert("WebSocket is connected");
-            } else {
-              alert("WebSocket is not connected");
-            }
-          }}
-        >
-          Test WebSocket Connection
-        </button>
-        <div>
-          <span
-            style={{
-              display: "inline-block",
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              backgroundColor: isConnected ? "green" : "red",
-              marginRight: "10px",
+    
+          {/* Message Input */}
+          <form
+            className={styles["message-form"]}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const messageInput = document.querySelector<HTMLInputElement>("#message");
+              if (messageInput && messageInput.value.trim() !== "") {
+                sendMessage(messageInput.value.trim());
+                messageInput.value = "";
+              }
             }}
-          ></span>
-          {isConnected ? "Connected" : "Disconnected"}
+          >
+            <input
+              type="text"
+              id="message"
+              placeholder="Type your message here..."
+              className={styles.formControl}
+            />
+            <button type="submit" className={styles["btn-primary"]}>
+              Send
+            </button>
+          </form>
+    
+          {/* WebSocket Status and Test Button */}
+          <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
+            <div className="d-flex align-items-center">
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: isConnected ? "green" : "red",
+                  marginRight: "10px",
+                }}
+              />
+              <span>{isConnected ? "Connected" : "Disconnected"}</span>
+            </div>
+
+            <button
+              className="btn btn-outline-secondary"
+              style={{ fontSize: "0.9rem" }}
+              onClick={() => {
+                if (stompClientRef.current && stompClientRef.current.connected) {
+                  alert("WebSocket is connected");
+                } else {
+                  alert("WebSocket is not connected");
+                }
+              }}
+            >
+              Test WebSocket Connection
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );    
 };
 
 export default ChatPage;
