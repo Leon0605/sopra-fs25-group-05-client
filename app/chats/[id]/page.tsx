@@ -153,6 +153,28 @@ const ChatPage: React.FC = () => {
     }    
   };
 
+  const formatTimestamp = (timestamp: string): string => {
+    if (!timestamp.includes(",")) {
+      console.error("Invalid timestamp format:", timestamp);
+      return timestamp; // Return the original timestamp if the format is invalid
+    }
+  
+    const [datePart, timePart] = timestamp.split(",").map((part) => part.trim());
+    const today = (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    })();
+  
+    console.log("datePart:", datePart);
+    console.log("timePart:", timePart);
+    console.log("today:", today);
+  
+    return datePart === today ? timePart : datePart;
+  };
+
   // Consolidated useEffect
   useEffect(() => {
     fetchUsers();
@@ -212,10 +234,7 @@ const ChatPage: React.FC = () => {
                       <p className={styles["translation"]}>{message.translatedMessage}</p>
                     </div>
                     <p className={styles["timestamp"]}>
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatTimestamp(message.timestamp)}
                     </p>
                   </li>
                 );
