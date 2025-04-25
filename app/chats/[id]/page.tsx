@@ -105,7 +105,7 @@ const ChatPage: React.FC = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     // Use SockJS for the WebSocket connection
-    const socket = new SockJS("https://sopra-fs25-group-05-server.oa.r.appspot.com/ws", null, ['xhr-streaming','xhr-polling']);
+    const socket = new SockJS("https://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
     const stompClient = new Client({
       webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
       debug: (str) => console.log(str),
