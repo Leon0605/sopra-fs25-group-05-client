@@ -151,8 +151,18 @@ const ChatPage: React.FC = () => {
   };
 
   const formatTimestamp = (timestamp: string): string => {
-    const [datePart, timePart] = timestamp.split(",");
+    if (!timestamp.includes(",")) {
+      console.error("Invalid timestamp format:", timestamp);
+      return timestamp; // Return the original timestamp if the format is invalid
+    }
+  
+    const [datePart, timePart] = timestamp.split(",").map((part) => part.trim());
     const today = new Date().toLocaleDateString("de-DE");
+  
+    console.log("datePart:", datePart);
+    console.log("timePart:", timePart);
+    console.log("today:", today);
+  
     return datePart === today ? timePart : datePart;
   };
 
