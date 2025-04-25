@@ -137,7 +137,7 @@ const ChatPage: React.FC = () => {
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const fetchedMessages: Message[] = await apiService.get<Message[]>(`/chats/${chatId}/${token}`);
+      const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${token}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
     } catch (error: unknown) {
