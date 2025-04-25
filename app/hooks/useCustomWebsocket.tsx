@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useWebSocket from "react-use-websocket";
+// import useWebSocket from "react-use-websocket";
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
+import { Chat } from "@/types/chat"; // Import the UserChatDTO type
 
 interface Message {
   messageId?: string;
@@ -32,21 +33,21 @@ export const useCustomWebsocket = () => {
   const router = useRouter();
 
   // Use react-use-websocket to manage the WebSocket connection
-  const { sendMessage, lastMessage, readyState } = useWebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws", {
-    onOpen: () => console.log("WebSocket connection opened"),
-    onClose: () => console.log("WebSocket connection closed"),
-    shouldReconnect: () => true, // Automatically reconnect on disconnection
-  });
+  // const { sendMessage, lastMessage, readyState } = useWebSocket("wss://sopra-fs25-group-05-server.oa.r.appspot.com/ws", {
+  //   onOpen: () => console.log("WebSocket connection opened"),
+  //   onClose: () => console.log("WebSocket connection closed"),
+  //   shouldReconnect: () => true, // Automatically reconnect on disconnection
+  // });
 
-  const handleIncomingMessage = (messageBody: string) => {
-    try { 
-      const parsedMessage = JSON.parse(messageBody) as Message;
-      console.log("Parsed incoming message:", parsedMessage);
-      setMessages((prev) => [...prev, parsedMessage]);
-      } catch (error) {
-      console.error("Failed to parse message:", error);
-      }
-  };
+  // const handleIncomingMessage = (messageBody: string) => {
+  //   try { 
+  //     const parsedMessage = JSON.parse(messageBody) as Message;
+  //     console.log("Parsed incoming message:", parsedMessage);
+  //     setMessages((prev) => [...prev, parsedMessage]);
+  //     } catch (error) {
+  //     console.error("Failed to parse message:", error);
+  //     }
+  // };
   
 
   const fetchRequests = async () => {   
@@ -71,21 +72,15 @@ export const useCustomWebsocket = () => {
     }
 
     try {
-      const response = await fetch("/chats", {
-        method: "GET",
+      const chatids = await apiService.get<Chat[]>("/chats", {
         headers: {
-            "Content-Type": "application/json",
-            "userId": userId, // Include the userId in the request header
-        },
-    });
+            userId: userId.toString(), // Include the userId in the request header
+         },
+     });
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch chats: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const ids = data.map((chat: { chatId: string }) => chat.chatId);
-    console.log("Fetched chat IDs:", data); // Log the fetched data to the console
+    // const data = await response.json();
+    const ids = chatids.map((chat: { chatId: string }) => chat.chatId);
+    console.log("Fetched chat IDs:", ids); // Log the fetched data to the console
     setChatIds(ids); // Assume the API returns an array of UserChatDTO objects
     } catch (error) {
       console.error("Error fetching chats:", error);
@@ -139,18 +134,18 @@ export const useCustomWebsocket = () => {
     }
   }, [chatIds]);
 
-  useEffect(() => {
-    if (lastMessage !== null) {
-      // Handle incoming WebSocket messages
-      handleIncomingMessage(lastMessage.data);
-    }
-  }, [lastMessage]);
+  // useEffect(() => {
+  //   if (lastMessage !== null) {
+  //     // Handle incoming WebSocket messages
+  //     handleIncomingMessage(lastMessage.data);
+  //   }
+  // }, [lastMessage]);
 
   return {
     messages,
     onlineUsers,
     incomingRequests,
-    sendMessage,
-    readyState,
+    // sendMessage,
+    // readyState,
   };
 };

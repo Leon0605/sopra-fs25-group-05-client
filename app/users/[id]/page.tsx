@@ -270,6 +270,7 @@ const UserProfile: React.FC = () => {
         {
           headers: {
             Authorization: `${token}`, // Include the token in the Authorization header
+            "Content-Type": "application/json",
           },
         }
       );
