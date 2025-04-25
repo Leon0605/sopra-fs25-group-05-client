@@ -31,7 +31,6 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef<Client | null>(null);
-  //const [language, setLanguage] = useState<string[]|null>;
 
   const colours = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -39,15 +38,15 @@ const ChatPage: React.FC = () => {
   ];
   const userColors: { [key: string]: string } = {};
 
-      useEffect(() => {
-        setHasMounted(true);
-      }, []);
-    
-      useEffect(() => {
-        if (hasMounted && !token) {
-          //router.push("/login");
-        }
-      }, [hasMounted, token]);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !token) {
+      //router.push("/login");
+    }
+  }, [hasMounted, token]);
 
   // Assign a color to a user
   const getUserColor = (userId: number): string => {
@@ -103,13 +102,14 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const currentLanguage: () => Promise<string|null> = async () => {
-      const user = await apiService.get<User>(`/user/${localStorage.getItem("userId")}`)
-      return user.language
-  }
-
   // Setup WebSocket connection
   const setupWebSocket = () => {
+    // ensure users are fetched before setting up WebSocket
+    if (!users || users.length === 0) {
+      console.error("Users array is not populated yet");
+      return () => {}; // Return a no-op cleanup function
+    }
+
     // Use SockJS for the WebSocket connection
     const socket = new SockJS("https://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
     const stompClient = new Client({
@@ -119,25 +119,23 @@ const ChatPage: React.FC = () => {
         console.log("Connected to WebSocket");
         setIsConnected(true);
         stompClientRef.current = stompClient;
-  
+
         // Retrieve the user's language preference
         const userId = localStorage.getItem("userId");
         const currentUser = users?.find((user) => user.id === Number(userId));
-        console.log(currentUser?.id)
-        console.log(currentUser?.language)
+        console.log("Current user:", currentUser);
+        const userLanguage = currentUser?.language || "en"; // Default to "en"
 
-        //const userLanguage = currentUser?.language; // Default to "en"
-  
-        stompClient.subscribe(`/topic/${currentLanguage()}/${chatId}`, (message) => {
+        stompClient.subscribe(`/topic/${userLanguage}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
-        });        
+        });
       },
       onDisconnect: () => {
         console.log("Disconnected from WebSocket");
         setIsConnected(false);
       },
     });
-  
+
     stompClient.activate();
     return () => stompClient.deactivate();
   };
@@ -156,7 +154,7 @@ const ChatPage: React.FC = () => {
       } else {
         console.error("An unknown error occurred:", error);
       }
-    }    
+    }
   };
 
   const formatTimestamp = (timestamp: string): string => {
@@ -164,7 +162,7 @@ const ChatPage: React.FC = () => {
       console.error("Invalid timestamp format:", timestamp);
       return timestamp; // Return the original timestamp if the format is invalid
     }
-  
+
     const [datePart, timePart] = timestamp.split(",").map((part) => part.trim());
     const today = (() => {
       const date = new Date();
@@ -173,52 +171,56 @@ const ChatPage: React.FC = () => {
       const year = date.getFullYear();
       return `${day}.${month}.${year}`;
     })();
-  
+
     console.log("datePart:", datePart);
     console.log("timePart:", timePart);
     console.log("today:", today);
-  
+
     return datePart === today ? timePart : datePart;
   };
 
   // Consolidated useEffect
   useEffect(() => {
-    fetchUsers();
-    const cleanupWebSocket = setupWebSocket();
+    const initialize = async () => {
+      await fetchUsers(); // Ensure users are fetched before setting up WebSocket
+      const cleanupWebSocket = setupWebSocket();
 
-    if (chatId) {
-      fetchMessages();
-    }
+      if (chatId) {
+        fetchMessages();
+      }
 
-    return () => {
-      cleanupWebSocket();
+      return () => {
+        cleanupWebSocket();
+      };
     };
+
+    initialize();
   }, [chatId, apiService]);
 
-  
+
   if (!hasMounted || !token || !users) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-light" role="status" />
-      </div>
+        <div className="d-flex justify-content-center align-items-center vh-100">
+          <div className="spinner-border text-light" role="status" />
+        </div>
     );
   }
-  
-    return (
+
+  return (
       <div id="chat-page" className={styles["chat-page"]}>
         {/* Floating title top-left */}
         <h1 className={styles["chat-title"]}>Habla! Chat</h1>
 
         <button
-          className={styles["main-nav-button"]}
-          onClick={() => router.push("/main")}
+            className={styles["main-nav-button"]}
+            onClick={() => router.push("/main")}
         >
           Go to Main Page
         </button>
-    
+
         {/* Chat Card */}
         <div className={styles["chat-container"]}>
-    
+
           {/* Scrollable Message Area */}
           <div className={styles["chat-messages-container"]}>
             <ul className={styles["message-area"]}>
@@ -226,84 +228,84 @@ const ChatPage: React.FC = () => {
                 const user = users?.find((user) => user.id === message.userId);
                 const userColor = getUserColor(message.userId);
                 return (
-                  <li key={message.messageId} className={styles["chat-message"]}>
-                    <div className={styles["avatar-username"]}>
-                      <i style={{ backgroundColor: userColor }}>
-                        {user?.username?.[0] || "?"}
-                      </i>
-                      <span className={styles["username"]}>
+                    <li key={message.messageId} className={styles["chat-message"]}>
+                      <div className={styles["avatar-username"]}>
+                        <i style={{ backgroundColor: userColor }}>
+                          {user?.username?.[0] || "?"}
+                        </i>
+                        <span className={styles["username"]}>
                         {user?.username || "Anonymous"}
                       </span>
-                    </div>
-                    <div className={styles["message-block"]}>
-                      <p className={styles["original"]}>{message.originalMessage}</p>
-                      <p className={styles["translation"]}>{message.translatedMessage}</p>
-                    </div>
-                    <p className={styles["timestamp"]}>
-                      {formatTimestamp(message.timestamp)}
-                    </p>
-                  </li>
+                      </div>
+                      <div className={styles["message-block"]}>
+                        <p className={styles["original"]}>{message.originalMessage}</p>
+                        <p className={styles["translation"]}>{message.translatedMessage}</p>
+                      </div>
+                      <p className={styles["timestamp"]}>
+                        {formatTimestamp(message.timestamp)}
+                      </p>
+                    </li>
                 );
               })}
             </ul>
           </div>
-    
+
           {/* Message Input */}
           <form
-            className={styles["message-form"]}
-            onSubmit={(e) => {
-              e.preventDefault();
-              const messageInput = document.querySelector<HTMLInputElement>("#message");
-              if (messageInput && messageInput.value.trim() !== "") {
-                sendMessage(messageInput.value.trim());
-                messageInput.value = "";
-              }
-            }}
+              className={styles["message-form"]}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const messageInput = document.querySelector<HTMLInputElement>("#message");
+                if (messageInput && messageInput.value.trim() !== "") {
+                  sendMessage(messageInput.value.trim());
+                  messageInput.value = "";
+                }
+              }}
           >
             <input
-              type="text"
-              id="message"
-              placeholder="Type your message here..."
-              className={styles.formControl}
+                type="text"
+                id="message"
+                placeholder="Type your message here..."
+                className={styles.formControl}
             />
             <button type="submit" className={styles["btn-primary"]}>
               Send
             </button>
           </form>
-    
+
           {/* WebSocket Status and Test Button */}
           <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
             <div className="d-flex align-items-center">
               <span
-                style={{
-                  display: "inline-block",
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  backgroundColor: isConnected ? "green" : "red",
-                  marginRight: "10px",
-                }}
+                  style={{
+                    display: "inline-block",
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    backgroundColor: isConnected ? "green" : "red",
+                    marginRight: "10px",
+                  }}
               />
               <span>{isConnected ? "Connected" : "Disconnected"}</span>
             </div>
 
             <button
-              className="btn btn-outline-secondary"
-              style={{ fontSize: "0.9rem" }}
-              onClick={() => {
-                if (stompClientRef.current && stompClientRef.current.connected) {
-                  alert("WebSocket is connected");
-                } else {
-                  alert("WebSocket is not connected");
-                }
-              }}
+                className="btn btn-outline-secondary"
+                style={{ fontSize: "0.9rem" }}
+                onClick={() => {
+                  if (stompClientRef.current && stompClientRef.current.connected) {
+                    alert("WebSocket is connected");
+                  } else {
+                    alert("WebSocket is not connected");
+                  }
+                }}
             >
               Test WebSocket Connection
             </button>
           </div>
         </div>
       </div>
-    );    
+  );
 };
 
 export default ChatPage;
