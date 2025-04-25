@@ -106,6 +106,9 @@ const ChatPage: React.FC = () => {
   const currentLanguage = async () => {
     const user = await apiService.get<User>(`/users/${localStorage.getItem("userId")}`)
     const language = user.language ?? "en"
+    console.log(user.id)
+    console.log(user.language)
+    console.log(localStorage.getItem("userId"))
     setLanguage(language)
   }
 
