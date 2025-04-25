@@ -185,8 +185,9 @@ const ChatPage: React.FC = () => {
   // Consolidated useEffect
   useEffect(() => {
     fetchUsers();
-    const cleanupWebSocket = setupWebSocket();
     currentLanguage()
+    const cleanupWebSocket = setupWebSocket();
+    
     if (chatId) {
       fetchMessages();
     }
