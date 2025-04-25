@@ -150,6 +150,12 @@ const ChatPage: React.FC = () => {
     }    
   };
 
+  const formatTimestamp = (timestamp: string): string => {
+    const [datePart, timePart] = timestamp.split(",");
+    const today = new Date().toLocaleDateString("de-DE");
+    return datePart === today ? timePart : datePart;
+  };
+
   // Consolidated useEffect
   useEffect(() => {
     fetchUsers();
@@ -209,10 +215,7 @@ const ChatPage: React.FC = () => {
                       <p className={styles["translation"]}>{message.translatedMessage}</p>
                     </div>
                     <p className={styles["timestamp"]}>
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatTimestamp(message.timestamp)}
                     </p>
                   </li>
                 );
