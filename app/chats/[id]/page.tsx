@@ -31,7 +31,7 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef<Client | null>(null);
-  //const [language, setLanguage] = useState<string[]|null>;
+  const [language, setLanguage] = useState<string | null>(null);
 
   const colours = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -103,9 +103,10 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const currentLanguage: () => Promise<string|null> = async () => {
+  const currentLanguage = async () => {
     const user = await apiService.get<User>(`/users/${localStorage.getItem("userId")}`)
-    return user.language
+    const language = user.language ?? "en"
+    setLanguage(language)
   }
 
   // Setup WebSocket connection
@@ -128,7 +129,7 @@ const ChatPage: React.FC = () => {
 
         //const userLanguage = currentUser?.language; // Default to "en"
 
-        stompClient.subscribe(`/topic/${currentLanguage()}/${chatId}`, (message) => {
+        stompClient.subscribe(`/topic/${language}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
         });
       },
