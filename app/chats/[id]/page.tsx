@@ -189,6 +189,9 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     fetchUsers();
     currentLanguage()
+    if(language == null){
+      return;
+    }
     const cleanupWebSocket = setupWebSocket();
     
     if (chatId) {
@@ -198,7 +201,7 @@ const ChatPage: React.FC = () => {
     return () => {
       cleanupWebSocket();
     };
-  }, [chatId, apiService]);
+  }, [chatId, apiService,language]);
 
 
   if (!hasMounted || !token || !users) {
