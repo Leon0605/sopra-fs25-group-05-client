@@ -157,7 +157,13 @@ const ChatPage: React.FC = () => {
     }
   
     const [datePart, timePart] = timestamp.split(",").map((part) => part.trim());
-    const today = new Date().toLocaleDateString("de-DE");
+    const today = (() => {
+      const date = new Date();
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    })();
   
     console.log("datePart:", datePart);
     console.log("timePart:", timePart);
