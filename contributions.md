@@ -91,12 +91,26 @@ reason).
 
 ---
 
-## Contributions Week 5 - [Begin Date] to [End Date]
+## Contributions Week 5 - 22.04.2025 to 29.04.2025
 
-_Continue with the same table format as above._
-
----
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @Leon0605 | | | | |
+@Leon0605 | | | | |
+| @ctraill | | | | |
+| @ctraill | | | | |
+| @nikola-pavlovic-git | | | | |
+| @adevantery | 25.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/95e0d2f54b06e15bf845d870b69e25c2da7886e9 | | Styling chat page |
+| @adevantery | | | | Fixing for deployement |
 
 ## Contributions Week 6 - [Begin Date] to [End Date]
 
-_Continue with the same table format as above._
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @Leon0605 | | | | |
+@Leon0605 | | | | |
+| @ctraill | | | | |
+| @ctraill | | | | |
+| @nikola-pavlovic-git | | | | |
+| @adevantery | | | | |
+| @adevantery | | | | |
