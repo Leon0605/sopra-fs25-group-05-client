@@ -13,7 +13,6 @@ const Dashboard: React.FC = () => {
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
@@ -132,6 +131,9 @@ const Dashboard: React.FC = () => {
           </button>
           <button className="btn-primary" onClick={() => router.push("/friends")}>
             Go to Friend List
+          </button>
+          <button className="btn-primary" onClick={() => router.push("/flashcards")}>
+            Go to Flashcard List
           </button>
           <button className="btn-secondary" onClick={handleLogout}>
             Logout

@@ -1,0 +1,212 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useApi } from "@/hooks/useApi";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { Flashcard } from "@/types/flashcard";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+const FlashcardSetPage: React.FC = () => {
+  const { id: flashcardSetId } = useParams();
+  const apiService = useApi();
+  const router = useRouter();
+  const { value: token } = useLocalStorage<string>("token", "");
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => setHasMounted(true), []);
+  useEffect(() => {
+    if (hasMounted && !token) router.push("/login");
+  }, [hasMounted, token]);
+
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      try {
+        const result = await apiService.get<Flashcard[]>(`/flashcards/${flashcardSetId}`, {
+          headers: { Authorization: token },
+        });
+        setFlashcards(result);
+      } catch (err) {
+        console.error("Failed to load flashcards:", err);
+      }
+    };
+    if (flashcardSetId) fetchFlashcards();
+  }, [apiService, token, flashcardSetId]);
+
+  const handleAddFlashcard = async () => {
+    const front = prompt("Enter the front content:");
+    if (!front) return;
+    const back = prompt("Enter the back content (optional, leave empty for translation):");
+    try {
+      await apiService.post(`/flashcards/${flashcardSetId}`,
+        { contentFront: front, ...(back ? { contentBack: back } : {}) },
+        {
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          }
+      );
+      const updated = await apiService.get<Flashcard[]>(`/flashcards/${flashcardSetId}`, {
+        headers: { Authorization: token },
+      });
+      setFlashcards(updated);
+    } catch (err) {
+      console.error("Failed to add flashcard:", err);
+      alert("Error creating flashcard");
+    }
+  };
+
+  const handleEditCard = async (flashcardId: string, currentFront: string, currentBack: string) => {
+    const newFront = prompt("Enter new front content:", currentFront);
+    if (newFront === null) return;
+  
+    const newBack = prompt("Enter new back content (optional):", currentBack);
+    if (newBack === null) return;
+  
+    try {
+      await apiService.put(
+        `/flashcards/${flashcardSetId}/${flashcardId}`,
+        {
+          contentFront: newFront,
+          contentBack: newBack,
+        },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      // Refresh state (basic way: refetch list or patch state manually)
+      const updatedFlashcards = flashcards.map((card) =>
+        card.flashcardId === flashcardId
+          ? { ...card, contentFront: newFront, contentBack: newBack }
+          : card
+      );
+      setFlashcards(updatedFlashcards);
+    } catch (err) {
+      console.error("Failed to edit flashcard:", err);
+      alert("Could not update flashcard.");
+    }
+  };
+  
+  
+  const handleDeleteCard = async (flashcardId: string) => {
+    if (!confirm("Are you sure you want to delete this flashcard?")) return;
+  
+    try {
+      await apiService.delete(`/flashcards/${flashcardSetId}/${flashcardId}`, 
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+    );
+  
+      // Refresh the list after deletion
+      const updatedFlashcards = flashcards.filter((card) => card.flashcardId !== flashcardId);
+      setFlashcards(updatedFlashcards);
+    } catch (err) {
+      console.error("Failed to delete flashcard:", err);
+      alert("Could not delete the flashcard.");
+    }
+  };
+  
+  
+
+  return (
+    <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
+      <div className="auth-card" style={{ maxWidth: "800px", width: "100%" }}>
+        <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Flashcards</h2>
+  
+        {/* Scrollable flashcard list */}
+        <div
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            marginBottom: "1.5rem",
+            paddingRight: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+          }}
+        >
+          {flashcards.map((card) => (
+            <div
+              key={card.flashcardId}
+              className="card shadow-sm mb-1"
+              style={{
+                backgroundColor: "#f3e9fb",
+                border: "1px solid #9B86BD",
+                borderRadius: "12px",
+              }}
+            >
+              <div className="card-body py-1 px-4">
+
+                <div className="row">
+                  <div className="col-md">
+                    <p className="fw-bold text-primary">Front</p>
+                    <p>{card.contentFront}</p>
+                  </div>
+                  <div className="col-md">
+                    <p className="fw-bold text-primary">Back</p>
+                    <p>{card.contentBack}</p>
+                  </div>
+
+                    {isEditing && (
+                    <div className="col-md d-flex justify-content-end mt-2" style={{ gap: "10px" }}>
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() =>
+                                handleEditCard(card.flashcardId, card.contentFront, card.contentBack)
+                            }
+                            >
+                            Edit
+                        </button>
+
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCard(card.flashcardId)}>
+                        Delete
+                        </button>
+                    </div>
+                    )}
+
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+  
+        {/* Action Buttons */}
+        <div className="auth-buttons d-flex justify-content-between mt-4">
+          {isEditing ? (
+            <>
+              <button className="btn-primary" onClick={() => setIsEditing(false)}>
+                Exit Editing
+              </button>
+              <button className="btn-primary" onClick={handleAddFlashcard}>
+                Add Flashcard
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn-primary" onClick={() => setIsEditing(true)}>
+                Edit Cards
+              </button>
+              <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+                Back to Sets
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  
+};
+
+export default FlashcardSetPage;

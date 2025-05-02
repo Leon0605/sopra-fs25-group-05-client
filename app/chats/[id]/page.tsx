@@ -6,6 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
+import { getApiDomain } from "@/utils/domain";
 import SockJS from 'sockjs-client';
 import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -115,7 +116,7 @@ const ChatPage: React.FC = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     // Use SockJS for the WebSocket connection
-    const socket = new SockJS("https://sopra-fs25-group-05-server.oa.r.appspot.com/ws");
+    const socket = new SockJS(`${getApiDomain()}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
       debug: (str) => console.log(str),

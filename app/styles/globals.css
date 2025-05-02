@@ -65,11 +65,12 @@ body {
   border-radius: 2.5rem;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
   width: 100%;
-  max-width: 390px;
+  max-width: 600px;
   text-align: center;
   border: 5px solid #9B86BD;
   z-index: 3;
   position: relative;
+  flex-direction: column;
 }
 
 

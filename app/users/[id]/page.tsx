@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import ReactDatePicker from "react-datepicker";
+import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "../../components/Navbar";
-import { useApi } from "@/hooks/useApi";
+import { useApi } from "@/hooks/useApi";  
 import { Card, Typography, Select, Button, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import dayjs from "dayjs";
@@ -140,7 +141,7 @@ const UserProfile: React.FC = () => {
     console.log("FormData contents:", formData.get("photo"));
   
     try {
-      const response = await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users/${id}/photo`, {
+      const response = await fetch(`${getApiDomain()}/users/${id}/photo`, {
         method: "POST",
         body: formData,
       });
@@ -617,7 +618,7 @@ const UserProfile: React.FC = () => {
             <Button
               type="primary"
               disabled={friendRequestSent || isFriend}
-              onClick={handleSendFriendRequest} // ✅ THIS WAS MISSING
+              onClick={handleSendFriendRequest} 
               style={{
                 backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                 borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",

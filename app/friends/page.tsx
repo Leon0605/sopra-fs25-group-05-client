@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
+import { getApiDomain } from "@/utils/domain";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
@@ -59,7 +60,7 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-      await fetch(`https://sopra-fs25-group-05-server.oa.r.appspot.com/users/${userId}/friend-request`, {
+      await fetch(`${getApiDomain()}/users/${userId}/friend-request`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
