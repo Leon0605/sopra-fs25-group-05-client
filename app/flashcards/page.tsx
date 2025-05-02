@@ -120,8 +120,8 @@ const Flashcards: React.FC = () => {
   };
 
   const handleEditSet = (setId: string) => {
-    const newFrom = prompt("Enter the new 'From' language:");
-    const newTo = prompt("Enter the new 'To' language:");
+    const newFrom = prompt("Enter the new source language:");
+    const newTo = prompt("Enter the new target language:");    
   
     if (!newFrom || !newTo) {
       alert("Edit cancelled or invalid input.");
