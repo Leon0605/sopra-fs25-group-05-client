@@ -223,7 +223,7 @@ const Flashcards: React.FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-muted">You don't have any flashcard sets yet.</p>
+          <p className="text-muted">You do not have any flashcard sets yet.</p>
         )}
   
         {/* Action Buttons */}
