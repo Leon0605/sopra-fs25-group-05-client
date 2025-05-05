@@ -109,8 +109,8 @@ reason).
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
 | @Leon0605 | 05.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/16c4c907946397493aeedd0d5cc52c3f5e5f26c6 | Added Privacy Settings handling in Backend| User information only gets displayed to authorized Users|
 @Leon0605 | 05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/16c4c907946397493aeedd0d5cc52c3f5e5f26c6| Added Message Status functionality Backend|User can now see if his Message has been read by other chatters |
-| @ctraill | | | | |
-| @ctraill | | | | |
+| @ctraill | 05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/bf8dbda7aabb3d47dc229040f1136bbcc3263fa0 | Update to read status of messages opened in chat page | Send updated read status of messages to backend |
+| @ctraill | 05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/a166cfc4ad17ab6905ff5e66d2619d2158995edf | Refactoring of users page & selective rendering of private information | Users can now only see detailed information of public profiles or friends |
 | @nikola-pavlovic-git |01.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/108c4d4f95fa99b56608e0b79793e7a2e082fddb |https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 | Adding more functionallity to flashcards, like editing, deleting etc.|
 | @nikola-pavlovic-git |05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/0783ee6d04f8d69555a7cf74cc0d0d048a0d7ba7| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53| Adding  JUnit test for the flashcardService and flashcardController + bug fixes|
 | @adevantery | | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/c322f5163adb3550e766529be228e03c34cd4353 | Page display for sets and cards | Flashcard system frontend |
