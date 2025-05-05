@@ -303,22 +303,22 @@ const UserProfile: React.FC = () => {
 
   return (
     <div>
-      {alertMessage && (
+      {alertMessage && notificationsEnabled && (
         <div
           className={`bubble-message ${alertType}`}
           style={{
             position: "fixed",
-            top: "20px", // Adjust this to position the bubble
-            left: "50%",
-            transform: "translateX(-50%)", // Center horizontally
-            backgroundColor: alertType === "success" ? "#4caf50" : "#f44336", // Green for success, red for danger
+            bottom: "20px", // Adjust this to position the bubble
+            right: "20px",
+            border: "3px solid #9B86BD",
+            backgroundColor: alertType === "success" ? "#E2BBE9" : "#f44336", // Green for success, red for danger
             color: "white",
             padding: "10px 20px",
             borderRadius: "20px",
             boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
             zIndex: 1050, // Ensure it appears above other elements
             textAlign: "center",
-            maxWidth: "80%", // Optional: Limit the width of the bubble
+            maxWidth: "300px", // Optional: Limit the width of the bubble
           }}
         >
           {alertMessage}
