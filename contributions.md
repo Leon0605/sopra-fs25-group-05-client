@@ -111,7 +111,8 @@ reason).
 @Leon0605 | | | | |
 | @ctraill | | | | |
 | @ctraill | | | | |
-| @nikola-pavlovic-git | | | | |
+| @nikola-pavlovic-git |01.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/108c4d4f95fa99b56608e0b79793e7a2e082fddb |https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 | Adding more functionallity to flashcards, like editing, deleting etc.|
+| @nikola-pavlovic-git |05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/0783ee6d04f8d69555a7cf74cc0d0d048a0d7ba7| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53| Adding  JUnit test for the flashcardService and flashcardController + bug fixes|
 | @adevantery | | | | |
 | @adevantery | | | | |
 
@@ -123,6 +124,7 @@ reason).
 @Leon0605 | | | | |
 | @ctraill | | | | |
 | @ctraill | | | | |
+| @nikola-pavlovic-git | | | | |
 | @nikola-pavlovic-git | | | | |
 | @adevantery | | | | |
 | @adevantery | | | | |
