@@ -107,8 +107,8 @@ reason).
 
 | **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
-| @Leon0605 | | | | |
-@Leon0605 | | | | |
+| @Leon0605 | 05.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/16c4c907946397493aeedd0d5cc52c3f5e5f26c6 | Added Privacy Settings handling in Backend| User information only gets displayed to authorized Users|
+@Leon0605 | 05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/16c4c907946397493aeedd0d5cc52c3f5e5f26c6| Added Message Status functionality Backend|User can now see if his Message has been read by other chatters |
 | @ctraill | | | | |
 | @ctraill | | | | |
 | @nikola-pavlovic-git |01.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/108c4d4f95fa99b56608e0b79793e7a2e082fddb |https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 | Adding more functionallity to flashcards, like editing, deleting etc.|
