@@ -91,7 +91,7 @@ reason).
 
 ---
 
-## Contributions Week 5 - 22.04.2025 to 29.04.2025
+## Contributions Week 5 - 22.04.2025 to 29.04.2025 (Easter break)
 
 | **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
@@ -100,8 +100,8 @@ reason).
 | @ctraill | | | | |
 | @ctraill | | | | |
 | @nikola-pavlovic-git | | | | |
-| @adevantery | 25.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/c322f5163adb3550e766529be228e03c34cd4353 | | Flashcard system frontend display |
-| @adevantery | | | | Flashcard system connection to backend |
+| @adevantery | 25.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/95e0d2f54b06e15bf845d870b69e25c2da7886e9 | | Styling chat page |
+| @adevantery | | | | |
 
 ## Contributions Week 7 - 29.04.2025 to 06.05.2025
 
@@ -113,8 +113,8 @@ reason).
 | @ctraill | | | | |
 | @nikola-pavlovic-git |01.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/108c4d4f95fa99b56608e0b79793e7a2e082fddb |https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 | Adding more functionallity to flashcards, like editing, deleting etc.|
 | @nikola-pavlovic-git |05.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/0783ee6d04f8d69555a7cf74cc0d0d048a0d7ba7| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53| Adding  JUnit test for the flashcardService and flashcardController + bug fixes|
-| @adevantery | | | | |
-| @adevantery | | | | |
+| @adevantery | | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/c322f5163adb3550e766529be228e03c34cd4353 | | Flashcard system frontend display |
+| @adevantery | | | | Flashcard system connection to backend |
 
 ## Contributions Week 6 - [Begin Date] to [End Date]
 
