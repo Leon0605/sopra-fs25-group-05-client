@@ -100,8 +100,20 @@ reason).
 | @ctraill | | | | |
 | @ctraill | | | | |
 | @nikola-pavlovic-git | | | | |
-| @adevantery | 25.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/95e0d2f54b06e15bf845d870b69e25c2da7886e9 | | Styling chat page |
-| @adevantery | | | | Fixing for deployement |
+| @adevantery | 25.4.2025 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/c322f5163adb3550e766529be228e03c34cd4353 | | Flashcard system frontend display |
+| @adevantery | | | | Flashcard system connection to backend |
+
+## Contributions Week 7 - 29.04.2025 to 06.05.2025
+
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @Leon0605 | | | | |
+@Leon0605 | | | | |
+| @ctraill | | | | |
+| @ctraill | | | | |
+| @nikola-pavlovic-git | | | | |
+| @adevantery | | | | |
+| @adevantery | | | | |
 
 ## Contributions Week 6 - [Begin Date] to [End Date]
 
