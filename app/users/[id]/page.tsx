@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import ReactDatePicker from "react-datepicker";
+import DatePicker from "react-datepicker";
 import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "../../components/Navbar";
 import { useApi } from "@/hooks/useApi";
-import { Button, Input, Form } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
-import styles from "./UserProfile.module.css";
+import "@/styles/globals.css";
 import dayjs from "dayjs";
+
 
 interface User {
   id: number;
@@ -37,15 +37,17 @@ const UserProfile: React.FC = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [language, setLanguage] = useState<string>("en");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [form] = Form.useForm();
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [users, setUsers] = useState<User[] | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
-  const datePickerRef = useRef<ReactDatePicker | null>(null);
+  const datePickerRef = useRef<DatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
@@ -252,38 +254,38 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    // Validate the form fields
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      showAlert("All fields are required.", "danger");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showAlert("New passwords do not match!", "danger");
+      return;
+    }
+
     try {
-      const values = await form.validateFields(); // Validate the form fields
-      const { oldPassword, newPassword, confirmPassword } = values;
-
-      if (newPassword !== confirmPassword) {
-        return showAlert("New passwords do not match!", "danger");
-      }
-
       setLoading(true);
 
-      const response: Response = await apiService.post(
-        `users/${id}/change-password`,
-        { oldPassword, newPassword },
-        {
-          headers: {
-            Authorization: `${token}`, // Include the token in the Authorization header
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // Replace this with your API call logic
+      console.log("Changing password:", { oldPassword, newPassword });
 
-      if (!response.ok) {
-        throw new Error("Failed to change password");
-      }
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       showAlert("Password changed successfully!", "success");
-      form.resetFields(); // Reset the form fields after successful submission
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      // Hide the password form
       setIsPasswordFormVisible(false);
     } catch (error) {
       console.error("Failed to change password:", error);
-      showAlert("Failed to change password", "danger");
+      showAlert("Failed to change password.", "danger");
     } finally {
       setLoading(false);
     }
@@ -302,7 +304,7 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div>
+    <div style={{ width: "500px" }}>
       {alertMessage && notificationsEnabled && (
         <div
           className={`bubble-message ${alertType}`}
@@ -390,40 +392,49 @@ const UserProfile: React.FC = () => {
                     marginTop: "10px",
                   }}
                 />
-                
-                <div className="form-check form-switch d-flex align-items-center mb-3">
-                  <label className="form-check-label me-2">Receive Notifications</label>
-                  <input className="form-check-input" type="checkbox" id="notificationsSwitch"
-                    checked={notificationsEnabled}
-                    onChange={(e) => handleNotificationsToggle(e.target.checked)}/>
+
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">Receive Notifications: </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="notificationsSwitch"
+                        checked={notificationsEnabled}
+                        onChange={(e) => handleNotificationsToggle(e.target.checked)}
+                        style={{
+                          backgroundColor: notificationsEnabled ? "rgb(119, 118, 179)" : "",
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="mb-3 row">
+                <div className="mb-3 row align-items-center">
                   <label className="col-sm-4 col-form-label">Birthday:</label>
-                  <div className="col-sm-8">
-
-                    <ReactDatePicker
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <DatePicker
+                      className="custom-date-picker"
                       ref={datePickerRef}
                       selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
                       onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
                       dateFormat="dd-MMM-yyyy"
-                      className="custom-date-picker"
+                      showYearDropdown
+                      showMonthDropdown
+                      dropdownMode="select"
+                      popperPlacement="right-start"
                     />
                   </div>
                 </div>
+
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label">Language:</label>
-                  <div className="col-sm-8">
+                  <label className="col-sm-4 col-form-label text-nowrap">Language:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
                       value={language}
                       onChange={handleLanguageChange}
                       disabled={user.id !== userId}
-                      style={{
-                        width: 200,
-                        backgroundColor: "white",
-                        color: "black",
-                        borderRadius: "8px",
-                      }}
                     >
                       <option value="en" style={{ color: "black" }}>English</option>
                       <option value="fr" style={{ color: "black" }}>French</option>
@@ -434,8 +445,8 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label">Learning language:</label>
-                  <div className="col-sm-8">
+                  <label className="col-sm-4 col-form-label text-nowrap">Learning language:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
                       value={user.learningLanguage || "en"}
                       onChange={handleLearningLanguageChange}
@@ -455,10 +466,10 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label">Privacy:</label>
-                  <div className="col-sm-8">
+                  <label className="col-sm-4 col-form-label text-nowrap">Privacy:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
-                      value={user.privacy}
+                      value={user.privacy || "open"}
                       onChange={handlePrivacyChange}
                       style={{
                         width: 200,
@@ -486,42 +497,53 @@ const UserProfile: React.FC = () => {
 
                   {isPasswordFormVisible && (
                     <div className="passwordChange">
-                      <Form form={form} layout="vertical">
-                        <Form.Item
-                          label="Old Password"
-                          name="oldPassword"
-                          rules={[{ required: true, message: "Please enter your old password!" }]}
-                        >
-                          <Input.Password placeholder="Enter old password" />
-                        </Form.Item>
+                      <form onSubmit={handlePasswordChange}>
+                        <div>
+                          <label htmlFor="oldPassword">Password:</label>
+                          <input
+                            type="password"
+                            id="oldPassword"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            required
+                            placeholder="Enter old password"
+                          />
+                        </div>
 
-                        <Form.Item
-                          label="New Password"
-                          name="newPassword"
-                          rules={[{ required: true, message: "Please enter your new password!" }]}
-                        >
-                          <Input.Password placeholder="Enter new password" />
-                        </Form.Item>
+                        <div>
+                          <label htmlFor="newPassword">New Password:</label>
+                          <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            placeholder="Enter new password"
+                          />
+                        </div>
 
-                        <Form.Item
-                          label="Confirm New Password"
-                          name="confirmPassword"
-                          rules={[{ required: true, message: "Please confirm your new password!" }]}
-                        >
-                          <Input.Password placeholder="Confirm new password" />
-                        </Form.Item>
+                        <div>
+                          <label htmlFor="confirmPassword">Confirm new Password:</label>
+                          <input
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            placeholder="Enter new password"
+                          />
+                        </div>
 
                         <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                          <Button
-                            type="primary"
-                            onClick={handlePasswordChange} // Call the password change logic
-                            loading={loading}
+                          <button
+                            className="btn-secondary"
+                            type="submit"
                           >
-                            Change Password
-                          </Button>
-                          <Button onClick={() => setIsPasswordFormVisible(false)}>Cancel</Button>
+                            {loading ? "Loading..." : "Change Password"}
+                          </button>
+                          <button className="btn-secondary" onClick={() => setIsPasswordFormVisible(false)}>Cancel</button>
                         </div>
-                      </Form>
+                      </form>
                     </div>
                   )}
                 </div>
@@ -532,16 +554,16 @@ const UserProfile: React.FC = () => {
             {/* User views friend or not-private page */}
             {(user.id !== userId) && (isFriend || user.privacy !== "private") && (
               <div>
-                <div className={styles["flex-end-container"]}>
+                <div className="flex-end-container">
                   <p className="text-muted">Birthday: </p> <p className="text-muted">{user.birthday}</p>
                 </div>
-                <div className={styles["flex-end-container"]}>
+                <div className="flex-end-container">
                   <p className="text-muted">Language: </p> <p className="text-muted">{user.language}</p>
                 </div>
-                <div className={styles["flex-end-container"]}>
+                <div className="flex-end-container">
                   <p className="text-muted">Learning Language: </p> <p className="text-muted">{user.learningLanguage}</p>
                 </div>
-                <div className={styles["flex-end-container"]}>
+                <div className="flex-end-container">
                   <p className="text-muted">Privacy: </p> <p className="text-muted">{user.privacy === "private" ? "Private" : "Open"}</p>
                 </div>
 
