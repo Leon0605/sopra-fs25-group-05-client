@@ -69,17 +69,32 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const profileUserData = await apiService.get<User>(`/users/${id}`);
-        console.log("Fetched user data:", profileUserData);
-
-        const currentUserData = await apiService.get<User>(`/users/${userId}`);
+        console.log("token:", token);
         const users: User[] = await apiService.get<User[]>("/users");
+        console.log("users:", users);
         if (!users || users.length === 0) {
           router.push("/login");
           return;
         }
         setUsers(users);
 
+        const profileUserData = await apiService.get<User>(`/users/${id}`, 
+          {
+            headers: {
+              Token: `${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+        console.log("Fetched user data:", profileUserData);
+
+        const currentUserData = await apiService.get<User>(`/users/${userId}`, 
+          {
+            headers: {
+              Token: `${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+        
         
         setUser(profileUserData);
         setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
@@ -153,7 +168,13 @@ const UserProfile: React.FC = () => {
       showAlert("Profile picture successfully updated", "success");
   
       // Fetch the updated user data to display the new photo
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
@@ -171,7 +192,13 @@ const UserProfile: React.FC = () => {
     try {
       await apiService.put(`/users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       showAlert(`Failed to update language: ${err}`, "danger");
@@ -185,7 +212,13 @@ const UserProfile: React.FC = () => {
       showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update learning language:", err);
@@ -200,7 +233,13 @@ const UserProfile: React.FC = () => {
       showAlert(`Privacy updated to ${newPrivacy}`, "success");
   
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
@@ -240,7 +279,13 @@ const UserProfile: React.FC = () => {
       showAlert("Birthday updated successfully!", "success");
   
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       setUser(updatedUser);
 
       // Remove focus from the date picker
