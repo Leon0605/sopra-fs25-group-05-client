@@ -12,7 +12,6 @@ import OrbitDashboard from '@/components/OrbitDashboard';
 const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
-  const [users, setUsers] = useState<User[] | null>(null);
   const [friends, setFriends] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
@@ -59,7 +58,7 @@ const Dashboard: React.FC = () => {
     try {
       if (!userId) return;
 
-      const [friendsData, incomingData, usersData] = await Promise.all([
+      const [friendsData, usersData] = await Promise.all([
         apiService.get<User[]>(`users/${userId}/friends`),
         apiService.get<User[]>(`users/${userId}/friend-request`),
         apiService.get<User[]>(`/users`),
@@ -69,9 +68,7 @@ const Dashboard: React.FC = () => {
       if (!current) throw new Error("Current user not found");
 
       const pendingIds = current.sentFriendRequestsList || [];
-      const pending = usersData.filter((u) => pendingIds.includes(u.id || 0));
 
-      setUsers(usersData);
       setCurrentUser(current);
       setFriends(friendsData);
     } catch (err) {

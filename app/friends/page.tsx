@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
-import { getApiDomain } from "@/utils/domain";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";

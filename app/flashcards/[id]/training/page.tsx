@@ -17,7 +17,6 @@ const FlashcardTraining: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentCards, setCurrentCards] = useState<Flashcard[]>([]);
-  const [knownCards, setKnownCards] = useState<string[]>([]);
   const [unknownCards, setUnknownCards] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -70,7 +69,6 @@ const FlashcardTraining: React.FC = () => {
     const cards = shuffleCards ? shuffleArray(flashcards) : flashcards;
     setCurrentCards(cards);
     setCurrentIndex(0);
-    setKnownCards([]);
     setUnknownCards([]);
     setRoundCompleted(false);
     setRoundNumber(1);
@@ -85,9 +83,7 @@ const FlashcardTraining: React.FC = () => {
     setFlipped(false);
 
     setTimeout(() => {
-      if (isKnown) {
-        setKnownCards((prev) => [...prev, currentCard.flashcardId]);
-      } else {
+      if (!isKnown) {
         setUnknownCards((prev) => [...prev, currentCard.flashcardId]);
       }
 
@@ -109,7 +105,6 @@ const FlashcardTraining: React.FC = () => {
     setCurrentCards(nextRoundCards);
     setCurrentIndex(0);
     setFlipped(false);
-    setKnownCards([]);
     setUnknownCards([]);
     setRoundCompleted(false);
     setRoundNumber((prev) => prev + 1);
@@ -120,7 +115,6 @@ const FlashcardTraining: React.FC = () => {
     setCurrentCards(cards);
     setCurrentIndex(0);
     setFlipped(false);
-    setKnownCards([]);
     setUnknownCards([]);
     setRoundCompleted(false);
     setRoundNumber(1);
@@ -239,7 +233,7 @@ return (
         ) : (
           <div className="d-flex gap-3 mt-3" style={{ zIndex: 2, position: "relative" }}>
             <button className="btn btn-outline-danger" onClick={() => handleAnswer(false)}>
-              Didn't Know
+              Did not Know
             </button>
             <button className="btn btn-outline-success" onClick={() => handleAnswer(true)}>
               Knew It

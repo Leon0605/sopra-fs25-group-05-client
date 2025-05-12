@@ -17,7 +17,8 @@ const OrbitDashboard: React.FC<OrbitDashboardProps> = ({
   const orbitRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    let start = performance.now();
+
+    const start = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - start;
@@ -33,10 +34,7 @@ const OrbitDashboard: React.FC<OrbitDashboardProps> = ({
           const y = radius * Math.sin(radians);
 
           const element = item as HTMLElement;
-          const inner = element.querySelector(
-            ".orbitItemInner"
-          ) as HTMLElement;
-
+          
           element.style.transform = `translate(${x}px, ${y}px)`;
         });
       }
