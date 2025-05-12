@@ -120,8 +120,8 @@ reason).
 
 | **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
-| @Leon0605 | | | | |
-@Leon0605 | | | | |
+| @Leon0605 | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/bbae8a58b818d6780b7f5cdf7b018439fff3efe3| Added functionality for Groupchats | Users can now be added/deleted to/from existing group chats |
+@Leon0605 | 12.05.25  | + https://github.com/Leon0605/sopra-fs25-group-05-server/commit/a2fe0f5ac4a22627e7edc34c13405ca9b471503d | Test adaption to match changes + trying to bug fix WS | assuring that tests work again + trying to handle WS connection failure |
 | @ctraill | | | | |
 | @ctraill | | | | |
 | @nikola-pavlovic-git | 12.05.25| https://github.com/Leon0605/sopra-fs25-group-05-server/commit/540e1bd2fb18f3ab038d11ad0d3100204a065f36| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 |Added Integration Test for Flashcard-Service and -controller, database bug for flashcard fixed, users can now rename the flashcardSet  |
