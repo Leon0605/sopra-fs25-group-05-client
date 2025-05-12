@@ -67,8 +67,6 @@ const Dashboard: React.FC = () => {
       const current = usersData.find((u) => u.id === userId);
       if (!current) throw new Error("Current user not found");
 
-      const pendingIds = current.sentFriendRequestsList || [];
-
       setCurrentUser(current);
       setFriends(friendsData);
     } catch (err) {
