@@ -121,9 +121,7 @@ const ChatPage: React.FC = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     // Use SockJS for the WebSocket connection
-    const socket = new SockJS(`${getApiDomain()}ws`, null, {
-      withCredentials: true, // Include credentials in the request
-    });
+    const socket = new SockJS(`${getApiDomain()}ws`);
     console.log("Socket: ", socket);
     console.log("WebSocket URL:", `${getApiDomain()}ws`);
     const stompClient = new Client({

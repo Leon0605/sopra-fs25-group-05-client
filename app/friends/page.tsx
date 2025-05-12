@@ -11,7 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const FriendsPage: React.FC = () => {
   const apiService = useApi();
   const router = useRouter();
-  const { value: userId } = useLocalStorage<number>("userId", 0);
+  const userId = localStorage.getItem("userId");
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
@@ -60,7 +60,7 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-      await fetch(`${getApiDomain()}/users/${userId}/friend-request`, {
+      await fetch(`${getApiDomain()}users/${userId}/friend-request`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

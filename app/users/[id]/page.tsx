@@ -66,11 +66,26 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const profileUserData = await apiService.get<User>(`/users/${id}`);
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        const profileUserData = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
         console.log("Fetched user data:", profileUserData);
 
-        const currentUserData = await apiService.get<User>(`/users/${userId}`);
-        const users: User[] = await apiService.get<User[]>("/users");
+        profileUserData.privacy = profileUserData.privacy || "private"; // Default to "private" if undefined
+
+        const currentUserData = await apiService.get<User>(`users/${userId}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
+        const users: User[] = await apiService.get<User[]>("users");
         if (!users || users.length === 0) {
           router.push("/login");
           return;
@@ -134,7 +149,7 @@ const UserProfile: React.FC = () => {
     // Log the file and FormData before sending
     console.log("Uploading photo for user:", user.id);
     console.log("File details:", file);
-    console.log("Posting data to:", `/users/${id}/photo`);
+    console.log("Posting data to:", `users/${id}/photo`);
     console.log("FormData contents:", formData.get("photo"));
 
     try {
@@ -150,7 +165,11 @@ const UserProfile: React.FC = () => {
       showAlert("Profile picture successfully updated", "success");
 
       // Fetch the updated user data to display the new photo
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
       if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
@@ -167,9 +186,13 @@ const UserProfile: React.FC = () => {
     const newLanguage = event.target.value;
     setLanguage(newLanguage);
     try {
-      await apiService.put(`/users/${id}`, { language: newLanguage });
+      await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       showAlert(`Failed to update language: ${err}`, "danger");
@@ -180,11 +203,15 @@ const UserProfile: React.FC = () => {
     if (!user || user.id !== userId) return;
     const newLearningLanguage = event.target.value;
     try {
-      await apiService.put(`/users/${id}`, { learningLanguage: newLearningLanguage });
+      await apiService.put(`users/${id}`, { learningLanguage: newLearningLanguage });
       showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update learning language:", err);
@@ -196,11 +223,15 @@ const UserProfile: React.FC = () => {
     if (!user || user.id !== userId) return; // Ensure the logged-in user is updating their own profile
     const newPrivacy = event.target.value;
     try {
-      await apiService.put(`/users/${id}`, { privacy: newPrivacy });
+      await apiService.put(`users/${id}`, { privacy: newPrivacy });
       showAlert(`Privacy updated to ${newPrivacy}`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
@@ -210,7 +241,7 @@ const UserProfile: React.FC = () => {
 
   const handleSendFriendRequest = async () => {
     try {
-      const response: Response = await apiService.post(`/users/${id}/friend-request`, {}, {
+      const response: Response = await apiService.post(`users/${id}/friend-request`, {}, {
         headers: {
           Authorization: `${token}`,
         },
@@ -235,12 +266,16 @@ const UserProfile: React.FC = () => {
       const newBirthday = date ? dayjs(date).format("YYYY-MM-DD") : null; // Convert Date to Dayjs and format
       console.log("Selected date:", newBirthday);
 
-      await apiService.put(`/users/${id}`, { birthday: newBirthday });
+      await apiService.put(`users/${id}`, { birthday: newBirthday });
       // Show a success alert
       showAlert("Birthday updated successfully!", "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`);
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
       setUser(updatedUser);
 
       // Remove focus from the date picker
