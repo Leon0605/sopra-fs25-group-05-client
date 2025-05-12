@@ -29,6 +29,7 @@ const ChatPage: React.FC = () => {
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
+  const { value: userId } = useLocalStorage<number>("userId", 0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef<Client | null>(null);
@@ -96,7 +97,7 @@ const ChatPage: React.FC = () => {
   // Fetch users from the API
   const fetchUsers = async () => {
     try {
-      const users: User[] = await apiService.get<User[]>("/users");
+      const users: User[] = await apiService.get<User[]>("users");
       console.log("Fetched users:", users);
       setUsers(users);
     } catch (error) {
@@ -105,7 +106,11 @@ const ChatPage: React.FC = () => {
   };
 
   const currentLanguage = async () => {
-    const user = await apiService.get<User>(`/users/${localStorage.getItem("userId")}`)
+    const user = await apiService.get<User>(`users/${localStorage.getItem("userId")}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
     const language = user.language ?? "en"
     console.log(user.id)
     console.log(user.language)
@@ -116,7 +121,11 @@ const ChatPage: React.FC = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     // Use SockJS for the WebSocket connection
-    const socket = new SockJS(`${getApiDomain()}/ws`);
+    const socket = new SockJS(`${getApiDomain()}ws`, null, {
+      withCredentials: true, // Include credentials in the request
+    });
+    console.log("Socket: ", socket);
+    console.log("WebSocket URL:", `${getApiDomain()}ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
       debug: (str) => console.log(str),
@@ -160,8 +169,9 @@ const ChatPage: React.FC = () => {
   // Fetch previously sent messages from the API
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${token}`);
+      // const token = JSON.parse(localStorage.getItem("token") || '""');
+      // console.log("Token:", token);
+      const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${userId}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
 
