@@ -58,16 +58,26 @@ const Dashboard: React.FC = () => {
     try {
       if (!userId) return;
 
-      const headers = {
-        Token: `${token}`,
-        "Content-Type": "application/json",
-      };
+      const friendsData = await apiService.get<User[]>(
+        `users/${userId}/friends`,
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      const [friendsData, incomingRequests, usersData] = await Promise.all([
-        apiService.get<User[]>(`users/${userId}/friends`, { headers }),
-        apiService.get<User[]>(`users/${userId}/friend-request`, { headers }),
-        apiService.get<User[]>(`/users`, { headers }),
-      ]);
+      const usersData = await apiService.get<User[]>(
+        `/users`,
+        {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
 
 
       const current = usersData.find((u) => u.id === userId);
