@@ -116,6 +116,19 @@ reason).
 | @adevantery | | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/c322f5163adb3550e766529be228e03c34cd4353 | Page display for sets and cards | Flashcard system frontend |
 | @adevantery | | | Connection to backend and displaying cards and sets | Flashcard system frontend |
 
+## Contributions Week 8 - 06.05.2025 to 13.05.2025
+
+| **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
+|----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
+| @Leon0605 | | | | |
+@Leon0605 | | | | |
+| @ctraill | | | | |
+| @ctraill | | | | |
+| @nikola-pavlovic-git | | | | |
+| @nikola-pavlovic-git | | | | |
+| @adevantery | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/e048c66606e12cbc76f128761ad5bc224d525133 | setting up orbits of user and friends in main page | Main Page Styling |
+| @adevantery | | | Setting up a training page to work on the flashcards like quizlet | Learning Flashcards |
+
 ## Contributions Week 6 - [Begin Date] to [End Date]
 
 | **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
