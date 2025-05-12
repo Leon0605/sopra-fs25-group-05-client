@@ -122,8 +122,9 @@ reason).
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
 | @Leon0605 | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/bbae8a58b818d6780b7f5cdf7b018439fff3efe3| Added functionality for Groupchats | Users can now be added/deleted to/from existing group chats |
 @Leon0605 | 12.05.25  | + https://github.com/Leon0605/sopra-fs25-group-05-server/commit/a2fe0f5ac4a22627e7edc34c13405ca9b471503d | Test adaption to match changes + trying to bug fix WS | assuring that tests work again + trying to handle WS connection failure |
-| @ctraill | | | | |
-| @ctraill | | | | |
+| @ctraill | 10.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/3e124e9a23132abced41bf68a2df3df4d2fb443a | Updated user profile to remove antd dependencies. Update to layout. | Improved user experience and popup message appearance. |
+| @ctraill | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/508fb1deba4300d9e8525c7c7f0d6a03a9b829ca | Update to consolidate API usage across page. | Consistent API address implementation. |
+| @ctraill | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/8a8bdd812dcc42001040a26a75b9d99b2c72dda6 | Add drag and drop group chat functionality. API consistency. Added 15sec interval for friend requests / message updates. | Improved user experience / functionality.  |
 | @nikola-pavlovic-git | 12.05.25| https://github.com/Leon0605/sopra-fs25-group-05-server/commit/540e1bd2fb18f3ab038d11ad0d3100204a065f36| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 |Added Integration Test for Flashcard-Service and -controller, database bug for flashcard fixed, users can now rename the flashcardSet  |
 | @nikola-pavlovic-git | 12.05.25| https://github.com/Leon0605/sopra-fs25-group-05-server/commit/afdce17976718a508d52396853cd1f2b1f6816e5|https://github.com/Leon0605/sopra-fs25-group-05-server/issues/76 | user photo is now saved as byte[] instead of string and optimizing messages entity and user language changes for stable database|
 | @adevantery | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/e048c66606e12cbc76f128761ad5bc224d525133 | setting up orbits of user and friends in main page | Main Page Styling |
