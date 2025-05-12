@@ -124,8 +124,8 @@ reason).
 @Leon0605 | | | | |
 | @ctraill | | | | |
 | @ctraill | | | | |
-| @nikola-pavlovic-git | | | | |
-| @nikola-pavlovic-git | | | | |
+| @nikola-pavlovic-git | 12.05.25| https://github.com/Leon0605/sopra-fs25-group-05-server/commit/540e1bd2fb18f3ab038d11ad0d3100204a065f36| https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53 |Added Integration Test for Flashcard-Service and -controller, database bug for flashcard fixed, users can now rename the flashcardSet  |
+| @nikola-pavlovic-git | 12.05.25| https://github.com/Leon0605/sopra-fs25-group-05-server/commit/afdce17976718a508d52396853cd1f2b1f6816e5|https://github.com/Leon0605/sopra-fs25-group-05-server/issues/76 | user photo is now saved as byte[] instead of string and optimizing messages entity and user language changes for stable database|
 | @adevantery | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/e048c66606e12cbc76f128761ad5bc224d525133 | setting up orbits of user and friends in main page | Main Page Styling |
 | @adevantery | | | Setting up a training page to work on the flashcards like quizlet | Learning Flashcards |
 
