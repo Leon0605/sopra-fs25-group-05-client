@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const FriendsPage: React.FC = () => {
   const apiService = useApi();
   const router = useRouter();
-  const { value: userId } = useLocalStorage<number>("userId", 0);
+  const userId = localStorage.getItem("userId");
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
@@ -71,7 +71,6 @@ const FriendsPage: React.FC = () => {
           },
         }
       );
-
 
       const acceptedUser = incomingRequests.find((u) => u.id === senderId);
       if (acceptedUser) setFriends((prev) => [...prev, acceptedUser]);

@@ -208,15 +208,78 @@ body {
 }
 
 .passwordChange {
-  position: "absolute";
-  top: "0";
-  left: "calc(100% + 20px)"; 
-  width: "300px";
-  padding: "20px";
-  border: "1px solid #ccc";
-  border-radius: "8px";
-  background-color: "#f9f9f9";
-  box-shadow: "0 4px 6px rgba(0, 0, 0, 0.1)";
+  z-index: 10 !important; /* ensure it appears above other elements */
+  position: absolute !important;
+  top: 300px !important;
+  left: 450px !important; /* Adjust as needed */
+  border: 5px solid #9b86bd !important; /* Bootstrap-like border */
+  border-radius: 8px !important; /* Bootstrap-like border radius */
+  width: 300px !important; /* Adjust as needed */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #E2BBE9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.custom-date-picker {
+  color: #000;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem !important;
+  padding: 0.375rem 0.75rem !important;
+  height: 38px !important;
+  width: 200px !important;
+}
+
+.form-select {
+  height: 38px !important; /* Set the desired height */
+  width: 200px !important; /* Set the desired width */
+  background-color: white;
+  border-radius: 8px;  
+  border: 1px solid #ced4da;  
+  padding-left: 8px; /* Space before the text */
+  padding-right: 30px; /* Space after the dropdown arrow */
+}
+
+.react-datepicker__current-month {
+  font-size: 16px !important; /* or whatever size you prefer */
+}
+
+/* Optionally adjust dropdown sizes too */
+.react-datepicker__month-dropdown-container,
+.react-datepicker__year-dropdown-container {
+  font-size: 14px !important; /* or whatever size you prefer */
+}
+
+.react-datepicker {
+  border: 1px solid #ced4da !important; /* Bootstrap-like border */
+}
+
+.react-datepicker__header {
+  background-color: #e2bbe9 !important; /* Bootstrap-like background */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important; /* optional soft shadow */
+}
+
+.react-datepicker-popper {
+  z-index: 10 !important; /* ensure it appears above other elements */
+  position: absolute !important;
+  top: 0 !important;
+  left: 75px !important; /* Adjust as needed */
+  border: 5px solid #9b86bd !important; /* Bootstrap-like border */
+  border-radius: 8px !important; /* Bootstrap-like border radius */
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.flex-end-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Aligns the Select to the right */
+  gap: 10px;
+  margin-bottom: 30px;
 }
 
 /* Flashcard learning */

@@ -13,28 +13,6 @@ const Navbar = () => {
   console.log("Messages:", messages);
   console.log("Online Users:", onlineUsers);
 
-  // useEffect(() => {
-  //   socket.on("getNotification", (data) => {
-  //     setNotifications((prev) => [...prev, data]);
-  //   });
-  // }, [socket]);
-
-  // const displayNotification = ({ fromUserId, type, content }: Notification) => {
-  //   let action;
-  
-  //   if (type === "message") {
-  //     action = "sent you a message";
-  //   } else if (type === "friend_request") {
-  //     action = "sent you a friend request";
-  //   } else {
-  //     action = "performed an action";
-  //   }
-  
-  //   return (
-  //     <span className="notification">{`User ${fromUserId} ${action}: ${content}`}</span>
-  //   );
-  // };
-
   return (
     <div className="navbar">
       <span className="logo">Habla! Chat App</span>

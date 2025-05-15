@@ -29,6 +29,7 @@ const ChatPage: React.FC = () => {
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
+  const { value: userId } = useLocalStorage<number>("userId", 0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef<Client | null>(null);
@@ -96,7 +97,7 @@ const ChatPage: React.FC = () => {
   // Fetch users from the API
   const fetchUsers = async () => {
     try {
-      const users: User[] = await apiService.get<User[]>("/users");
+      const users: User[] = await apiService.get<User[]>("users");
       console.log("Fetched users:", users);
       setUsers(users);
     } catch (error) {
@@ -105,7 +106,11 @@ const ChatPage: React.FC = () => {
   };
 
   const currentLanguage = async () => {
-    const user = await apiService.get<User>(`/users/${localStorage.getItem("userId")}`)
+    const user = await apiService.get<User>(`users/${localStorage.getItem("userId")}`, {
+          headers: {
+            Token: token, // Pass the token as a header
+          },
+        });
     const language = user.language ?? "en"
     console.log(user.id)
     console.log(user.language)
@@ -116,7 +121,9 @@ const ChatPage: React.FC = () => {
   // Setup WebSocket connection
   const setupWebSocket = () => {
     // Use SockJS for the WebSocket connection
-    const socket = new SockJS(`${getApiDomain()}/ws`);
+    const socket = new SockJS(`${getApiDomain()}ws`);
+    console.log("Socket: ", socket);
+    console.log("WebSocket URL:", `${getApiDomain()}ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
       debug: (str) => console.log(str),
@@ -147,13 +154,29 @@ const ChatPage: React.FC = () => {
     return () => stompClient.deactivate();
   };
 
+  const updateMessageStatus = async (messageId: string, userId: number) => {
+    try {
+      const endpoint = `/${messageId}/${userId}`;
+      const response = await apiService.put(endpoint, null)
+      console.log("Message status updated successfully:", response);
+    } catch (error: any) {
+      console.error("Error updating message status:", error.response?.data || error.message);
+    }
+  };
+
   // Fetch previously sent messages from the API
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${token}`);
+      // const token = JSON.parse(localStorage.getItem("token") || '""');
+      // console.log("Token:", token);
+      const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${userId}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
+
+      // Update the status of each message
+      for (const message of fetchedMessages) {
+        await updateMessageStatus(message.messageId, message.userId);
+      }
     } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
       if (error instanceof Error) {
@@ -190,11 +213,11 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     fetchUsers();
     currentLanguage()
-    if(language == null){
+    if (language == null) {
       return;
     }
     const cleanupWebSocket = setupWebSocket();
-    
+
     if (chatId) {
       fetchMessages();
     }
@@ -202,116 +225,116 @@ const ChatPage: React.FC = () => {
     return () => {
       cleanupWebSocket();
     };
-  }, [chatId, apiService,language]);
+  }, [chatId, apiService, language]);
 
 
   if (!hasMounted || !token || !users) {
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100">
-          <div className="spinner-border text-light" role="status" />
-        </div>
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
     );
   }
 
   return (
-      <div id="chat-page" className={styles["chat-page"]}>
-        {/* Floating title top-left */}
-        <h1 className={styles["chat-title"]}>Habla! Chat</h1>
+    <div id="chat-page" className={styles["chat-page"]}>
+      {/* Floating title top-left */}
+      <h1 className={styles["chat-title"]}>Habla! Chat</h1>
 
-        <button
-            className={styles["main-nav-button"]}
-            onClick={() => router.push("/main")}
+      <button
+        className={styles["main-nav-button"]}
+        onClick={() => router.push("/main")}
+      >
+        Go to Main Page
+      </button>
+
+      {/* Chat Card */}
+      <div className={styles["chat-container"]}>
+
+        {/* Scrollable Message Area */}
+        <div className={styles["chat-messages-container"]}>
+          <ul className={styles["message-area"]}>
+            {messages.map((message) => {
+              const user = users?.find((user) => user.id === message.userId);
+              const userColor = getUserColor(message.userId);
+              return (
+                <li key={message.messageId} className={styles["chat-message"]}>
+                  <div className={styles["avatar-username"]}>
+                    <i style={{ backgroundColor: userColor }}>
+                      {user?.username?.[0] || "?"}
+                    </i>
+                    <span className={styles["username"]}>
+                      {user?.username || "Anonymous"}
+                    </span>
+                  </div>
+                  <div className={styles["message-block"]}>
+                    <p className={styles["original"]}>{message.originalMessage}</p>
+                    <p className={styles["translation"]}>{message.translatedMessage}</p>
+                  </div>
+                  <p className={styles["timestamp"]}>
+                    {formatTimestamp(message.timestamp)}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* Message Input */}
+        <form
+          className={styles["message-form"]}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const messageInput = document.querySelector<HTMLInputElement>("#message");
+            if (messageInput && messageInput.value.trim() !== "") {
+              sendMessage(messageInput.value.trim());
+              messageInput.value = "";
+            }
+          }}
         >
-          Go to Main Page
-        </button>
+          <input
+            type="text"
+            id="message"
+            placeholder="Type your message here..."
+            className={styles.formControl}
+          />
+          <button type="submit" className={styles["btn-primary"]}>
+            Send
+          </button>
+        </form>
 
-        {/* Chat Card */}
-        <div className={styles["chat-container"]}>
-
-          {/* Scrollable Message Area */}
-          <div className={styles["chat-messages-container"]}>
-            <ul className={styles["message-area"]}>
-              {messages.map((message) => {
-                const user = users?.find((user) => user.id === message.userId);
-                const userColor = getUserColor(message.userId);
-                return (
-                    <li key={message.messageId} className={styles["chat-message"]}>
-                      <div className={styles["avatar-username"]}>
-                        <i style={{ backgroundColor: userColor }}>
-                          {user?.username?.[0] || "?"}
-                        </i>
-                        <span className={styles["username"]}>
-                        {user?.username || "Anonymous"}
-                      </span>
-                      </div>
-                      <div className={styles["message-block"]}>
-                        <p className={styles["original"]}>{message.originalMessage}</p>
-                        <p className={styles["translation"]}>{message.translatedMessage}</p>
-                      </div>
-                      <p className={styles["timestamp"]}>
-                        {formatTimestamp(message.timestamp)}
-                      </p>
-                    </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Message Input */}
-          <form
-              className={styles["message-form"]}
-              onSubmit={(e) => {
-                e.preventDefault();
-                const messageInput = document.querySelector<HTMLInputElement>("#message");
-                if (messageInput && messageInput.value.trim() !== "") {
-                  sendMessage(messageInput.value.trim());
-                  messageInput.value = "";
-                }
+        {/* WebSocket Status and Test Button */}
+        <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
+          <div className="d-flex align-items-center">
+            <span
+              style={{
+                display: "inline-block",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                backgroundColor: isConnected ? "green" : "red",
+                marginRight: "10px",
               }}
-          >
-            <input
-                type="text"
-                id="message"
-                placeholder="Type your message here..."
-                className={styles.formControl}
             />
-            <button type="submit" className={styles["btn-primary"]}>
-              Send
-            </button>
-          </form>
-
-          {/* WebSocket Status and Test Button */}
-          <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
-            <div className="d-flex align-items-center">
-              <span
-                  style={{
-                    display: "inline-block",
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    backgroundColor: isConnected ? "green" : "red",
-                    marginRight: "10px",
-                  }}
-              />
-              <span>{isConnected ? "Connected" : "Disconnected"}</span>
-            </div>
-
-            <button
-                className="btn btn-outline-secondary"
-                style={{ fontSize: "0.9rem" }}
-                onClick={() => {
-                  if (stompClientRef.current && stompClientRef.current.connected) {
-                    alert("WebSocket is connected");
-                  } else {
-                    alert("WebSocket is not connected");
-                  }
-                }}
-            >
-              Test WebSocket Connection
-            </button>
+            <span>{isConnected ? "Connected" : "Disconnected"}</span>
           </div>
+
+          <button
+            className="btn btn-outline-secondary"
+            style={{ fontSize: "0.9rem" }}
+            onClick={() => {
+              if (stompClientRef.current && stompClientRef.current.connected) {
+                alert("WebSocket is connected");
+              } else {
+                alert("WebSocket is not connected");
+              }
+            }}
+          >
+            Test WebSocket Connection
+          </button>
         </div>
       </div>
+    </div>
   );
 };
 
