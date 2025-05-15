@@ -16,6 +16,7 @@ interface Message {
   chatId: string;
   userId: number;
   content: string;
+  status: string;
   originalMessage: string;
   translatedMessage: string;
   timestamp: string;
@@ -34,6 +35,7 @@ const ChatPage: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef<Client | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const colours = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -44,6 +46,13 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  // Scroll to the bottom of the message area when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (hasMounted && !token) {
@@ -106,17 +115,18 @@ const ChatPage: React.FC = () => {
   };
 
   const currentLanguage = async () => {
-    const user = await apiService.get<User>(`users/${localStorage.getItem("userId")}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
-    const language = user.language ?? "en"
-    console.log(user.id)
-    console.log(user.language)
-    console.log(localStorage.getItem("userId"))
-    setLanguage(language)
-  }
+    if (!token || !userId) {
+      console.warn("Token or userId missing, skipping currentLanguage fetch.");
+      return;
+    }
+    const user = await apiService.get<User>(`users/${userId}`, {
+      headers: {
+        Token: token,
+      },
+    });
+    const language = user.language ?? "en";
+    setLanguage(language);
+  };
 
   // Setup WebSocket connection
   const setupWebSocket = () => {
@@ -154,15 +164,15 @@ const ChatPage: React.FC = () => {
     return () => stompClient.deactivate();
   };
 
-  const updateMessageStatus = async (messageId: string, userId: number) => {
-    try {
-      const endpoint = `/${messageId}/${userId}`;
-      const response = await apiService.put(endpoint, null)
-      console.log("Message status updated successfully:", response);
-    } catch (error: any) {
-      console.error("Error updating message status:", error.response?.data || error.message);
-    }
-  };
+  // const updateMessageStatus = async (messageId: string, userId: number) => {
+  //   try {
+  //     const endpoint = `/${messageId}/${userId}`;
+  //     const response = await apiService.put(endpoint, null)
+  //     console.log("Message status updated successfully:", response);
+  //   } catch (error: any) {
+  //     console.error("Error updating message status:", error.response?.data || error.message);
+  //   }
+  // };
 
   // Fetch previously sent messages from the API
   const fetchMessages = async () => {
@@ -174,9 +184,9 @@ const ChatPage: React.FC = () => {
       console.log("Fetched messages:", fetchedMessages);
 
       // Update the status of each message
-      for (const message of fetchedMessages) {
-        await updateMessageStatus(message.messageId, message.userId);
-      }
+      // for (const message of fetchedMessages) {
+      //   await updateMessageStatus(message.messageId, message.userId);
+      // }
     } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
       if (error instanceof Error) {
@@ -202,20 +212,22 @@ const ChatPage: React.FC = () => {
       return `${day}.${month}.${year}`;
     })();
 
-    console.log("datePart:", datePart);
-    console.log("timePart:", timePart);
-    console.log("today:", today);
-
     return datePart === today ? timePart : datePart;
   };
 
   // Consolidated useEffect
   useEffect(() => {
     fetchUsers();
+    // Only call currentLanguage if token and userId are available
+    if (!token || !userId) {
+      return;
+    }
+
     currentLanguage()
     if (language == null) {
       return;
     }
+
     const cleanupWebSocket = setupWebSocket();
 
     if (chatId) {
@@ -225,7 +237,7 @@ const ChatPage: React.FC = () => {
     return () => {
       cleanupWebSocket();
     };
-  }, [chatId, apiService, language]);
+  }, [chatId, apiService, language, token, userId]);
 
 
   if (!hasMounted || !token || !users) {
@@ -271,12 +283,23 @@ const ChatPage: React.FC = () => {
                     <p className={styles["original"]}>{message.originalMessage}</p>
                     <p className={styles["translation"]}>{message.translatedMessage}</p>
                   </div>
-                  <p className={styles["timestamp"]}>
+                  <div className={styles["timestamp"]}>
                     {formatTimestamp(message.timestamp)}
-                  </p>
+                    {userId === message.userId && (
+                      <p className={styles["status"]}>
+                        {message.status === "sent" ? (
+                          <span style={{ color: "grey" }}>✔</span>
+                        ) : (
+                          <span style={{ color: "green" }}>✔✔</span>
+                        )}
+                        {message.status}
+                      </p>
+                    )}
+                  </div>
                 </li>
               );
             })}
+            <div ref={messagesEndRef} />
           </ul>
         </div>
 
