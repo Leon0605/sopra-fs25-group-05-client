@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
-import { getApiDomain } from "@/utils/domain";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
@@ -31,7 +30,8 @@ const FriendsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
+      if (hasMounted)
+{      try {
         if (userId === null) return;
 
         const [friendsData, incomingData, users] = await Promise.all([
@@ -50,7 +50,7 @@ const FriendsPage: React.FC = () => {
         setPendingRequests(pending);
       } catch (err) {
         console.error("Error fetching friends/requests", err);
-      } 
+      } }
     };
 
     fetchData();
@@ -60,15 +60,17 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-      await fetch(`${getApiDomain()}users/${userId}/friend-request`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-          senderUserId: senderId.toString(),
-        },
-      
-      });
+      await apiService.put<void>(
+        `/users/${userId}/friend-request`,
+        null,
+        {
+          headers: {
+            Authorization: token,
+            senderUserId: senderId.toString(),
+            Accept: "true", // or "false" depending on logic
+          },
+        }
+      );
 
       const acceptedUser = incomingRequests.find((u) => u.id === senderId);
       if (acceptedUser) setFriends((prev) => [...prev, acceptedUser]);

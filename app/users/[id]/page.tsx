@@ -92,6 +92,22 @@ const UserProfile: React.FC = () => {
         }
         setUsers(users);
 
+        const profileUserData = await apiService.get<User>(`/users/${id}`, 
+          {
+            headers: {
+              Token: `${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+        console.log("Fetched user data:", profileUserData);
+
+        const currentUserData = await apiService.get<User>(`/users/${userId}`, 
+          {
+            headers: {
+              Token: `${token}`,
+              "Content-Type": "application/json",
+            },
+          });
 
         setUser(profileUserData);
         setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
@@ -165,9 +181,11 @@ const UserProfile: React.FC = () => {
       showAlert("Profile picture successfully updated", "success");
 
       // Fetch the updated user data to display the new photo
-      const updatedUser = await apiService.get<User>(`users/${id}`, {
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
       if (!updatedUser) {
@@ -188,9 +206,11 @@ const UserProfile: React.FC = () => {
     try {
       await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
-      const updatedUser = await apiService.get<User>(`users/${id}`, {
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
       setUser(updatedUser);
@@ -207,9 +227,11 @@ const UserProfile: React.FC = () => {
       showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`users/${id}`, {
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
       setUser(updatedUser);
@@ -227,9 +249,11 @@ const UserProfile: React.FC = () => {
       showAlert(`Privacy updated to ${newPrivacy}`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`users/${id}`, {
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
       setUser(updatedUser);
@@ -271,9 +295,11 @@ const UserProfile: React.FC = () => {
       showAlert("Birthday updated successfully!", "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`users/${id}`, {
+      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+        {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
       setUser(updatedUser);
