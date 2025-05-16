@@ -192,3 +192,72 @@
   margin: 0;
   padding: 0;
 }
+
+.navbar {
+  position: fixed;  
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background-color: #1f1f1f;
+  width: 100vw;
+  height: 60px; /* Set a fixed height for the navbar */
+}
+
+.navbar .icons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-right: 20px;
+}
+
+.navbar .icon {
+  position: relative;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.navbar .counter {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.navbar .notifications {
+  background-color: rgb(102, 121, 207);
+  border: 1px solid #ddd;
+  position: absolute;
+  top: 50px;
+  color: white;
+  right: 10px;
+  border-radius: 5px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 10px;
+}
+
+.navbar .nButton {
+  display: block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  background-color: #a6ddf0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navbar .nButton:hover {
+  background-color: #371eaa;
+}

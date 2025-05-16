@@ -8,6 +8,7 @@ import { User } from "@/types/user";
 import { Client } from "@stomp/stompjs";
 import { getApiDomain } from "@/utils/domain";
 import SockJS from 'sockjs-client';
+import Navbar from "../../components/Navbar";
 import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -249,115 +250,120 @@ const ChatPage: React.FC = () => {
   }
 
   return (
-    <div id="chat-page" className={styles["chat-page"]}>
-      {/* Floating title top-left */}
-      <h1 className={styles["chat-title"]}>Habla! Chat</h1>
+    <main>
+      <header>
+        <Navbar />
+      </header>
+      <div id="chat-page" className={styles["chat-page"]}>
+        {/* Floating title top-left */}
+        {/* <h1 className={styles["chat-title"]}>Habla! Chat</h1>
 
-      <button
-        className={styles["main-nav-button"]}
-        onClick={() => router.push("/main")}
-      >
-        Go to Main Page
-      </button>
-
-      {/* Chat Card */}
-      <div className={styles["chat-container"]}>
-
-        {/* Scrollable Message Area */}
-        <div className={styles["chat-messages-container"]}>
-          <ul className={styles["message-area"]}>
-            {messages.map((message) => {
-              const user = users?.find((user) => user.id === message.userId);
-              const userColor = getUserColor(message.userId);
-              return (
-                <li key={message.messageId} className={styles["chat-message"]}>
-                  <div className={styles["avatar-username"]}>
-                    <i style={{ backgroundColor: userColor }}>
-                      {user?.username?.[0] || "?"}
-                    </i>
-                    <span className={styles["username"]}>
-                      {user?.username || "Anonymous"}
-                    </span>
-                  </div>
-                  <div className={styles["message-block"]}>
-                    <p className={styles["original"]}>{message.originalMessage}</p>
-                    <p className={styles["translation"]}>{message.translatedMessage}</p>
-                  </div>
-                  <div className={styles["timestamp"]}>
-                    {formatTimestamp(message.timestamp)}
-                    {userId === message.userId && (
-                      <p className={styles["status"]}>
-                        {message.status === "sent" ? (
-                          <span style={{ color: "grey" }}>✔</span>
-                        ) : (
-                          <span style={{ color: "green" }}>✔✔</span>
-                        )}
-                        {message.status}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </ul>
-        </div>
-
-        {/* Message Input */}
-        <form
-          className={styles["message-form"]}
-          onSubmit={(e) => {
-            e.preventDefault();
-            const messageInput = document.querySelector<HTMLInputElement>("#message");
-            if (messageInput && messageInput.value.trim() !== "") {
-              sendMessage(messageInput.value.trim());
-              messageInput.value = "";
-            }
-          }}
+        <button
+          className={styles["main-nav-button"]}
+          onClick={() => router.push("/main")}
         >
-          <input
-            type="text"
-            id="message"
-            placeholder="Type your message here..."
-            className={styles.formControl}
-          />
-          <button type="submit" className={styles["btn-primary"]}>
-            Send
-          </button>
-        </form>
+          Go to Main Page
+        </button> */}
 
-        {/* WebSocket Status and Test Button */}
-        <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
-          <div className="d-flex align-items-center">
-            <span
-              style={{
-                display: "inline-block",
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                backgroundColor: isConnected ? "green" : "red",
-                marginRight: "10px",
-              }}
-            />
-            <span>{isConnected ? "Connected" : "Disconnected"}</span>
+        {/* Chat Card */}
+        <div className={styles["chat-container"]}>
+
+          {/* Scrollable Message Area */}
+          <div className={styles["chat-messages-container"]}>
+            <ul className={styles["message-area"]}>
+              {messages.map((message) => {
+                const user = users?.find((user) => user.id === message.userId);
+                const userColor = getUserColor(message.userId);
+                return (
+                  <li key={message.messageId} className={styles["chat-message"]}>
+                    <div className={styles["avatar-username"]}>
+                      <i style={{ backgroundColor: userColor }}>
+                        {user?.username?.[0] || "?"}
+                      </i>
+                      <span className={styles["username"]}>
+                        {user?.username || "Anonymous"}
+                      </span>
+                    </div>
+                    <div className={styles["message-block"]}>
+                      <p className={styles["original"]}>{message.originalMessage}</p>
+                      <p className={styles["translation"]}>{message.translatedMessage}</p>
+                    </div>
+                    <div className={styles["timestamp"]}>
+                      {formatTimestamp(message.timestamp)}
+                      {userId === message.userId && (
+                        <p className={styles["status"]}>
+                          {message.status === "sent" ? (
+                            <span style={{ color: "grey" }}>✔</span>
+                          ) : (
+                            <span style={{ color: "green" }}>✔✔</span>
+                          )}
+                          {message.status}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </ul>
           </div>
 
-          <button
-            className="btn btn-outline-secondary"
-            style={{ fontSize: "0.9rem" }}
-            onClick={() => {
-              if (stompClientRef.current && stompClientRef.current.connected) {
-                alert("WebSocket is connected");
-              } else {
-                alert("WebSocket is not connected");
+          {/* Message Input */}
+          <form
+            className={styles["message-form"]}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const messageInput = document.querySelector<HTMLInputElement>("#message");
+              if (messageInput && messageInput.value.trim() !== "") {
+                sendMessage(messageInput.value.trim());
+                messageInput.value = "";
               }
             }}
           >
-            Test WebSocket Connection
-          </button>
+            <input
+              type="text"
+              id="message"
+              placeholder="Type your message here..."
+              className={styles.formControl}
+            />
+            <button type="submit" className={styles["btn-primary"]}>
+              Send
+            </button>
+          </form>
+
+          {/* WebSocket Status and Test Button */}
+          <div className="d-flex align-items-center justify-content-between p-3" style={{ gap: "16px" }}>
+            <div className="d-flex align-items-center">
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: isConnected ? "green" : "red",
+                  marginRight: "10px",
+                }}
+              />
+              <span>{isConnected ? "Connected" : "Disconnected"}</span>
+            </div>
+
+            <button
+              className="btn btn-outline-secondary"
+              style={{ fontSize: "0.9rem" }}
+              onClick={() => {
+                if (stompClientRef.current && stompClientRef.current.connected) {
+                  alert("WebSocket is connected");
+                } else {
+                  alert("WebSocket is not connected");
+                }
+              }}
+            >
+              Test WebSocket Connection
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

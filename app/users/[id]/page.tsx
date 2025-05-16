@@ -153,7 +153,7 @@ const UserProfile: React.FC = () => {
     console.log("FormData contents:", formData.get("photo"));
 
     try {
-      const response = await fetch(`${getApiDomain()}/users/${id}/photo`, {
+      const response = await fetch(`${getApiDomain()}users/${id}/photo`, {
         method: "POST",
         body: formData,
       });
@@ -166,10 +166,10 @@ const UserProfile: React.FC = () => {
 
       // Fetch the updated user data to display the new photo
       const updatedUser = await apiService.get<User>(`users/${id}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
+        headers: {
+          Token: token, // Pass the token as a header
+        },
+      });
       if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
@@ -181,6 +181,23 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const handleDeletePhoto = async () => {
+    try {
+      await apiService.delete(`users/${id}/photo`, {
+        headers: { Token: token },
+      });
+      showAlert("Profile photo deleted", "success");
+      // Optionally fetch updated user data
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+        headers: { Token: token },
+      });
+      setUser(updatedUser);
+    } catch (error) {
+      showAlert("Failed to delete photo", "danger");
+    }
+  }
+
+
   const handleLanguageChange = async (event: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
     if (!user || user.id !== userId) return;
     const newLanguage = event.target.value;
@@ -189,10 +206,10 @@ const UserProfile: React.FC = () => {
       await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
       const updatedUser = await apiService.get<User>(`users/${id}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
+        headers: {
+          Token: token, // Pass the token as a header
+        },
+      });
       setUser(updatedUser);
     } catch (err) {
       showAlert(`Failed to update language: ${err}`, "danger");
@@ -208,10 +225,10 @@ const UserProfile: React.FC = () => {
 
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`users/${id}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
+        headers: {
+          Token: token, // Pass the token as a header
+        },
+      });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update learning language:", err);
@@ -228,10 +245,10 @@ const UserProfile: React.FC = () => {
 
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`users/${id}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
+        headers: {
+          Token: token, // Pass the token as a header
+        },
+      });
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
@@ -272,10 +289,10 @@ const UserProfile: React.FC = () => {
 
       // Fetch the updated user data to reflect the changes
       const updatedUser = await apiService.get<User>(`users/${id}`, {
-          headers: {
-            Token: token, // Pass the token as a header
-          },
-        });
+        headers: {
+          Token: token, // Pass the token as a header
+        },
+      });
       setUser(updatedUser);
 
       // Remove focus from the date picker
@@ -363,7 +380,7 @@ const UserProfile: React.FC = () => {
       )}
       <Navbar />
       <div className="card-container">
-        <div className="auth-card" style={{ maxWidth: "900px", width: "100%", marginTop: "1rem" }}>
+        <div className="auth-card" style={{ maxWidth: "900px", width: "100%", marginTop: "0rem" }}>
           <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
           <div style={{ position: "relative", display: "inline-block" }}>
             <div
@@ -374,18 +391,20 @@ const UserProfile: React.FC = () => {
                 borderRadius: "50%",
                 backgroundColor: user.status === "ONLINE" ? "green" : "yellow", // Green if online, yellow if offline
                 border: "2px solid white", // Optional border for better visibility
-                top: "5px", // Adjust this to position the dot
+                top: "3px", // Adjust this to position the dot
                 left: "50%", // Adjust this to position the dot
                 transform: "translate(30px)", // Center the dot
+                zIndex: 1, // Ensure the dot is above the image
               }}
             ></div>
 
             <div
               style={{
+                position: "relative",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                marginBottom: "30px",
+                marginBottom: "10px",
               }}
             >
               {user.photo ? (
@@ -393,11 +412,11 @@ const UserProfile: React.FC = () => {
                   src={user.photo}
                   alt={`${user.username}'s profile`}
                   style={{
-                    width: "150px",
-                    height: "150px",
+                    width: "175px",
+                    height: "175px",
                     borderRadius: "50%",
                     objectFit: "cover",
-                    marginBottom: "10px",
+                    marginBottom: "5px",
                     border: "3px solid #9b86bd",
                   }}
                 />
@@ -406,28 +425,81 @@ const UserProfile: React.FC = () => {
                   src="/images/default-user.png" // Path to the generic user image
                   alt="Default user profile"
                   style={{
-                    width: "150px",
-                    height: "150px",
+                    width: "175px",
+                    height: "175px",
                     borderRadius: "50%",
                     objectFit: "cover",
-                    marginBottom: "10px",
+                    marginBottom: "5px",
                     border: "3px solid #9b86bd",
                   }}
                 />
               )}
+
+              {user.id === userId && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="photo-upload"
+                    style={{ display: "none" }}
+                    onChange={handlePhotoUpload}
+                  />
+                  <button
+                    className="btn-secondary"
+                    type="button"
+                    onClick={() => document.getElementById("photo-upload")?.click()}
+                    style={{
+                      position: "absolute",
+                      bottom: "0px",
+                      left: "80px", // adjust as needed for your design
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      zIndex: 2,
+                    }}
+                    title="Upload Photo"
+                  >
+                    <i className="bi bi-camera" />
+                  </button>
+
+                  {user.photo && user.photo !== "/images/default-user.png" && (
+                    <>
+                      <button
+                        className="btn-secondary"
+                        type="button"
+                        onClick={handleDeletePhoto}
+                        style={{
+                          position: "absolute",
+                          bottom: "0px",
+                          right: "80px", // adjust as needed for your design
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          padding: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                          zIndex: 2,
+                        }}
+                        title="Delete Photo"
+                      >
+                        <i className="bi bi-trash" style={{ margin: 0 }} />
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
             </div>
             {/* User views their own profile */}
             {user.id === userId && (
               <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  style={{
-                    marginTop: "10px",
-                  }}
-                />
-
                 <div className="mb-3 row align-items-center">
                   <label className="col-sm-4 col-form-label text-nowrap">Receive Notifications: </label>
                   <div className="col-sm-8 d-flex justify-content-end">
@@ -454,11 +526,19 @@ const UserProfile: React.FC = () => {
                       ref={datePickerRef}
                       selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
                       onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
+                      onChangeRaw={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        if (target && target.value === '') {
+                          handleBirthdayChange(null); // Clear date if input is emptied
+                        }
+                      }}
                       dateFormat="dd-MMM-yyyy"
                       showYearDropdown
                       showMonthDropdown
                       dropdownMode="select"
                       popperPlacement="right-start"
+                      maxDate={new Date()} // Prevent future dates
+                      placeholderText="Select your birthday"
                     />
                   </div>
                 </div>

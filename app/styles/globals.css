@@ -73,7 +73,6 @@ body {
   flex-direction: column;
 }
 
-
 /* Card Title */
 .auth-card h2 {
   font-weight: bold;
@@ -138,72 +137,72 @@ body {
 }
 
 .navbar {
-  height: 50px;
-  background-color: #4f568a;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  color: white;
+  position: fixed !important;  
+  top: 0 !important;
+  left: 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 20px !important;
+  background-color: #9b86bd;
+  height: 60px !important; /* Set a fixed height for the navbar */
+  width: 100vw !important;
+}
+
+.navbar .icons {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 15px !important;
+  margin-right: 20px !important;
+}
+
+.navbar .icon {
   position: relative;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.icons {
-  display: flex;
-  align-items: center;
-}
-
-.icon {
-  margin-left: 15px;
   cursor: pointer;
-  position: relative;
+  margin-right: 10px;
 }
 
-.iconImg {
-  width: 20px;
-  height: 20px;
-}
-
-.counter {
-  width: 5px;
-  height: 5px;
-  background-color: red;
-  border-radius: 50%;
-  padding: 5px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.navbar .counter {
   position: absolute;
   top: -5px;
   right: -5px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
 }
 
-.notifications {
+.navbar .notifications {
+  background-color: rgb(102, 121, 207);
+  border: 1px solid #ddd;
   position: absolute;
   top: 50px;
-  right: 0;
-  background-color: white;
-  color: black;
-  font-weight: 300;
-  display: flex;
-  flex-direction: column;
+  color: white;
+  right: 10px;
+  border-radius: 5px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
   padding: 10px;
 }
 
-.notification {
-  padding: 5px;
-  font-size: 14px;
+.navbar .nButton {
+  display: block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  background-color: #a6ddf0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.nButton {
-  width: 80%;
-  padding: 5px;
-  margin-top: 10px;
+.navbar .nButton:hover {
+  background-color: #371eaa;
 }
 
 .passwordChange {
@@ -222,8 +221,8 @@ body {
 }
 
 .custom-date-picker {
-  color: #000;
-  background-color: #fff;
+  color: #000 !important;
+  background-color: white !important;
   border: 1px solid #ced4da;
   border-radius: 0.375rem !important;
   padding: 0.375rem 0.75rem !important;
@@ -252,6 +251,7 @@ body {
 }
 
 .react-datepicker {
+  background: white !important;
   border: 1px solid #ced4da !important; /* Bootstrap-like border */
 }
 
@@ -271,6 +271,11 @@ body {
 
 .react-datepicker__triangle {
   display: none;
+}
+
+.custom-date-picker::placeholder {
+  color: #212529 !important;
+  opacity: 1; /* Ensures the color is not faded */
 }
 
 .flex-end-container {
