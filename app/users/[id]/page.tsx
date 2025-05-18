@@ -73,7 +73,8 @@ const UserProfile: React.FC = () => {
 
         const profileUserData = await apiService.get<User>(`users/${id}`, {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
         console.log("Fetched user data:", profileUserData);
@@ -82,7 +83,8 @@ const UserProfile: React.FC = () => {
 
         const currentUserData = await apiService.get<User>(`users/${userId}`, {
           headers: {
-            Token: token, // Pass the token as a header
+            Token: `${token}`,
+            "Content-Type": "application/json",
           },
         });
         const users: User[] = await apiService.get<User[]>("users");
@@ -539,9 +541,8 @@ const UserProfile: React.FC = () => {
                       selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
                       onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
                       onChangeRaw={(e) => {
-                        const target = e.target as HTMLInputElement;
-                        if (target && target.value === '') {
-                          handleBirthdayChange(null); // Clear date if input is emptied
+                        if (e && e.target instanceof HTMLInputElement && e.target.value === "") {
+                          handleBirthdayChange(null);
                         }
                       }}
                       dateFormat="dd-MMM-yyyy"

@@ -18,7 +18,6 @@ const Dashboard: React.FC = () => {
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
   const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
-  const [chatGroup, setChatGroup] = useState<number[]>([]);
 
   const handleLogout = async () => {
     try {
@@ -51,7 +50,6 @@ const Dashboard: React.FC = () => {
   }, [hasMounted, token]);
 
   useEffect(() => {
-
   const fetchData = async () => {
     try {
       if (!userId) return;
@@ -75,10 +73,6 @@ const Dashboard: React.FC = () => {
           },
         }
       );
-      if (!usersData || usersData.length === 0) {
-          router.push("/login");
-          return;
-
 
       const current = usersData.find((u) => u.id === userId);
       if (!current) throw new Error("Current user not found");
@@ -124,7 +118,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (!hasMounted || !token || !users) {
+  if (!hasMounted || !token || !currentUser) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
         <div className="spinner-border text-light" role="status" />
@@ -156,7 +150,7 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {currentUser && friends && (
         <OrbitDashboard
           currentUser={currentUser}
@@ -164,6 +158,9 @@ const Dashboard: React.FC = () => {
           onUserClick={handleUserClick}
         />
       )}
+
+
+
 
     </div>
   );

@@ -40,7 +40,7 @@ const FriendsPage: React.FC = () => {
           apiService.get<User[]>(`users`),
         ]);
 
-        const currentUser = users.find((u) => u.id === userId);
+        const currentUser = users.find((u) => u.id === Number(userId));
         const pendingIds = currentUser?.sentFriendRequestsList || [];
         const pending = users.filter((u) => pendingIds.includes(u.id || 0));
 
@@ -71,6 +71,7 @@ const FriendsPage: React.FC = () => {
           },
         }
       );
+
 
       const acceptedUser = incomingRequests.find((u) => u.id === senderId);
       if (acceptedUser) setFriends((prev) => [...prev, acceptedUser]);
