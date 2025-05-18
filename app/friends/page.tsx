@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const FriendsPage: React.FC = () => {
   const apiService = useApi();
   const router = useRouter();
-  const userId = localStorage.getItem("userId");
+  const { value: userId } = useLocalStorage<number>("userId", 0);
   const { value: token } = useLocalStorage<string>("token", "");
   const [hasMounted, setHasMounted] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
@@ -18,38 +18,38 @@ const FriendsPage: React.FC = () => {
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState<User[]>([]);
 
-    useEffect(() => {
-      setHasMounted(true);
-    }, []);
-  
-    useEffect(() => {
-      if (hasMounted && !token) {
-        router.push("/login");
-      }
-    }, [hasMounted, token]);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !token) {
+      router.push("/login");
+    }
+  }, [hasMounted, token]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (hasMounted)
 {      try {
-        if (userId === null) return;
+          if (userId === null) return;
 
-        const [friendsData, incomingData, users] = await Promise.all([
-          apiService.get<User[]>(`users/${userId}/friends`),
-          apiService.get<User[]>(`users/${userId}/friend-request`),
-          apiService.get<User[]>(`users`),
-        ]);
+          const [friendsData, incomingData, users] = await Promise.all([
+            apiService.get<User[]>(`users/${userId}/friends`),
+            apiService.get<User[]>(`users/${userId}/friend-request`),
+            apiService.get<User[]>(`users`),
+          ]);
 
         const currentUser = users.find((u) => u.id === Number(userId));
-        const pendingIds = currentUser?.sentFriendRequestsList || [];
-        const pending = users.filter((u) => pendingIds.includes(u.id || 0));
+          const pendingIds = currentUser?.sentFriendRequestsList || [];
+          const pending = users.filter((u) => pendingIds.includes(u.id || 0));
 
-        setUsers(users);
-        setFriends(friendsData);
-        setIncomingRequests(incomingData);
-        setPendingRequests(pending);
-      } catch (err) {
-        console.error("Error fetching friends/requests", err);
+          setUsers(users);
+          setFriends(friendsData);
+          setIncomingRequests(incomingData);
+          setPendingRequests(pending);
+        } catch (err) {
+          console.error("Error fetching friends/requests", err);
       } }
     };
 
@@ -94,7 +94,7 @@ const FriendsPage: React.FC = () => {
     <div className="card-container">
       <div className="auth-card" style={{ maxWidth: "900px", width: "100%", marginTop: "1rem" }}>
         <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Friends</h2>
-  
+
         <h4 style={{ color: "#5A639C" }}>Your Friends</h4>
         <div className="mb-4">
           {friends.length > 0 ? (
@@ -109,7 +109,7 @@ const FriendsPage: React.FC = () => {
             <p className="text-muted">You have no friends yet.</p>
           )}
         </div>
-  
+
         <h4 style={{ color: "#5A639C" }}>Incoming Friend Requests</h4>
         <div className="mb-4">
           {incomingRequests.length > 0 ? (
@@ -125,7 +125,7 @@ const FriendsPage: React.FC = () => {
             <p className="text-muted">No incoming requests.</p>
           )}
         </div>
-  
+
         <h4 style={{ color: "#5A639C" }}>Pending Friend Requests</h4>
         <div className="mb-4">
           {pendingRequests.length > 0 ? (
@@ -139,7 +139,7 @@ const FriendsPage: React.FC = () => {
             <p className="text-muted">No pending requests.</p>
           )}
         </div>
-  
+
         <div className="auth-buttons">
           <button className="btn-secondary" onClick={() => router.push("/main")}>
             Go to Main Page
@@ -147,7 +147,7 @@ const FriendsPage: React.FC = () => {
         </div>
       </div>
     </div>
-  );  
+  );
 };
 
 export default FriendsPage;
