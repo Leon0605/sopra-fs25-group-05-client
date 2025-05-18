@@ -15,7 +15,6 @@ const Flashcards: React.FC = () => {
   const [users, setUsers] = useState<User[] | null>(null);
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [hasMounted, setHasMounted] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
@@ -64,25 +63,6 @@ const Flashcards: React.FC = () => {
 
     fetchUsers()
   }, [apiService]);
-
-  const handleDelete = async (setId: string) => {
-    const confirmed = confirm("Are you sure you want to delete this set?");
-    if (!confirmed) return;
-  
-    try {
-      await apiService.delete(`/flashcards/${setId}`, {
-        headers: {
-          Authorization: token,
-          "Content-Type": "application/json",
-        },
-      });
-  
-      setFlashcardSets((prev) => prev.filter((set) => set.flashcardSetId !== setId));
-    } catch (error) {
-      console.error("Failed to delete set:", error);
-      alert("Failed to delete the flashcard set. Please try again.");
-    }
-  };
   
 
   const handleCreateFlashcardSet = async () => { 
@@ -119,22 +99,6 @@ const Flashcards: React.FC = () => {
     }
   };
 
-  const handleEditSet = (setId: string) => {
-    const newFrom = prompt("Enter the new source language:");
-    const newTo = prompt("Enter the new target language:");    
-  
-    if (!newFrom || !newTo) {
-      alert("Edit cancelled or invalid input.");
-      return;
-    }
-  
-    alert(`(Mock) Set ${setId} would be updated:\nFrom: ${newFrom}\nTo: ${newTo}`);
-  };
-  
-  
-  
-  
-
   if (!hasMounted || !token || !users) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -153,11 +117,11 @@ const Flashcards: React.FC = () => {
             style={{
               maxHeight: "400px",
               overflowY: "auto",
-              overflowX: "hidden", // 💡 disables horizontal scroll
+              overflowX: "hidden",
               marginBottom: "1rem",
               paddingRight: "8px",
-              width: "100%", // ensures it doesn't overflow container width
-              whiteSpace: "normal", // ensures text/content wraps
+              width: "100%",
+              whiteSpace: "normal",
             }}
           >
           
@@ -168,18 +132,24 @@ const Flashcards: React.FC = () => {
                 style={{
                   backgroundColor: "#EDF0FF",
                   borderRadius: "12px",
-                  cursor: isEditing ? "default" : "pointer",
+                  cursor: "pointer",
                   transition: "transform 0.2s ease",
                 }}
-                onClick={() => {
-                  if (!isEditing) {
-                    router.push(`/flashcards/${set.flashcardSetId}`);
-                  }
-                }}
-                onMouseEnter={(e) => !isEditing && (e.currentTarget.style.transform = "scale(1.02)")}
+                onClick={() =>
+                  router.push(
+                    `/flashcards/${set.flashcardSetId}?name=${encodeURIComponent(set.flashcardSetName)}`
+                  )
+                }
+                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
-                <div className="col-sm-3 fw-bold text-primary">{set.flashcardSetName}</div>
+                <div 
+                  className="col-sm-3 fw-bold text-primary"   
+                  style={{
+                    wordWrap: "break-word",
+                    whiteSpace: "normal",
+                  }}>{set.flashcardSetName}
+                </div>
   
                 <div className="col-md-4">
                 <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
@@ -192,33 +162,6 @@ const Flashcards: React.FC = () => {
                     To: <strong>{set.learningLanguage ?? "-"}</strong>
                   </div>
                 </div>
-                <div className="col-md-3">
-                  {isEditing && (
-
-<div className="d-flex p-1">
-                    <button
-                      className="btn btn-secondary me-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditSet(set.flashcardSetId);
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      className="btn btn-secondary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(set.flashcardSetId);
-                      }}
-                    >
-                      Delete
-                    </button>
-                    </div>
-                  )}
-                </div>
-
               </div>
             ))}
           </div>
@@ -228,25 +171,12 @@ const Flashcards: React.FC = () => {
   
         {/* Action Buttons */}
         <div className="auth-buttons d-flex justify-content-between mt-4">
-          {isEditing ? (
-            <>
-              <button className="btn-primary" onClick={() => setIsEditing(false)}>
-                Exit Edit Mode
-              </button>
               <button className="btn-primary" onClick={handleCreateFlashcardSet}>
                 Add New Set
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="btn-primary" onClick={() => setIsEditing(true)}>
-                Edit Sets
               </button>
               <button className="btn-secondary" onClick={() => router.push("/main")}>
                 Go to Main Page
               </button>
-            </>
-          )}
         </div>
       </div>
     </div>

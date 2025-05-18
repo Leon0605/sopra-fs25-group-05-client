@@ -372,7 +372,7 @@ const UserProfile: React.FC = () => {
         </div>
       )}
     <Navbar/>
-    <div className="card-container" style={{ display: "flex", position: "relative" }}>
+    <div className="card-container" style={{ display: "flex", position: "relative", height: "80vh", overflowY: "auto", padding: "20px" }}>
       <Card
         title={
           <Title level={3} style={{ color: "white" }}>

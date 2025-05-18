@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Flashcard } from "@/types/flashcard";
+import { FlashcardSet } from "@/types/flashcardSet";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useSearchParams } from "next/navigation";
 
 const FlashcardSetPage: React.FC = () => {
   const { id: flashcardSetId } = useParams();
@@ -17,6 +19,8 @@ const FlashcardSetPage: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
+  const searchParams = useSearchParams();
+  const setName = searchParams.get("name") || "Flashcards";
   
 
   useEffect(() => {
@@ -30,18 +34,18 @@ const FlashcardSetPage: React.FC = () => {
   useEffect(() => {
 
     const fetchUsers = async () => {
-          try {
-            const users: User[] = await apiService.get<User[]>("/users");
-            if (!users || users.length === 0) {
-              router.push("/login");
-              return;
-            }
-            setUsers(users);
-          } catch (error) {
-            console.error("Error fetching users:", error);
-            router.push("/login");
-          }
-        };
+      try {
+        const users: User[] = await apiService.get<User[]>("/users");
+        if (!users || users.length === 0) {
+          router.push("/login");
+          return;
+        }
+        setUsers(users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        router.push("/login");
+      }
+    };
     fetchUsers()
   }, [apiService]);
 
@@ -162,6 +166,58 @@ const FlashcardSetPage: React.FC = () => {
     router.push(`/flashcards/${flashcardSetId}/training`);
   };
 
+  const handleRenameFlashcardSet = async (setId: string, currentName: string) => {
+    const newName = prompt("Enter a new name for this flashcard set:", currentName);
+    if (!newName || newName.trim() === "") {
+      alert("Flashcard set name cannot be empty.");
+      return;
+    }
+
+    try {
+      await apiService.put(
+        `/flashcards/${setId}`,
+        { flashcardSetName: newName },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Optionally update locally or redirect to refresh name in URL
+      alert("Set renamed successfully!");
+      router.push(`/flashcards/${setId}?name=${encodeURIComponent(newName)}`);
+    } catch (err) {
+      console.error("Failed to rename flashcard set:", err);
+      alert("Renaming failed. Please try again.");
+    }
+  };
+
+
+
+  const handleDeleteSet = async () => {
+    const confirmed = confirm("Are you sure you want to delete this set?");
+    if (!confirmed) return;
+
+    try {
+      await apiService.delete(`/flashcards/${flashcardSetId}`, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      });
+
+      alert("Set deleted.");
+      router.push("/flashcards"); // Go back to sets page
+    } catch (error) {
+      console.error("Failed to delete set:", error);
+      alert("Could not delete set. Please try again.");
+    }
+  };
+
+
+
 
   if (!hasMounted || !token || !users) {
     return (
@@ -234,41 +290,56 @@ const FlashcardSetPage: React.FC = () => {
           ))}
         </div>
   
-{/* Action Buttons */}
-<div className="auth-buttons d-flex flex-column gap-0">
-  {!isEditing && (
-    <button
-      className="btn-primary "
-      onClick={handleStartTraining}
-    >
-      Start Train
-    </button>
-  )}
+        {/* Action Buttons */}
+        <div className="auth-buttons d-flex flex-column gap-0">
+          {!isEditing ? (
+            <div className="auth-buttons d-flex justify-content-between w-100">
+              <button className="btn-primary" onClick={handleAddFlashcard}>
+                Add Flashcard
+              </button>
+              <button
+                className="btn-primary "
+                onClick={handleStartTraining}
+              >
+                Start Train
+              </button>
+            </div>
+            ) : (
+            <div className="auth-buttons d-flex justify-content-between w-100">
+              <button
+                className="btn-primary"
+                onClick={() => handleRenameFlashcardSet(flashcardSetId as string, setName)}
+              >
+                Rename Set
+              </button>
+              <button className="btn-primary" onClick={handleDeleteSet}>
+                Delete Set
+              </button>
+            </div>
+          )}
 
-  <div className="auth-buttons d-flex justify-content-between w-100">
-    {isEditing ? (
-      <>
-        <button className="btn-primary" onClick={() => setIsEditing(false)}>
-          Exit Editing
-        </button>
-        <button className="btn-primary" onClick={handleAddFlashcard}>
-          Add Flashcard
-        </button>
-      </>
-    ) : (
-      <>
-        <button className="btn-primary" onClick={() => setIsEditing(true)}>
-          Edit Cards
-        </button>
-        <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
-          Back to Sets
-        </button>
-      </>
-    )}
-  </div>
-</div>
-
-
+          <div className="auth-buttons d-flex justify-content-between w-100">
+            {isEditing ? (
+              <>
+                <button className="btn-primary" onClick={() => setIsEditing(false)}>
+                  Exit Editing
+                </button>
+                <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+                  Back to Sets
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn-primary" onClick={() => setIsEditing(true)}>
+                  Editing mode
+                </button>
+                <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+                  Back to Sets
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
