@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Flashcard } from "@/types/flashcard";
+import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const FlashcardSetPage: React.FC = () => {
@@ -15,24 +16,54 @@ const FlashcardSetPage: React.FC = () => {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [hasMounted, setHasMounted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [users, setUsers] = useState<User[] | null>(null);
+  
 
-  useEffect(() => setHasMounted(true), []);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   useEffect(() => {
     if (hasMounted && !token) router.push("/login");
   }, [hasMounted, token]);
 
   useEffect(() => {
-    const fetchFlashcards = async () => {
-      try {
-        const result = await apiService.get<Flashcard[]>(`/flashcards/${flashcardSetId}`, {
-          headers: { Authorization: token },
-        });
-        setFlashcards(result);
-      } catch (err) {
-        console.error("Failed to load flashcards:", err);
-      }
-    };
-    if (flashcardSetId) fetchFlashcards();
+
+    const fetchUsers = async () => {
+          try {
+            const users: User[] = await apiService.get<User[]>("/users");
+            if (!users || users.length === 0) {
+              router.push("/login");
+              return;
+            }
+            setUsers(users);
+          } catch (error) {
+            console.error("Error fetching users:", error);
+            router.push("/login");
+          }
+        };
+    fetchUsers()
+  }, [apiService]);
+
+  useEffect(() => {
+
+    if (token) {
+      const fetchFlashcards = async () => {
+        try {
+          const result = await apiService.get<Flashcard[]>(`/flashcards/${flashcardSetId}`, {
+            headers: 
+            { 
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          });
+          setFlashcards(result);
+        } catch (err) {
+          console.error("Failed to load flashcards:", err);
+        }
+      };
+      if (flashcardSetId) fetchFlashcards();
+    }
   }, [apiService, token, flashcardSetId]);
 
   const handleAddFlashcard = async () => {
@@ -117,19 +148,41 @@ const FlashcardSetPage: React.FC = () => {
     }
   };
   
+  const handleStartTraining = () => {
+    if (!flashcards || flashcards.length === 0) {
+      alert("This set has no flashcards. Please add cards before starting training.");
+      return;
+    }
+
+    /*
+    const direction = prompt("Choose direction:\n1. Front to Back\n2. Back to Front");
+    const order = prompt("Choose order:\n1. Ordered\n2. Mixed");
+    */
+
+    router.push(`/flashcards/${flashcardSetId}/training`);
+  };
+
+
+  if (!hasMounted || !token || !users) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
+    );
+  }
   
 
   return (
     <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
       <div className="auth-card" style={{ maxWidth: "800px", width: "100%" }}>
-        <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Flashcards</h2>
+        <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>Flashcards</h2>
   
         {/* Scrollable flashcard list */}
         <div
           style={{
-            maxHeight: "400px",
+            maxHeight: "240px",
             overflowY: "auto",
-            marginBottom: "1.5rem",
+            marginBottom: "1rem",
             paddingRight: "8px",
             display: "flex",
             flexDirection: "column",
@@ -146,7 +199,7 @@ const FlashcardSetPage: React.FC = () => {
                 borderRadius: "12px",
               }}
             >
-              <div className="card-body py-1 px-4">
+              <div className="card-body py-1 px-2">
 
                 <div className="row">
                   <div className="col-md">
@@ -181,28 +234,41 @@ const FlashcardSetPage: React.FC = () => {
           ))}
         </div>
   
-        {/* Action Buttons */}
-        <div className="auth-buttons d-flex justify-content-between mt-4">
-          {isEditing ? (
-            <>
-              <button className="btn-primary" onClick={() => setIsEditing(false)}>
-                Exit Editing
-              </button>
-              <button className="btn-primary" onClick={handleAddFlashcard}>
-                Add Flashcard
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="btn-primary" onClick={() => setIsEditing(true)}>
-                Edit Cards
-              </button>
-              <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
-                Back to Sets
-              </button>
-            </>
-          )}
-        </div>
+{/* Action Buttons */}
+<div className="auth-buttons d-flex flex-column gap-0">
+  {!isEditing && (
+    <button
+      className="btn-primary "
+      onClick={handleStartTraining}
+    >
+      Start Train
+    </button>
+  )}
+
+  <div className="auth-buttons d-flex justify-content-between w-100">
+    {isEditing ? (
+      <>
+        <button className="btn-primary" onClick={() => setIsEditing(false)}>
+          Exit Editing
+        </button>
+        <button className="btn-primary" onClick={handleAddFlashcard}>
+          Add Flashcard
+        </button>
+      </>
+    ) : (
+      <>
+        <button className="btn-primary" onClick={() => setIsEditing(true)}>
+          Edit Cards
+        </button>
+        <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+          Back to Sets
+        </button>
+      </>
+    )}
+  </div>
+</div>
+
+
       </div>
     </div>
   );
