@@ -10,6 +10,7 @@ import styles from "./Navbar.module.css";
 
 import { User } from "@/types/user";
 import { Chat } from "@/types/chat"; // Import the UserChatDTO type
+import { useAlert } from "@/components/alertContext";
 
 interface Message {
   messageId?: string;
@@ -34,6 +35,7 @@ const Navbar = () => {
   const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
+  const notificationsEnabledRef = useRef(notificationsEnabled);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
@@ -61,17 +63,20 @@ const Navbar = () => {
     }
   };
 
-  const showAlert = (message: string, type: "success" | "danger") => {
-    console.log("showAlert called", message, type, notificationsEnabled);
-    setAlertMessage(message);
-    setAlertType(type);
+  const { showAlert } = useAlert();
 
-    // Automatically dismiss the alert after 3 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-      setAlertType(null);
-    }, 3000);
-  };
+  // const showAlert = (message: string, type: "success" | "danger") => {
+  //   console.log("showAlert called", message, type, notificationsEnabled);
+  //   if (!notificationsEnabledRef.current) return;
+  //   setAlertMessage(message);
+  //   setAlertType(type);
+
+  //   // Automatically hide the alert after 3 seconds
+  //   setTimeout(() => {
+  //     setAlertMessage(null);
+  //     setAlertType(null);
+  //   }, 3000);
+  // };
 
   const fetchRequests = async () => {
     try {
@@ -171,6 +176,10 @@ const Navbar = () => {
     prevIncomingRequestsRef.current = incomingRequests;
   }, [incomingRequests]);
 
+  useEffect(() => {
+    notificationsEnabledRef.current = notificationsEnabled;
+  }, [notificationsEnabled]);
+
   // useEffect for displaying incoming messages
   useEffect(() => {
     const prev = prevMessagesRef.current;
@@ -211,7 +220,11 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed">
       <div className="container-fluid">
-        <span className="logo fs-4 text-white">Habla! Chat App</span>
+        <img
+          src="../images/HablaLogo.png"
+          alt="Habla! Logo"
+          style={{ height: "125px", width: "125px", objectFit: "contain" }} // Adjust as needed
+        />
 
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
           <span className="navbar-toggler-icon"></span>
@@ -310,7 +323,7 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-        {alertMessage && notificationsEnabled && (
+        {alertMessage && (
           <div
             className={`bubble-message ${alertType}`}
             style={{
@@ -323,7 +336,7 @@ const Navbar = () => {
               padding: "10px 20px",
               borderRadius: "20px",
               boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-              zIndex: 1050, // Ensure it appears above other elements
+              zIndex: 2000, // Ensure it appears above other elements
               textAlign: "center",
               maxWidth: "300px", // Optional: Limit the width of the bubble
             }}

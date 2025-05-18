@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
+import { useAlert } from "@/components/alertContext";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "../../components/Navbar";
 import { useApi } from "@/hooks/useApi";
@@ -45,13 +46,22 @@ const UserProfile: React.FC = () => {
   const { value: token } = useLocalStorage<string>("token", "");
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [users, setUsers] = useState<User[] | null>(null);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
+  const { showAlert } = useAlert();
+  // const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  // const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<DatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
+
+  const languageMap: { [key: string]: string } = {
+    en: "English",
+    fr: "French",
+    de: "German",
+    es: "Spanish",
+    // Add more as needed
+  };
 
   useEffect(() => {
     setHasMounted(true);
@@ -113,16 +123,16 @@ const UserProfile: React.FC = () => {
   }, [apiService, id, userId]);
 
 
-  const showAlert = (message: string, type: "success" | "danger") => {
-    setAlertMessage(message);
-    setAlertType(type);
+  // const showAlert = (message: string, type: "success" | "danger") => {
+  //   setAlertMessage(message);
+  //   setAlertType(type);
 
-    // Automatically dismiss the alert after 3 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-      setAlertType(null);
-    }, 3000);
-  };
+  //   // Automatically dismiss the alert after 3 seconds
+  //   setTimeout(() => {
+  //     setAlertMessage(null);
+  //     setAlertType(null);
+  //   }, 3000);
+  // };
 
   const handleNotificationsToggle = (checked: boolean) => {
     setNotificationsEnabled(checked);
@@ -167,7 +177,7 @@ const UserProfile: React.FC = () => {
 
       // Fetch the updated user data to display the new photo
 
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -209,8 +219,8 @@ const UserProfile: React.FC = () => {
     try {
       await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
-      
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -232,7 +242,7 @@ const UserProfile: React.FC = () => {
       showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -254,7 +264,7 @@ const UserProfile: React.FC = () => {
       showAlert(`Privacy updated to ${newPrivacy}`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -300,7 +310,7 @@ const UserProfile: React.FC = () => {
       showAlert("Birthday updated successfully!", "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -371,30 +381,9 @@ const UserProfile: React.FC = () => {
 
   return (
     <div style={{ width: "500px" }}>
-      {alertMessage && notificationsEnabled && (
-        <div
-          className={`bubble-message ${alertType}`}
-          style={{
-            position: "fixed",
-            bottom: "20px", // Adjust this to position the bubble
-            right: "20px",
-            border: "3px solid #9B86BD",
-            backgroundColor: alertType === "success" ? "#E2BBE9" : "#f44336", // Green for success, red for danger
-            color: "white",
-            padding: "10px 20px",
-            borderRadius: "20px",
-            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-            zIndex: 1050, // Ensure it appears above other elements
-            textAlign: "center",
-            maxWidth: "300px", // Optional: Limit the width of the bubble
-          }}
-        >
-          {alertMessage}
-        </div>
-      )}
       <Navbar />
       <div className="card-container">
-        <div className="auth-card" style={{ maxWidth: "900px", width: "100%", marginTop: "0rem" }}>
+        <div className="auth-card" style={{ maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "0rem" }}>
           <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
           <div style={{ position: "relative", display: "inline-block" }}>
             <div
@@ -682,17 +671,46 @@ const UserProfile: React.FC = () => {
             {/* User views friend or not-private page */}
             {(user.id !== userId) && (isFriend || user.privacy !== "private") && (
               <div>
-                <div className="flex-end-container">
-                  <p className="text-muted">Birthday: </p> <p className="text-muted">{user.birthday}</p>
+
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Birthday:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px" }}>
+                      {user.birthday || "Not Set"}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-end-container">
-                  <p className="text-muted">Language: </p> <p className="text-muted">{user.language}</p>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.language || "Not Set"}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-end-container">
-                  <p className="text-muted">Learning Language: </p> <p className="text-muted">{user.learningLanguage}</p>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Learning Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.learningLanguage || "Not Set"}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-end-container">
-                  <p className="text-muted">Privacy: </p> <p className="text-muted">{user.privacy === "private" ? "Private" : "Open"}</p>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Privacy:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {user.privacy}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
@@ -726,8 +744,9 @@ const UserProfile: React.FC = () => {
                   disabled={friendRequestSent || isFriend}
                   onClick={handleSendFriendRequest}
                   style={{
-                    backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                    borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                    backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
+                    color: "#5A639C",
+                    borderColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
                   }}
                 >
                   {isFriend
