@@ -40,7 +40,7 @@ const FriendsPage: React.FC = () => {
           apiService.get<User[]>(`users`),
         ]);
 
-        const currentUser = users.find((u) => u.id === userId);
+        const currentUser = users.find((u) => u.id === Number(userId));
         const pendingIds = currentUser?.sentFriendRequestsList || [];
         const pending = users.filter((u) => pendingIds.includes(u.id || 0));
 
@@ -60,17 +60,6 @@ const FriendsPage: React.FC = () => {
     if (!userId) return;
 
     try {
-<<<<<<< HEAD
-      await fetch(`${getApiDomain()}users/${userId}/friend-request`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-          senderUserId: senderId.toString(),
-        },
-      
-      });
-=======
       await apiService.put<void>(
         `/users/${userId}/friend-request`,
         null,
@@ -83,7 +72,6 @@ const FriendsPage: React.FC = () => {
         }
       );
 
->>>>>>> origin/main
 
       const acceptedUser = incomingRequests.find((u) => u.id === senderId);
       if (acceptedUser) setFriends((prev) => [...prev, acceptedUser]);
