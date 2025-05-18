@@ -14,8 +14,7 @@ const Dashboard: React.FC = () => {
   const [users, setUsers] = useState<User[] | null>(null);
   
   const [hasMounted, setHasMounted] = useState(false);
-  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
+  const { value: token } = useLocalStorage<string>("token", "");
   
 
     useEffect(() => {

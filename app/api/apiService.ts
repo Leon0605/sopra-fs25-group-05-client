@@ -101,39 +101,51 @@ export class ApiService {
     );
   }
 
-  /**
-   * PUT request.
-   * @param endpoint - The API endpoint (e.g. "/users/123").
-   * @param data - The payload to update.
-   * @returns JSON data of type T.
-   */
-  public async put<T>(endpoint: string, data: unknown): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: this.defaultHeaders,
-      body: JSON.stringify(data),
-    });
-    return this.processResponse<T>(
-      res,
-      "An error occurred while updating the data.\n",
-    );
-  }
+/**
+ * PUT request.
+ * @param endpoint - The API endpoint (e.g. "/users/123").
+ * @param data - The payload to update.
+ * @param options - Optional fetch options (e.g., custom headers).
+ * @returns JSON data of type T.
+ */
+public async put<T>(endpoint: string, data: unknown, options?: RequestInit): Promise<T> {
+  const url = `${this.baseURL}${endpoint}`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      ...this.defaultHeaders,
+      ...(options?.headers || {}),
+    },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return this.processResponse<T>(
+    res,
+    "An error occurred while updating the data.\n",
+  );
+}
 
-  /**
-   * DELETE request.
-   * @param endpoint - The API endpoint (e.g. "/users/123").
-   * @returns JSON data of type T.
-   */
-  public async delete<T>(endpoint: string): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: this.defaultHeaders,
-    });
-    return this.processResponse<T>(
-      res,
-      "An error occurred while deleting the data.\n",
-    );
-  }
+
+/**
+ * DELETE request.
+ * @param endpoint - The API endpoint (e.g. "/users/123").
+ * @param options - Optional request options (e.g. headers).
+ * @returns JSON data of type T.
+ */
+public async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${this.baseURL}${endpoint}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      ...this.defaultHeaders,
+      ...(options?.headers || {}),
+    },
+    ...options,
+  });
+  return this.processResponse<T>(
+    res,
+    "An error occurred while deleting the data.\n"
+  );
+}
+
 }
