@@ -210,12 +210,12 @@ reason).
 | @adevantery | 12.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/e048c66606e12cbc76f128761ad5bc224d525133 | setting up orbits of user and friends in main page | Main Page Styling |
 | @adevantery | | | Setting up a training page to work on the flashcards like quizlet | Learning Flashcards |
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 9 - 13.05.2025 to 20.05.2025
 
 | **Student**          | **Date**   | **Link to Commit** | **Description**                | **Relevance**                                                    |
 |----------------------|------------|--------------------| ------------------------------ |------------------------------------------------------------------|
-| @Leon0605 | | | | |
-@Leon0605 | | | | |
+| @Leon0605 | 19.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/92c5647aa993356bf2be9e497966a5c17642ebaa| Added Addtional Testing for Chat Service | Ensuring Chat Service works as expected|
+@Leon0605 | 19.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-server/commit/ccfd8592b37869d34c8011a594de34829253a9df | Added additonal missing functionality and bug fixxing | Enabling Notifications (get unread Messages) & fixxing issues on backend|
 | @ctraill | | | | |
 | @ctraill | | | | |
 | @nikola-pavlovic-git |15.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/3ab47686a5be036406554341402b86c082f9ad48 | https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53| Flashcards now support statistic. Users can see how many flashcards they trained and how well they are doing when training with flashcards. statistic are persisted|
