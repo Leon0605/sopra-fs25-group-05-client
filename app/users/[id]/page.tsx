@@ -57,9 +57,28 @@ const UserProfile: React.FC = () => {
 
   const languageMap: { [key: string]: string } = {
     en: "English",
+    ar: "Arabic",
+    bg: "Bulgarian",
+    hr: "Croatian",
+    cs: "Czech",
+    da: "Danish",
+    nl: "Dutch",
+    et: "Estonian",
+    fi: "Finnish",
     fr: "French",
     de: "German",
+    el: "Greek",
+    it: "Italian",
+    ja: "Japanese",
+    ko: "Korean",
+    mi: "Maori",
+    pt: "Portuguese",
+    ru: "Russian",
     es: "Spanish",
+    sv: "Swedish",
+    tr: "Turkish",
+    uk: "Ukrainian",
+
     // Add more as needed
   };
 
@@ -553,10 +572,11 @@ const UserProfile: React.FC = () => {
                       onChange={handleLanguageChange}
                       disabled={user.id !== userId}
                     >
-                      <option value="en" style={{ color: "black" }}>English</option>
-                      <option value="fr" style={{ color: "black" }}>French</option>
-                      <option value="de" style={{ color: "black" }}>German</option>
-                      <option value="es" style={{ color: "black" }}>Spanish</option>
+                      {Object.entries(languageMap).map(([code, name]) => (
+                        <option key={code} value={code} style={{ color: "black" }}>
+                          {name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -718,10 +738,10 @@ const UserProfile: React.FC = () => {
                     className="btn-secondary"
                     disabled={friendRequestSent || isFriend}
                     onClick={handleSendFriendRequest}
-                    style={{
-                      backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                      borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                    }}
+                  // style={{
+                  //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                  //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                  // }}
                   >
                     {isFriend
                       ? "Already Friends"
@@ -743,11 +763,11 @@ const UserProfile: React.FC = () => {
                   className="btn-secondary"
                   disabled={friendRequestSent || isFriend}
                   onClick={handleSendFriendRequest}
-                  style={{
-                    backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
-                    color: "#5A639C",
-                    borderColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
-                  }}
+                // style={{
+                //   backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
+                //   color: "#5A639C",
+                //   borderColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
+                // }}
                 >
                   {isFriend
                     ? "Already Friends"

@@ -149,8 +149,6 @@ const ChatPage: React.FC = () => {
         console.log(currentUser?.id)
         console.log(currentUser?.language)
 
-        //const userLanguage = currentUser?.language; // Default to "en"
-
         stompClient.subscribe(`/topic/${language}/${chatId}`, (message) => {
           if (message.body) handleIncomingMessage(message.body);
         });
@@ -165,29 +163,12 @@ const ChatPage: React.FC = () => {
     return () => stompClient.deactivate();
   };
 
-  // const updateMessageStatus = async (messageId: string, userId: number) => {
-  //   try {
-  //     const endpoint = `/${messageId}/${userId}`;
-  //     const response = await apiService.put(endpoint, null)
-  //     console.log("Message status updated successfully:", response);
-  //   } catch (error: any) {
-  //     console.error("Error updating message status:", error.response?.data || error.message);
-  //   }
-  // };
-
   // Fetch previously sent messages from the API
   const fetchMessages = async () => {
     try {
-      // const token = JSON.parse(localStorage.getItem("token") || '""');
-      // console.log("Token:", token);
       const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${userId}`);
       setMessages(fetchedMessages);
       console.log("Fetched messages:", fetchedMessages);
-
-      // Update the status of each message
-      // for (const message of fetchedMessages) {
-      //   await updateMessageStatus(message.messageId, message.userId);
-      // }
     } catch (error: unknown) {
       console.error("Failed to fetch messages:", error);
       if (error instanceof Error) {
@@ -255,15 +236,6 @@ const ChatPage: React.FC = () => {
         <Navbar />
       </header>
       <div id="chat-page" className={styles["chat-page"]}>
-        {/* Floating title top-left */}
-        {/* <h1 className={styles["chat-title"]}>Habla! Chat</h1>
-
-        <button
-          className={styles["main-nav-button"]}
-          onClick={() => router.push("/main")}
-        >
-          Go to Main Page
-        </button> */}
 
         {/* Chat Card */}
         <div className={styles["chat-container"]}>
@@ -286,7 +258,9 @@ const ChatPage: React.FC = () => {
                     </div>
                     <div className={styles["message-block"]}>
                       <p className={styles["original"]}>{message.originalMessage}</p>
-                      <p className={styles["translation"]}>{message.translatedMessage}</p>
+                      {message.originalMessage !== message.translatedMessage && (
+                        <p className={styles["translation"]}>{message.translatedMessage}</p>
+                      )}
                     </div>
                     <div className={styles["timestamp"]}>
                       {formatTimestamp(message.timestamp)}
