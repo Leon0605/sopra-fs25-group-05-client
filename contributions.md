@@ -220,5 +220,5 @@ reason).
 | @ctraill | | | | |
 | @nikola-pavlovic-git |15.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/3ab47686a5be036406554341402b86c082f9ad48 | https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53| Flashcards now support statistic. Users can see how many flashcards they trained and how well they are doing when training with flashcards. statistic are persisted|
 | @nikola-pavlovic-git |19.05.25 |https://github.com/Leon0605/sopra-fs25-group-05-server/commit/f7252a5b848bc837b7c8cf1bf981a9f6d1e6d1e9 | https://github.com/Leon0605/sopra-fs25-group-05-server/issues/53|Test for flashcard adapted/extended for statistic  |
-| @adevantery | | | | |
-| @adevantery | | | | |
+| @adevantery | 19.05.25 | https://github.com/Leon0605/sopra-fs25-group-05-client/commit/adb5585b2e2692d9ea40381abe63bbb0a13779fe | Improved navigation system (editing) + added statistics of sets/cards| Flashcard system |
+| @adevantery | | | merging + styling + main page images | Miscellaneous TODO |
