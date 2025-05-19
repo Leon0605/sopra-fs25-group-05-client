@@ -94,40 +94,53 @@ const FlashcardSetPage: React.FC = () => {
     }
   };
 
-  const handleEditCard = async (flashcardId: string, currentFront: string, currentBack: string) => {
-    const newFront = prompt("Enter new front content:", currentFront);
-    if (newFront === null) return;
-  
-    const newBack = prompt("Enter new back content (optional):", currentBack);
-    if (newBack === null) return;
-  
-    try {
-      await apiService.put(
-        `/flashcards/${flashcardSetId}/${flashcardId}`,
-        {
-          contentFront: newFront,
-          contentBack: newBack,
+  const handleEditCard = async (
+  flashcardId: string,
+  currentFront: string,
+  currentBack: string
+) => {
+  const newFront = prompt("Enter new front content:", currentFront);
+  if (newFront === null || newFront.trim() === "") return;
+
+  const newBack = prompt("Enter new back content or leave empty for auto-translation:", currentBack);
+  if (newBack === null) return;
+
+  // Build payload
+  const payload =
+  newBack.trim() === ""
+    ? { contentFront: newFront } // send only front
+    : { contentFront: newFront, contentBack: newBack };
+
+
+  try {
+    await apiService.put(
+      `/flashcards/${flashcardSetId}/${flashcardId}`,
+      payload,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-  
-      // Refresh state (basic way: refetch list or patch state manually)
-      const updatedFlashcards = flashcards.map((card) =>
-        card.flashcardId === flashcardId
-          ? { ...card, contentFront: newFront, contentBack: newBack }
-          : card
-      );
-      setFlashcards(updatedFlashcards);
-    } catch (err) {
-      console.error("Failed to edit flashcard:", err);
-      alert("Could not update flashcard.");
+      }
+    );
+    
+  const updatedFlashcards = await apiService.get<Flashcard[]>(
+    `/flashcards/${flashcardSetId}`,
+    {
+      headers: {
+        Authorization: token,
+      },
     }
-  };
+  );
+
+setFlashcards(updatedFlashcards);
+
+  } catch (err) {
+    console.error("Failed to edit flashcard:", err);
+    alert("Could not update flashcard.");
+  }
+};
+
   
   
   const handleDeleteCard = async (flashcardId: string) => {
@@ -229,83 +242,121 @@ const FlashcardSetPage: React.FC = () => {
   
 
   return (
-    <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="auth-card" style={{ maxWidth: "800px", width: "100%" }}>
-        <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>Flashcards</h2>
-  
-        {/* Scrollable flashcard list */}
-        <div
-          style={{
-            maxHeight: "240px",
-            overflowY: "auto",
-            marginBottom: "1rem",
-            paddingRight: "8px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "6px",
-          }}
-        >
-          {flashcards.map((card) => (
-            <div
-              key={card.flashcardId}
-              className="card shadow-sm mb-1"
-              style={{
-                backgroundColor: "#f3e9fb",
-                border: "1px solid #9B86BD",
-                borderRadius: "12px",
-              }}
-            >
-              <div className="card-body py-1 px-2">
+  <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
+    <div className="auth-card" style={{ maxWidth: "800px", width: "100%" }}>
+      <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>Flashcards</h2>
 
-                <div className="row">
-                  <div className="col-md">
-                    <p className="fw-bold text-primary">Front</p>
-                    <p>{card.contentFront}</p>
-                  </div>
-                  <div className="col-md">
-                    <p className="fw-bold text-primary">Back</p>
-                    <p>{card.contentBack}</p>
-                  </div>
+      {/* Scrollable flashcard list */}
+      <div
+        style={{
+          maxHeight: "240px",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          marginBottom: "1rem",
+          marginTop:"1rem", 
+          backgroundColor: "#9B86BD",
+          borderRadius: "12px",
+        }}
+      >
+        {flashcards.length > 0 ? (
+          flashcards.map((card) => (
+            <div
+              key={card.flashcardId}            >
+              <div
+                className="card shadow-sm"
+                style={{
+                  backgroundColor: "#FFF3F0",
+                  borderRadius: "12px",
+                  margin:"5px"
+                }}
+              >
+                <div className="card-body py-2 px-3">
+                  <div className="row">
+                    <div className="col-md">
+                      <p className="fw-bold" style={{ color: "#5A639C", marginBottom: "4px" }}>
+                        Front
+                      </p>
+                      <p>{card.contentFront}</p>
+                    </div>
+                    <div className="col-md">
+                      <p className="fw-bold" style={{ color: "#5A639C", marginBottom: "4px" }}>
+                        Back
+                      </p>
+                      <p>{card.contentBack}</p>
+                    </div>
+                    <div className="col-md d-flex align-items-center">
+                      <span
+                        className="badge"
+                        style={{
+                          backgroundColor:
+                            card.status === "CORRECT"
+                              ? "#4CAF50"
+                              : card.status === "WRONG"
+                              ? "#F44336"
+                              : "#999999",
+                          color: "white",
+                          fontSize: "0.8rem",
+                          padding: "6px 12px",
+                          borderRadius: "12px",
+                        }}
+                      >
+                        {card.status === "CORRECT"
+                          ? "✓ Correct"
+                          : card.status === "WRONG"
+                          ? "✗ Wrong"
+                          : "? Not Trained"}
+                      </span>
+                    </div>
+
 
                     {isEditing && (
-                    <div className="col-md d-flex justify-content-end mt-2" style={{ gap: "10px" }}>
+                      <div className="col-md d-flex justify-content-end gap-2 mt-2">
                         <button
-                            className="btn btn-secondary"
-                            onClick={() =>
-                                handleEditCard(card.flashcardId, card.contentFront, card.contentBack)
-                            }
-                            >
-                            Edit
+                          className="btn btn-secondary"
+                          onClick={() =>
+                            handleEditCard(card.flashcardId, card.contentFront, card.contentBack)
+                          }
+                        >
+                          Edit
                         </button>
-
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCard(card.flashcardId)}>
-                        Delete
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDeleteCard(card.flashcardId)}
+                        >
+                          Delete
                         </button>
-                    </div>
+                      </div>
                     )}
-
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-  
-        {/* Action Buttons */}
-        <div className="auth-buttons d-flex flex-column gap-0">
-          {!isEditing ? (
-            <div className="auth-buttons d-flex justify-content-between w-100">
-              <button className="btn-primary" onClick={handleAddFlashcard}>
-                Add Flashcard
-              </button>
-              <button
-                className="btn-primary "
-                onClick={handleStartTraining}
-              >
-                Start Train
-              </button>
-            </div>
-            ) : (
-            <div className="auth-buttons d-flex justify-content-between w-100">
+          ))
+        ) : (
+          <div
+            className="text-center"
+            style={{
+              borderRadius: "12px",
+              backgroundColor: "#9B86BD",
+              color: "white",
+              minHeight: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "30px",
+            }}
+          >
+            You do not have any flashcards yet.
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="auth-buttons d-flex flex-column gap-0 mb-0">
+        <div className="d-flex justify-content-between w-100">
+          {isEditing ? (
+            <>
               <button
                 className="btn-primary"
                 onClick={() => handleRenameFlashcardSet(flashcardSetId as string, setName)}
@@ -315,34 +366,45 @@ const FlashcardSetPage: React.FC = () => {
               <button className="btn-primary" onClick={handleDeleteSet}>
                 Delete Set
               </button>
-            </div>
+            </>
+          ) : (
+            <>
+              <button className="btn-primary" onClick={handleAddFlashcard}>
+                Add Flashcard
+              </button>
+              <button className="btn-primary" onClick={handleStartTraining}>
+                Start Train
+              </button>
+            </>
           )}
+        </div>
 
-          <div className="auth-buttons d-flex justify-content-between w-100">
-            {isEditing ? (
-              <>
-                <button className="btn-primary" onClick={() => setIsEditing(false)}>
-                  Exit Editing
-                </button>
-                <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
-                  Back to Sets
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="btn-primary" onClick={() => setIsEditing(true)}>
-                  Editing mode
-                </button>
-                <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
-                  Back to Sets
-                </button>
-              </>
-            )}
-          </div>
+        <div className="auth-buttons d-flex justify-content-between w-100 mt-2">
+          {isEditing ? (
+            <>
+              <button className="btn-primary" onClick={() => setIsEditing(false)}>
+                Exit Editing
+              </button>
+              <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+                Back to Sets
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn-primary" onClick={() => setIsEditing(true)}>
+                Editing Mode
+              </button>
+              <button className="btn-secondary" onClick={() => router.push("/flashcards")}>
+                Back to Sets
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
   
 };
 

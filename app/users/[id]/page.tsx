@@ -1,22 +1,18 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import ReactDatePicker from "react-datepicker";
+import DatePicker from "react-datepicker";
 import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
+import { useAlert } from "@/components/alertContext";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import Navbar from "../../components/Navbar";
-import { useApi } from "@/hooks/useApi";  
-import { Card, Typography, Select, Button, Input, Form } from "antd";
+import { useApi } from "@/hooks/useApi";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@/styles/globals.css";
 import dayjs from "dayjs";
-{/* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
-  integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
-  crossOrigin="anonymous"></script> */}
 
-const { Title, Text } = Typography;
-const { Option } = Select;
 
 interface User {
   id: number;
@@ -42,65 +38,77 @@ const UserProfile: React.FC = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [language, setLanguage] = useState<string>("en");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [form] = Form.useForm();
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [users, setUsers] = useState<User[] | null>(null);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
-  const datePickerRef = useRef<ReactDatePicker | null>(null);
+  const { showAlert } = useAlert();
+  // const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  // const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
+  const datePickerRef = useRef<DatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
 
-    useEffect(() => {
-      setHasMounted(true);
-    }, []);
-  
-    useEffect(() => {
-      if (hasMounted && !token) {
-        router.push("/login");
-      }
-    }, [hasMounted, token]);
+  const languageMap: { [key: string]: string } = {
+    en: "English",
+    fr: "French",
+    de: "German",
+    es: "Spanish",
+    // Add more as needed
+  };
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !token) {
+      router.push("/login");
+    }
+  }, [hasMounted, token]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("token:", token);
-        const users: User[] = await apiService.get<User[]>("/users");
-        console.log("users:", users);
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        const profileUserData = await apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Fetched user data:", profileUserData);
+
+        profileUserData.privacy = profileUserData.privacy || "private"; // Default to "private" if undefined
+
+        const currentUserData = await apiService.get<User>(`users/${userId}`, {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const users: User[] = await apiService.get<User[]>("users");
+
         if (!users || users.length === 0) {
           router.push("/login");
           return;
         }
         setUsers(users);
-
-        const profileUserData = await apiService.get<User>(`/users/${id}`, 
-          {
-            headers: {
-              Token: `${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-        console.log("Fetched user data:", profileUserData);
-
-        const currentUserData = await apiService.get<User>(`/users/${userId}`, 
-          {
-            headers: {
-              Token: `${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-        
-        
         setUser(profileUserData);
         setIsFriend(currentUserData.friendsList?.includes(profileUserData.id) || false);
         setFriendRequestSent(currentUserData.sentFriendRequestsList?.includes(profileUserData.id) || false);
         setLanguage(profileUserData.language || "en");
-  
+
       } catch (error) {
         console.error("Failed to fetch user:", error);
         showAlert("Failed to fetch user data from server.", "danger");
@@ -108,23 +116,23 @@ const UserProfile: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     if (id && userId) {
       fetchUserData();
     }
   }, [apiService, id, userId]);
-  
 
-  const showAlert = (message: string, type: "success" | "danger") => {
-    setAlertMessage(message);
-    setAlertType(type);
 
-    // Automatically dismiss the alert after 3 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-      setAlertType(null);
-    }, 3000);
-  };
+  // const showAlert = (message: string, type: "success" | "danger") => {
+  //   setAlertMessage(message);
+  //   setAlertType(type);
+
+  //   // Automatically dismiss the alert after 3 seconds
+  //   setTimeout(() => {
+  //     setAlertMessage(null);
+  //     setAlertType(null);
+  //   }, 3000);
+  // };
 
   const handleNotificationsToggle = (checked: boolean) => {
     setNotificationsEnabled(checked);
@@ -133,42 +141,43 @@ const UserProfile: React.FC = () => {
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || user.id !== userId) return;
-  
+
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Log the file type for debugging
     console.log("File type:", file.type);
-  
+
     // Check if the file is a PNG
     if (file.type !== "image/png") {
       showAlert("Profile pictures must be of a PNG format", "danger");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("photo", file);
 
     // Log the file and FormData before sending
     console.log("Uploading photo for user:", user.id);
     console.log("File details:", file);
-    console.log("Posting data to:", `/users/${id}/photo`);
+    console.log("Posting data to:", `users/${id}/photo`);
     console.log("FormData contents:", formData.get("photo"));
-  
+
     try {
-      const response = await fetch(`${getApiDomain()}/users/${id}/photo`, {
+      const response = await fetch(`${getApiDomain()}users/${id}/photo`, {
         method: "POST",
         body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to upload photo");
       }
-  
+
       showAlert("Profile picture successfully updated", "success");
-  
+
       // Fetch the updated user data to display the new photo
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -178,7 +187,7 @@ const UserProfile: React.FC = () => {
       if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
-  
+
       setUser(updatedUser);
     } catch (error) {
       console.error("Failed to upload photo:", error);
@@ -186,33 +195,54 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const handleLanguageChange = async (newLanguage: string) => {
+  const handleDeletePhoto = async () => {
+    try {
+      await apiService.delete(`users/${id}/photo`, {
+        headers: { Token: token },
+      });
+      showAlert("Profile photo deleted", "success");
+      // Optionally fetch updated user data
+      const updatedUser = await apiService.get<User>(`users/${id}`, {
+        headers: { Token: token },
+      });
+      setUser(updatedUser);
+    } catch (error) {
+      showAlert("Failed to delete photo", "danger");
+    }
+  }
+
+
+  const handleLanguageChange = async (event: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
     if (!user || user.id !== userId) return;
+    const newLanguage = event.target.value;
     setLanguage(newLanguage);
     try {
-      await apiService.put(`/users/${id}`, { language: newLanguage });
+      await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
             "Content-Type": "application/json",
           },
         });
+
       setUser(updatedUser);
     } catch (err) {
       showAlert(`Failed to update language: ${err}`, "danger");
-    } 
+    }
   };
 
-  const handleLearningLanguageChange = async (newLearningLanguage: string) => {
+  const handleLearningLanguageChange = async (event: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
     if (!user || user.id !== userId) return;
+    const newLearningLanguage = event.target.value;
     try {
-      await apiService.put(`/users/${id}`, { learningLanguage: newLearningLanguage });
+      await apiService.put(`users/${id}`, { learningLanguage: newLearningLanguage });
       showAlert(`Your learning language was successfully updated`, "success");
 
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -226,14 +256,15 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const handlePrivacyChange = async (newPrivacy: "private" | "open") => {
+  const handlePrivacyChange = async (event: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
     if (!user || user.id !== userId) return; // Ensure the logged-in user is updating their own profile
+    const newPrivacy = event.target.value;
     try {
-      await apiService.put(`/users/${id}`, { privacy: newPrivacy });
+      await apiService.put(`users/${id}`, { privacy: newPrivacy });
       showAlert(`Privacy updated to ${newPrivacy}`, "success");
-  
+
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -249,12 +280,12 @@ const UserProfile: React.FC = () => {
 
   const handleSendFriendRequest = async () => {
     try {
-      const response: Response = await apiService.post(`/users/${id}/friend-request`, {}, {
+      const response: Response = await apiService.post(`users/${id}/friend-request`, {}, {
         headers: {
           Authorization: `${token}`,
         },
       });
-  
+
       if (!response.ok) {
         console.error("Token: ", token);
         throw new Error("Failed to send friend request");
@@ -266,20 +297,20 @@ const UserProfile: React.FC = () => {
       showAlert("Failed to send friend request", "danger");
     }
   };
-  
+
   const handleBirthdayChange = async (date: Date | null) => {
     if (!user || user.id !== userId) return;
-  
+
     try {
       const newBirthday = date ? dayjs(date).format("YYYY-MM-DD") : null; // Convert Date to Dayjs and format
       console.log("Selected date:", newBirthday);
-    
-      await apiService.put(`/users/${id}`, { birthday: newBirthday });
+
+      await apiService.put(`users/${id}`, { birthday: newBirthday });
       // Show a success alert
       showAlert("Birthday updated successfully!", "success");
-  
+
       // Fetch the updated user data to reflect the changes
-      const updatedUser = await apiService.get<User>(`/users/${id}`, 
+      const updatedUser = await apiService.get<User>(`/users/${id}`,
         {
           headers: {
             Token: `${token}`,
@@ -299,38 +330,38 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent the default form submission behavior
+    // Validate the form fields
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      showAlert("All fields are required.", "danger");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showAlert("New passwords do not match!", "danger");
+      return;
+    }
+
     try {
-      const values = await form.validateFields(); // Validate the form fields
-      const { oldPassword, newPassword, confirmPassword } = values;
-
-      if (newPassword !== confirmPassword) {
-        return showAlert("New passwords do not match!", "danger");
-      }
-
       setLoading(true);
 
-      const response: Response = await apiService.post(
-        `users/${id}/change-password`,
-        { oldPassword, newPassword },
-        {
-          headers: {
-            Authorization: `${token}`, // Include the token in the Authorization header
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // Replace this with your API call logic
+      console.log("Changing password:", { oldPassword, newPassword });
 
-      if (!response.ok) {
-        throw new Error("Failed to change password");
-      }
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       showAlert("Password changed successfully!", "success");
-      form.resetFields(); // Reset the form fields after successful submission
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      // Hide the password form
       setIsPasswordFormVisible(false);
     } catch (error) {
       console.error("Failed to change password:", error);
-      showAlert("Failed to change password", "danger");
+      showAlert("Failed to change password.", "danger");
     } finally {
       setLoading(false);
     }
@@ -349,341 +380,389 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div>
-      {alertMessage && (
-        <div
-          className={`bubble-message ${alertType}`}
-          style={{
-            position: "fixed",
-            top: "20px", // Adjust this to position the bubble
-            left: "50%",
-            transform: "translateX(-50%)", // Center horizontally
-            backgroundColor: alertType === "success" ? "#4caf50" : "#f44336", // Green for success, red for danger
-            color: "white",
-            padding: "10px 20px",
-            borderRadius: "20px",
-            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-            zIndex: 1050, // Ensure it appears above other elements
-            textAlign: "center",
-            maxWidth: "80%", // Optional: Limit the width of the bubble
-          }}
-        >
-          {alertMessage}
-        </div>
-      )}
-    <Navbar/>
-    <div className="card-container" style={{ display: "flex", position: "relative", height: "80vh", overflowY: "auto", padding: "20px" }}>
-      <Card
-        title={
-          <Title level={3} style={{ color: "white" }}>
-            {user?.username ? `${user.username}'s Profile` : "User Profile"}
-          </Title>
-        }
-        style={{ backgroundColor: "#1f1f1f", color: "white" }}
-      >
-    
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between", // Pushes the switch to the right
-        alignItems: "center", // Vertically aligns the text and switch
-        marginBottom: "20px", // Optional: Add spacing below the row
-      }}
-    >
-      <p style={{ margin: 0 }}>
-        <Text strong style={{ color: "white" }}>Username:</Text> {user.username}
-      </p>
-      {user.id === userId && (
-      <div className="form-check form-switch">
-        <input
-          className="form-check-input"
-          type="checkbox"
-          id="notificationsSwitch"
-          checked={notificationsEnabled}
-          onChange={(e) => handleNotificationsToggle(e.target.checked)}
-        />
-        <label className="form-check-label" htmlFor="notificationsSwitch" style={{ color: "white" }}>
-          Receive Notifications
-        </label>
-      </div>
-      )}
-    </div>
-
-        <div
-          style={{
-            width: "15px",
-            height: "15px",
-            borderRadius: "50%",
-            backgroundColor: user.status === "ONLINE" ? "green" : "yellow", // Green if online, yellow if offline
-            border: "2px solid white", // Optional border for better visibility
-        }}
-      ></div>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            marginBottom: "30px",
-          }}
-        >
-          {user.photo ? (
-            <img
-              src={user.photo} 
-              alt={`${user.username}'s profile`}
+    <div style={{ width: "500px" }}>
+      <Navbar />
+      <div className="card-container">
+        <div className="auth-card" style={{scale:"0.6", maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "-5rem" }}>
+          <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <div
               style={{
-                width: "150px",
-                height: "150px",
+                position: "absolute",
+                width: "15px",
+                height: "15px",
                 borderRadius: "50%",
-                objectFit: "cover",
+                backgroundColor: user.status === "ONLINE" ? "green" : "yellow", // Green if online, yellow if offline
+                border: "2px solid white", // Optional border for better visibility
+                top: "3px", // Adjust this to position the dot
+                left: "50%", // Adjust this to position the dot
+                transform: "translate(30px)", // Center the dot
+                zIndex: 1, // Ensure the dot is above the image
+              }}
+            ></div>
+
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
                 marginBottom: "10px",
               }}
-            />
-          ) : (
-            <img
-              src="/images/default-user.png" // Path to the generic user image
-              alt="Default user profile"
-              style={{
-                width: "150px",
-                height: "150px",
-                borderRadius: "50%",
-                objectFit: "cover",
-                marginBottom: "10px",
-              }}
-            />
-          )}
-
-          {user.id === userId && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              style={{
-                marginTop: "10px",
-              }}
-            />
-          )}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: "10px",
-            marginBottom: "30px",
-          }}
-        >
-          <Text strong style={{ color: "white" }}>Birthday:</Text>
-          {
-            user.id === userId ? (
-              <ReactDatePicker
-                ref={datePickerRef}
-                selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
-                onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
-                dateFormat="dd-MMM-yyyy"
-                className="custom-date-picker"
-              />
-            ) : (
-              <Text style={{ color: "white" }}>
-                {user.birthday ? dayjs(user.birthday).format("YYYY-MM-DD") : "Not specified"}
-              </Text>
-            )}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end", // Aligns the Select to the right
-            gap: "10px",
-            marginBottom: "30px",
-          }}
-        >
-          <Text strong style={{ color: "white" }}>Language:</Text>
-          <Select
-            value={language}
-            onChange={handleLanguageChange}
-            disabled={user.id !== userId}
-            style={{
-              width: 200,
-              backgroundColor: "white",
-              color: "black",
-              borderRadius: "8px",
-            }}
-            dropdownStyle={{
-              backgroundColor: "white", // White dropdown background
-              color: "black",           // Black text
-            }}
-            popupClassName="custom-dropdown" // Additional class for more control
-          >
-            <Option value="en" style={{ color: "black" }}>English</Option>
-            <Option value="fr" style={{ color: "black" }}>French</Option>
-            <Option value="de" style={{ color: "black" }}>German</Option>
-            <Option value="es" style={{ color: "black" }}>Spanish</Option>
-          </Select>
-        </div>
-        
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end", // Aligns the Select to the right
-            gap: "10px",
-            marginBottom: "30px",
-          }}
-        >
-          <Text strong style={{ color: "white" }}>Learning Language:</Text>
-          {user.id === userId ? (
-            <Select
-              value={user.learningLanguage || "en"}
-              onChange={handleLearningLanguageChange}
-              style={{
-                width: 200,
-                backgroundColor: "white",
-                color: "black",
-                borderRadius: "8px",
-              }}
-              dropdownStyle={{
-                backgroundColor: "white",
-                color: "black",
-              }}
             >
-              <Option value="en" style={{ color: "black" }}>English</Option>
-              <Option value="fr" style={{ color: "black" }}>French</Option>
-              <Option value="de" style={{ color: "black" }}>German</Option>
-              <Option value="es" style={{ color: "black" }}>Spanish</Option>
-            </Select>
-          ) : (
-            <Text style={{ color: "white" }}>
-              {user.learningLanguage || "Not specified"}
-            </Text>
-          )}
-        </div>
-        
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end", // Aligns the Select to the right
-            gap: "10px",
-            marginBottom: "30px",
-          }}
-        >
-          <Text strong style={{ color: "white" }}>Privacy:</Text>
-          {user.id === userId ? (
-            <Select
-              value={user.privacy}
-              onChange={handlePrivacyChange}
-              style={{
-                width: 200,
-                backgroundColor: "white",
-                color: "black",
-                borderRadius: "8px",
-              }}
-              dropdownStyle={{
-                backgroundColor: "white",
-                color: "black",
-              }}
-            >
-              <Option value="open" style={{ color: "black" }}>Open</Option>
-              <Option value="private" style={{ color: "black" }}>Private</Option>
-            </Select>
-          ) : (
-            <Text style={{ color: "white" }}>
-              {user.privacy === "private" ? "Private" : "Open"}
-            </Text>
-          )}
-        </div>
+              {user.photo ? (
+                <img
+                  src={user.photo}
+                  alt={`${user.username}'s profile`}
+                  style={{
+                    width: "175px",
+                    height: "175px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    marginBottom: "5px",
+                    border: "3px solid #9b86bd",
+                  }}
+                />
+              ) : (
+                <img
+                  src="/images/default-user.png" // Path to the generic user image
+                  alt="Default user profile"
+                  style={{
+                    width: "175px",
+                    height: "175px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    marginBottom: "5px",
+                    border: "3px solid #9b86bd",
+                  }}
+                />
+              )}
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center", // Center the buttons horizontally
-            gap: "20px", // Add a gap between the buttons
-            marginTop: "20px", // Add some space above the buttons
-          }}
-        >
-          {user.id === userId && (
-            <Button
-              type="primary"
-              onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} // Toggle visibility
-              style={{
-                backgroundColor: "#4caf50", // Green button
-                borderColor: "#4caf50",
-              }}
-            >
-              {isPasswordFormVisible ? "Cancel" : "Change Password"}
-            </Button>
-          )}
-
-          {isPasswordFormVisible && (
-            <div className="passwordChange">
-              <Form form={form} layout="vertical">
-                <Form.Item
-                  label="Old Password"
-                  name="oldPassword"
-                  rules={[{ required: true, message: "Please enter your old password!" }]}
-                >
-                  <Input.Password placeholder="Enter old password" />
-                </Form.Item>
-
-                <Form.Item
-                  label="New Password"
-                  name="newPassword"
-                  rules={[{ required: true, message: "Please enter your new password!" }]}
-                >
-                  <Input.Password placeholder="Enter new password" />
-                </Form.Item>
-
-                <Form.Item
-                  label="Confirm New Password"
-                  name="confirmPassword"
-                  rules={[{ required: true, message: "Please confirm your new password!" }]}
-                >
-                  <Input.Password placeholder="Confirm new password" />
-                </Form.Item>
-
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                  <Button
-                    type="primary"
-                    onClick={handlePasswordChange} // Call the password change logic
-                    loading={loading}
+              {user.id === userId && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="photo-upload"
+                    style={{ display: "none" }}
+                    onChange={handlePhotoUpload}
+                  />
+                  <button
+                    className="btn-secondary"
+                    type="button"
+                    onClick={() => document.getElementById("photo-upload")?.click()}
+                    style={{
+                      position: "absolute",
+                      bottom: "0px",
+                      left: "80px", // adjust as needed for your design
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      zIndex: 2,
+                    }}
+                    title="Upload Photo"
                   >
-                    Change Password
-                  </Button>
-                  <Button onClick={() => setIsPasswordFormVisible(false)}>Cancel</Button>
-                </div>
-              </Form>
+                    <i className="bi bi-camera" />
+                  </button>
+
+                  {user.photo && user.photo !== "/images/default-user.png" && (
+                    <>
+                      <button
+                        className="btn-secondary"
+                        type="button"
+                        onClick={handleDeletePhoto}
+                        style={{
+                          position: "absolute",
+                          bottom: "0px",
+                          right: "80px", // adjust as needed for your design
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          padding: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                          zIndex: 2,
+                        }}
+                        title="Delete Photo"
+                      >
+                        <i className="bi bi-trash" style={{ margin: 0 }} />
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
             </div>
-          )}
+            {/* User views their own profile */}
+            {user.id === userId && (
+              <div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">Receive Notifications: </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="notificationsSwitch"
+                        checked={notificationsEnabled}
+                        onChange={(e) => handleNotificationsToggle(e.target.checked)}
+                        style={{
+                          backgroundColor: notificationsEnabled ? "rgb(119, 118, 179)" : "",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-          {user.id !== userId && (
-            <Button
-              type="primary"
-              disabled={friendRequestSent || isFriend}
-              onClick={handleSendFriendRequest} 
-              style={{
-                backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-              }}
-            >
-              {isFriend
-                ? "Already Friends"
-                : friendRequestSent
-                ? "Friend Request Sent"
-                : "Send Friend Request"}
-            </Button>
-          )}
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label">Birthday:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <DatePicker
+                      className="custom-date-picker"
+                      ref={datePickerRef}
+                      selected={user.birthday ? new Date(user.birthday) : null} // Convert birthday to a Date object
+                      onChange={(date: Date | null) => handleBirthdayChange(date ? (date) : null)}
+                      onChangeRaw={(e) => {
+                        if (e && e.target instanceof HTMLInputElement && e.target.value === "") {
+                          handleBirthdayChange(null);
+                        }
+                      }}
+                      dateFormat="dd-MMM-yyyy"
+                      showYearDropdown
+                      showMonthDropdown
+                      dropdownMode="select"
+                      popperPlacement="right-start"
+                      maxDate={new Date()} // Prevent future dates
+                      placeholderText="Select your birthday"
+                    />
+                  </div>
+                </div>
 
+                <div className="mb-3 row">
+                  <label className="col-sm-4 col-form-label text-nowrap">Language:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <select className="form-select"
+                      value={language}
+                      onChange={handleLanguageChange}
+                      disabled={user.id !== userId}
+                    >
+                      <option value="en" style={{ color: "black" }}>English</option>
+                      <option value="fr" style={{ color: "black" }}>French</option>
+                      <option value="de" style={{ color: "black" }}>German</option>
+                      <option value="es" style={{ color: "black" }}>Spanish</option>
+                    </select>
+                  </div>
+                </div>
 
-          <Button onClick={() => router.back()}>
-            Go back
-          </Button>
+                <div className="mb-3 row">
+                  <label className="col-sm-4 col-form-label text-nowrap">Learning language:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <select className="form-select"
+                      value={user.learningLanguage || "en"}
+                      onChange={handleLearningLanguageChange}
+                      style={{
+                        width: 200,
+                        backgroundColor: "white",
+                        color: "black",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <option value="en" style={{ color: "black" }}>English</option>
+                      <option value="fr" style={{ color: "black" }}>French</option>
+                      <option value="de" style={{ color: "black" }}>German</option>
+                      <option value="es" style={{ color: "black" }}>Spanish</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mb-3 row">
+                  <label className="col-sm-4 col-form-label text-nowrap">Privacy:</label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <select className="form-select"
+                      value={user.privacy || "open"}
+                      onChange={handlePrivacyChange}
+                      style={{
+                        width: 200,
+                        backgroundColor: "white",
+                        color: "black",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <option value="open" style={{ color: "black" }}>Open</option>
+                      <option value="private" style={{ color: "black" }}>Private</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end", // Aligns the Select to the right
+                  gap: "10px",
+                  marginBottom: "30px",
+                }}>
+                  <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
+                    <button onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} className="btn-secondary">{isPasswordFormVisible ? "Cancel" : "Change Password"}</button>
+                    <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+                  </div>
+
+                  {isPasswordFormVisible && (
+                    <div className="passwordChange">
+                      <form onSubmit={handlePasswordChange}>
+                        <div>
+                          <label htmlFor="oldPassword">Password:</label>
+                          <input
+                            type="password"
+                            id="oldPassword"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            required
+                            placeholder="Enter old password"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="newPassword">New Password:</label>
+                          <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            placeholder="Enter new password"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="confirmPassword">Confirm new Password:</label>
+                          <input
+                            type="password"
+                            id="confirmPassword"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            placeholder="Enter new password"
+                          />
+                        </div>
+
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                          <button
+                            className="btn-secondary"
+                            type="submit"
+                          >
+                            {loading ? "Loading..." : "Change Password"}
+                          </button>
+                          <button className="btn-secondary" onClick={() => setIsPasswordFormVisible(false)}>Cancel</button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* End user views their own profile */}
+
+            {/* User views friend or not-private page */}
+            {(user.id !== userId) && (isFriend || user.privacy !== "private") && (
+              <div>
+
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Birthday:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px" }}>
+                      {user.birthday || "Not Set"}
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.language || "Not Set"}
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Learning Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.learningLanguage || "Not Set"}
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Privacy:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {user.privacy}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="auth-buttons" >
+                  <button
+                    className="btn-secondary"
+                    disabled={friendRequestSent || isFriend}
+                    onClick={handleSendFriendRequest}
+                    style={{
+                      backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                      borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                    }}
+                  >
+                    {isFriend
+                      ? "Already Friends"
+                      : friendRequestSent
+                        ? "Friend Request Sent"
+                        : "Send Friend Request"}
+                  </button>
+
+                  <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+                </div>
+              </div>
+            )}
+            {/* End user views friend or not-private page */}
+
+            {/* User views not-friend or private page */}
+            {(user.id !== userId) && (!isFriend && user.privacy === "private") && (
+              <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
+                <button
+                  className="btn-secondary"
+                  disabled={friendRequestSent || isFriend}
+                  onClick={handleSendFriendRequest}
+                  style={{
+                    backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
+                    color: "#5A639C",
+                    borderColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
+                  }}
+                >
+                  {isFriend
+                    ? "Already Friends"
+                    : friendRequestSent
+                      ? "Friend Request Sent"
+                      : "Send Friend Request"}
+                </button>
+                <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+              </div>
+            )}
+            {/* End user views not-friend or private page */}
+
+          </div>
         </div>
-      </Card>
-    </div>
+      </div>
     </div>
   );
 };

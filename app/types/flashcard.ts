@@ -6,5 +6,6 @@ export interface Flashcard {
     contentBack: string;
     language: string;
     learningLanguage: string;
+    status: "NOTTRAINED" | "CORRECT" | "WRONG";
   }
   

@@ -1,10 +1,12 @@
 export interface FlashcardSet {
-    flashcardSetId: string;
-    flashcardsIds: string[];
-    learningLanguage: string;
-    userId: number;
-    flashcardSetName: string;
-    language: string;
-    flashcardQuantity: number;
-  }
-  
+  flashcardSetId: string;
+  flashcardSetName: string;
+  language: string;
+  learningLanguage: string;
+  flashcardQuantity: number;
+  statistic: {
+    NotTrained: number;
+    Correct: number;
+    Wrong: number;
+  };
+}

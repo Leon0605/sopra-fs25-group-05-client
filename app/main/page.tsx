@@ -8,6 +8,8 @@ import { User } from "@/types/user";
 import { Chat } from "@/types/chat";
 import "bootstrap/dist/css/bootstrap.min.css";
 import OrbitDashboard from '@/components/OrbitDashboard';
+import Navbar from "@/components/Navbar";
+
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
@@ -17,10 +19,7 @@ const Dashboard: React.FC = () => {
   const [hasMounted, setHasMounted] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
-  const { clear: clearNotificationsEnabled} = useLocalStorage<boolean>("notificationsEnabled", false);
-
-
-  
+  const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
 
   const handleLogout = async () => {
     try {
@@ -41,7 +40,6 @@ const Dashboard: React.FC = () => {
       router.push("/login");
     }
   };
-  
 
   useEffect(() => {
     setHasMounted(true);
@@ -77,8 +75,7 @@ const Dashboard: React.FC = () => {
           },
         }
       );
-
-
+      
 
       const current = usersData.find((u) => u.id === userId);
       if (!current) throw new Error("Current user not found");
@@ -94,6 +91,7 @@ const Dashboard: React.FC = () => {
 }, [userId, apiService]);
 
 
+
   const handleUserClick = async (clickedUser: User, isCurrentUser: boolean = false) => {
     if (!clickedUser.id || !userId) return;
 
@@ -103,7 +101,7 @@ const Dashboard: React.FC = () => {
     }
 
     try {
-      const userChats = await apiService.get<Chat[]>("/chats", {
+      const userChats = await apiService.get<Chat[]>("chats", {
         headers: { userId: String(userId) },
       });
 
@@ -113,7 +111,7 @@ const Dashboard: React.FC = () => {
       });
 
       if (privateChat) {
-        router.push(`/chats/${privateChat.chatId}`);
+        router.push(`chats/${privateChat.chatId}`);
       } else {
         alert("No private chat found with this user.");
       }
@@ -123,11 +121,18 @@ const Dashboard: React.FC = () => {
     }
   };
 
-
+  if (!hasMounted || !token || !currentUser) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-light" role="status" />
+      </div>
+    );
+  }
 
 
   return (
     <div className="container-fluid min-vh-100 py-3 px-5" style={{ color: "white" }}>
+      
       <div className="mb-2">
         {currentUser && <h2>Welcome, {currentUser.username}</h2>}
       </div>
@@ -150,13 +155,58 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {currentUser && friends && (
-        <OrbitDashboard
-          currentUser={currentUser}
-          users={friends}
-          onUserClick={handleUserClick}
-        />
-      )}
+      <div
+  className="position-relative d-flex justify-content-center align-items-center"
+  style={{ minHeight: "500px", position: "relative" }}
+>
+  {/* Left interactive image */}
+  <img
+    src="/images/alien.png"
+    alt="Alien"
+    style={{
+      position: "absolute",
+      left: "10%",
+      top: "65%",
+      transform: "translateY(-50%)",
+      width: "100px",
+      cursor: "pointer",
+      transition: "transform 0.2s ease",
+      zIndex: 10,
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-50%) scale(1.1)")}
+    onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(-50%)")}
+    onClick={() => alert("👽 Alien clicked!")}
+  />
+
+  {/* Right interactive image */}
+  <img
+    src="/images/rocket.png"
+    alt="Rocket"
+    style={{
+      position: "absolute",
+      right: "10%",
+      top: "40%",
+      transform: "translateY(-50%)",
+      width: "100px",
+      cursor: "pointer",
+      transition: "transform 0.2s ease",
+      zIndex: 10,
+      scale:"1.5"
+    }}
+    onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-50%) scale(1.1)")}
+    onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(-50%)")}
+    onClick={() => alert("🚀 Rocket clicked!")}
+  />
+
+  {/* Orbit in the center */}
+  <OrbitDashboard
+    currentUser={currentUser}
+    users={friends}
+    onUserClick={handleUserClick}
+    
+  />
+</div>
+
 
 
 

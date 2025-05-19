@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import StarsBackground from "@/styles/Background";
+import { AlertProvider } from "./components/alertContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,8 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <AlertProvider>
         <StarsBackground />
         {children}
+        </AlertProvider>
       </body>
     </html>
   );

@@ -1,0 +1,7 @@
+.flex-end-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Aligns the Select to the right */
+    gap: 10px;
+    margin-bottom: 30px;
+  }

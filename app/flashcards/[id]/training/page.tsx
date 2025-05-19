@@ -26,6 +26,14 @@ const FlashcardTraining: React.FC = () => {
   const [isFrontToBack, setIsFrontToBack] = useState(true);
   const [shuffleCards, setShuffleCards] = useState(true);
   const [showSetup, setShowSetup] = useState(true);
+  const [includeNotTrained, setIncludeNotTrained] = useState(true);
+  const [includeWrong, setIncludeWrong] = useState(true);
+  const [includeCorrect, setIncludeCorrect] = useState(true);
+  const notTrainedCount = flashcards.filter((c) => c.status === "NOTTRAINED").length;
+  const wrongCount = flashcards.filter((c) => c.status === "WRONG").length;
+  const correctCount = flashcards.filter((c) => c.status === "CORRECT").length;
+
+
 
   const shuffleArray = (array: Flashcard[]) => {
     const shuffled = [...array];
@@ -66,7 +74,28 @@ const FlashcardTraining: React.FC = () => {
   }, [id, token]);
 
   const handleStart = () => {
-    const cards = shuffleCards ? shuffleArray(flashcards) : flashcards;
+
+    if (!includeNotTrained && !includeWrong && !includeCorrect) {
+    alert("Please select at least one category to train.");
+    return;
+    }
+
+
+    let filtered = flashcards.filter((card) => {
+      if (card.status === "NOTTRAINED" && includeNotTrained) return true;
+      if (card.status === "WRONG" && includeWrong) return true;
+      if (card.status === "CORRECT" && includeCorrect) return true;
+      return false;
+    });
+
+    
+    if (filtered.length === 0) {
+      alert("Please select at least one category with cards to train.");
+      return;
+    }
+
+    const cards = shuffleCards ? shuffleArray(filtered) : filtered;
+
     setCurrentCards(cards);
     setCurrentIndex(0);
     setUnknownCards([]);
@@ -76,32 +105,53 @@ const FlashcardTraining: React.FC = () => {
     setShowSetup(false);
   };
 
+
   const handleFlip = () => setFlipped((prev) => !prev);
 
-  const handleAnswer = (isKnown: boolean) => {
-    const currentCard = currentCards[currentIndex];
-    setFlipped(false);
+const handleAnswer = async (isKnown: boolean) => {
+  const currentCard = currentCards[currentIndex];
+  setFlipped(false);
 
-    setTimeout(() => {
-      if (!isKnown) {
-        setUnknownCards((prev) => [...prev, currentCard.flashcardId]);
+  try {
+    await apiService.put(
+      `/flashcards/${id}/${currentCard.flashcardId}/status`,
+      null,
+      {
+        headers: {
+          Authorization: token,
+          Status: isKnown.toString(),
+        },
       }
+    );
+  } catch (err) {
+    console.error("Failed to update flashcard status:", err);
+    alert("Could not save training progress.");
+  }
 
-      if (currentIndex + 1 < currentCards.length) {
-        setCurrentIndex((prev) => prev + 1);
-      } else {
-        setRoundCompleted(true);
-        if (unknownCards.length === 0 && isKnown) {
-          setTrainingCompleted(true);
-        }
+  setTimeout(() => {
+    if (!isKnown) {
+      setUnknownCards((prev) => [...prev, currentCard.flashcardId]);
+    }
+
+    if (currentIndex + 1 < currentCards.length) {
+      setCurrentIndex((prev) => prev + 1);
+    } else {
+      setRoundCompleted(true);
+      if (unknownCards.length === 0 && isKnown) {
+        setTrainingCompleted(true);
       }
-    }, 180);
-  };
+    }
+  }, 200);
+};
+
 
   const startNextRound = () => {
-    const nextRoundCards = shuffleArray(
-      flashcards.filter((card) => unknownCards.includes(card.flashcardId))
+    const cardsToRepeat = flashcards.filter((card) =>
+      unknownCards.includes(card.flashcardId)
     );
+
+    const nextRoundCards = shuffleCards ? shuffleArray(cardsToRepeat) : cardsToRepeat;
+
     setCurrentCards(nextRoundCards);
     setCurrentIndex(0);
     setFlipped(false);
@@ -109,6 +159,7 @@ const FlashcardTraining: React.FC = () => {
     setRoundCompleted(false);
     setRoundNumber((prev) => prev + 1);
   };
+
 
   const restartTraining = () => {
     const cards = shuffleArray(flashcards);
@@ -119,7 +170,7 @@ const FlashcardTraining: React.FC = () => {
     setRoundCompleted(false);
     setRoundNumber(1);
     setTrainingCompleted(false);
-    setShowSetup(false);
+    setShowSetup(true);
   };
 
   const currentCard = currentCards[currentIndex];
@@ -136,7 +187,7 @@ return (
     <hr style={{ borderTop: "3px solid #9B86BD" }} />
 
     {/* Direction Options */}
-    <div className="mb-3">
+    <div className="mb-1">
       <label className="d-flex align-items-start gap-2">
         <input
           type="radio"
@@ -163,7 +214,7 @@ return (
     <hr style={{ borderTop: "3px solid #9B86BD" }} />
 
     {/* Shuffle Checkbox */}
-    <div className="mb-4">
+    <div className="mb-1">
       <label className="d-flex align-items-center gap-2">
         <input
           type="checkbox"
@@ -175,8 +226,44 @@ return (
       </label>
     </div>
 
+    <hr style={{ borderTop: "3px solid #9B86BD" }} />
+
+    {/* Status Filters */}
+<div className="mb-3">
+  <label className="d-flex align-items-center gap-2">
+    <input
+      type="checkbox"
+      checked={includeNotTrained}
+      onChange={() => setIncludeNotTrained(prev => !prev)}
+      style={{ width: "18px", height: "18px", margin: "5px" }}
+    />
+    <span className="ms-1">Not Trained Cards ({notTrainedCount})</span>
+  </label>
+
+  <label className="d-flex align-items-center gap-2">
+    <input
+      type="checkbox"
+      checked={includeWrong}
+      onChange={() => setIncludeWrong(prev => !prev)}
+      style={{ width: "18px", height: "18px", margin: "5px" }}
+    />
+    <span className="ms-1">Wrong Cards ({wrongCount})</span>
+  </label>
+
+  <label className="d-flex align-items-center gap-2">
+    <input
+      type="checkbox"
+      checked={includeCorrect}
+      onChange={() => setIncludeCorrect(prev => !prev)}
+      style={{ width: "18px", height: "18px", margin: "5px" }}
+    />
+    <span className="ms-1">Correct Cards ({correctCount})</span>
+  </label>
+</div>
+
+
     {/* Buttons */}
-    <div className="auth-buttons d-flex justify-content-between">
+    <div className="auth-buttons d-flex justify-content-between mb-2">
       <button className="btn-primary" onClick={handleStart}>Start</button>
       <button className="btn-secondary" onClick={() => router.back()}>Cancel</button>
     </div>
@@ -205,11 +292,11 @@ return (
             <div className="flip-card mb-4" onClick={handleFlip}>
               <div className={`flip-card-inner ${flipped ? "flipped" : ""}`}>
                 <div className="flip-card-front d-flex flex-column justify-content-center align-items-center">
-                  <h5 className="text-primary">{isFrontToBack ? "Front" : "Back"}</h5>
+                  <h5 style={{ color:"#7776B3"}} >{isFrontToBack ? "Front" : "Back"}</h5>
                   <h4 className="mt-2">{isFrontToBack ? currentCard?.contentFront : currentCard?.contentBack}</h4>
                 </div>
                 <div className="flip-card-back d-flex flex-column justify-content-center align-items-center">
-                  <h5 className="text-primary">{isFrontToBack ? "Back" : "Front"}</h5>
+                  <h5 style={{ color:"#7776B3"}}>{isFrontToBack ? "Back" : "Front"}</h5>
                   <h4 className="mt-2">{isFrontToBack ? currentCard?.contentBack : currentCard?.contentFront}</h4>
                 </div>
               </div>
@@ -232,12 +319,29 @@ return (
           </div>
         ) : (
           <div className="d-flex gap-3 mt-3" style={{ zIndex: 2, position: "relative" }}>
-            <button className="btn btn-outline-danger" onClick={() => handleAnswer(false)}>
+            <button
+              className="btn btn-danger"
+              style={{
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onClick={() => handleAnswer(false)}
+            >
               Did not Know
             </button>
-            <button className="btn btn-outline-success" onClick={() => handleAnswer(true)}>
+            <button
+              className="btn btn-success"
+              style={{
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onClick={() => handleAnswer(true)}
+            >
               Knew It
             </button>
+
           </div>
         )}
       </div>

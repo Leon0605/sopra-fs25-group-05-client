@@ -115,25 +115,30 @@ const Flashcards: React.FC = () => {
         {flashcardSets.length > 0 ? (
           <div
             style={{
-              maxHeight: "400px",
+              maxHeight: "300px",
+              minHeight: "10px",
               overflowY: "auto",
               overflowX: "hidden",
               marginBottom: "1rem",
               paddingRight: "8px",
               width: "100%",
               whiteSpace: "normal",
+              backgroundColor:"#9B86BD",
+              borderRadius: "12px",
+
             }}
           >
           
             {flashcardSets.map((set) => (
               <div
                 key={set.flashcardSetId}
-                className="d-flex flex-row flex-wrap align-items-center mb-3 p-3 m-1"
+                className="d-flex justify-content-between align-items-center mb-2 p-2 m-2"
                 style={{
-                  backgroundColor: "#EDF0FF",
+                  backgroundColor: "#FFF3F0",
                   borderRadius: "12px",
                   cursor: "pointer",
                   transition: "transform 0.2s ease",
+
                 }}
                 onClick={() =>
                   router.push(
@@ -144,17 +149,19 @@ const Flashcards: React.FC = () => {
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
                 <div 
-                  className="col-sm-3 fw-bold text-primary"   
+                  className="col-sm-4 fw-bold"   
                   style={{
                     wordWrap: "break-word",
                     whiteSpace: "normal",
+                    maxWidth:"200px",
+                    color:"#5A639C",
                   }}>{set.flashcardSetName}
                 </div>
   
-                <div className="col-md-4">
-                <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
-                  Quantity: <strong>{set.flashcardQuantity ?? "0"}</strong>{" "}
-                </div>
+                <div className="col-sm-3">
+                  <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
+                    Cards: <strong>{set.flashcardQuantity ?? "0"}</strong>{" "}
+                  </div>
                   <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
                     From: <strong>{set.language ?? "-"}</strong>{" "}
                   </div>
@@ -162,11 +169,38 @@ const Flashcards: React.FC = () => {
                     To: <strong>{set.learningLanguage ?? "-"}</strong>
                   </div>
                 </div>
+
+                <div className="col-md-4 flex" style={{whiteSpace: "nowrap"}}>
+                  <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
+                    Not Trained: <strong>{set.statistic.NotTrained.toFixed(1)}%</strong>
+                  </div>
+                  <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
+                    Wrong: <strong>{set.statistic.Wrong.toFixed(1)}%</strong>
+                  </div>
+                  <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
+                    Correct: <strong>{set.statistic?.Correct.toFixed(1)}%</strong>
+                  </div>
+                </div>
+
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-muted">You do not have any flashcard sets yet.</p>
+          <div
+            className="text-center"
+            style={{
+              borderRadius: "12px", // or "1rem", "50px", etc.
+              backgroundColor: "#9B86BD",
+              color: "white",
+              minHeight: "50px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "10px",
+            }}
+          >
+            You do not have any flashcard sets yet.
+          </div>
         )}
   
         {/* Action Buttons */}
