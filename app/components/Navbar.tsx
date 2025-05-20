@@ -41,8 +41,8 @@ const Navbar = () => {
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
   const prevIncomingRequestsRef = useRef<User[]>([]);
   const prevMessagesRef = useRef<Message[]>([]);
-  const [chatIds, setChatIds] = useState<string[]>([]); // Store all chat IDs for the user
-
+  const [chatIds, setChatIds] = useState<string[]>([]);
+  
   const handleLogout = async () => {
     try {
       if (userId && userId !== 0) {
@@ -64,19 +64,6 @@ const Navbar = () => {
   };
 
   const { showAlert } = useAlert();
-
-  // const showAlert = (message: string, type: "success" | "danger") => {
-  //   console.log("showAlert called", message, type, notificationsEnabled);
-  //   if (!notificationsEnabledRef.current) return;
-  //   setAlertMessage(message);
-  //   setAlertType(type);
-
-  //   // Automatically hide the alert after 3 seconds
-  //   setTimeout(() => {
-  //     setAlertMessage(null);
-  //     setAlertType(null);
-  //   }, 3000);
-  // };
 
   const fetchRequests = async () => {
     try {
