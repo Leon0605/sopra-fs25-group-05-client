@@ -3,6 +3,7 @@ export interface User {
   username: string | null;
   token: string | null;
   status: string | null;
+  photo?: string | null;
   language: string | null;
   sentFriendRequestsList?: number[];
   receivedFriendRequestsList?: number[];

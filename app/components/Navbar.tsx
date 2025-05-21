@@ -36,13 +36,16 @@ const Navbar = () => {
   const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const notificationsEnabledRef = useRef(notificationsEnabled);
+  const requestsDropdownRef = useRef<HTMLDivElement>(null);
+  const messagesDropdownRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<User[]>([]);
   const prevIncomingRequestsRef = useRef<User[]>([]);
   const prevMessagesRef = useRef<Message[]>([]);
   const [chatIds, setChatIds] = useState<string[]>([]);
-  
+  const [users, setUsers] = useState<User[]>([]);
+
   const handleLogout = async () => {
     try {
       if (userId && userId !== 0) {
@@ -105,7 +108,6 @@ const Navbar = () => {
   const fetchUnreadMessages = async (chatIds: string[]) => {
     console.log("Fetching messages for chat IDs:", chatIds);
     try {
-      //const token = JSON.parse(localStorage.getItem("token") || '""');
       if (!token) {
         console.error("Token is missing");
         return;
@@ -114,8 +116,8 @@ const Navbar = () => {
       const allMessages: Message[] = []; // Array to store all messages across chats
       for (const chatId of chatIds) {
         // Fetch messages for each chat ID
-        const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${userId}`);
-        console.log(`Fetched messages for chat ID ${chatId}:`, fetchedMessages);
+        const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${userId}/notifications`);
+        console.log(`Fetched unread messages for chat ID ${chatId}:`, fetchedMessages);
         allMessages.push(...fetchedMessages);
       }
 
@@ -140,9 +142,86 @@ const Navbar = () => {
     }
   };
 
+  // Function to handle accepting a friend request
+  const handleAcceptRequest = async (senderId: number) => {
+    if (!userId) return;
+
+    try {
+      await apiService.put<void>(
+        `/users/${userId}/friend-request`,
+        null,
+        {
+          headers: {
+            Authorization: token,
+            senderUserId: senderId.toString(),
+            Accept: "true",
+          },
+        }
+      );
+      // Optionally refresh the requests list or show a success alert
+      fetchRequests();
+      showAlert("Friend request accepted!", "success");
+    } catch (error) {
+      console.error("Failed to accept friend request:", error);
+      showAlert("Failed to accept friend request.", "danger");
+    }
+  };
+
+  // Function to handle rejecting a friend request
+  const handleRejectRequest = async (senderId: number) => {
+    if (!userId) return;
+
+    try {
+      await apiService.put<void>(
+        `/users/${userId}/friend-request`,
+        null,
+        {
+          headers: {
+            Authorization: token,
+            senderUserId: senderId.toString(),
+            Accept: "false",
+          },
+        }
+      );
+      // Optionally refresh the requests list or show a success alert
+      showAlert("Friend request rejected.", "success");
+    } catch (error) {
+      console.error("Failed to accept friend request:", error);
+      showAlert(`Oops, something went wrong: ${error}.`, "danger");
+    }
+  };
+
   useEffect(() => {
     chatIdsRef.current = chatIds;
   }, [chatIds]);
+
+  // useEffect for collecting senders of incoming messages
+  useEffect(() => {
+  // Get unique sender IDs from messages
+  const uniqueSenderIds = Array.from(new Set(messages.map(m => m.userId)));
+  // Find which sender IDs are missing from users array
+  const missingSenderIds = uniqueSenderIds.filter(
+    id => !users.some(u => u.id === id)
+  );
+
+  // Fetch missing users
+  if (missingSenderIds.length > 0) {
+    Promise.all(
+      missingSenderIds.map(id =>
+        apiService.get<User>(`users/${id}`, {
+          headers: {
+            Token: `${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+      )
+    ).then(fetchedUsers => {
+      setUsers(prev => [...prev, ...fetchedUsers]);
+    }).catch(err => {
+      console.error("Failed to fetch some users:", err);
+    });
+  }
+}, [messages, users, apiService]);
 
   // useEffect for displaying notifications
   useEffect(() => {
@@ -166,6 +245,55 @@ const Navbar = () => {
   useEffect(() => {
     notificationsEnabledRef.current = notificationsEnabled;
   }, [notificationsEnabled]);
+
+
+  // useEffect for dropdown close
+  useEffect(() => {
+    if (!openRequests) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const dropdown = requestsDropdownRef.current;
+      const bellButton = document.querySelector('[title="Notifications"]');
+
+      if (
+        dropdown &&
+        !dropdown.contains(target) &&
+        bellButton &&
+        !bellButton.contains(target)
+      ) {
+        setOpenRequests(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openRequests]);
+
+
+  // useEffect for messages dropdown closure
+  useEffect(() => {
+  if (!openMessages) return;
+
+  function handleClickOutside(event: MouseEvent) {
+    const target = event.target as Node;
+    const dropdown = messagesDropdownRef.current;
+    const envelopeButton = document.querySelector('[title="Messages"]');
+
+    if (
+      dropdown &&
+      !dropdown.contains(target) &&
+      envelopeButton &&
+      !envelopeButton.contains(target)
+    ) {
+      setOpenMessages(false);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [openMessages]);
+
 
   // useEffect for displaying incoming messages
   useEffect(() => {
@@ -205,12 +333,12 @@ const Navbar = () => {
   }, [token]);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed" style={{zIndex: 1050}}>
       <div className="container-fluid">
         <img
           src="../images/HablaLogo.png"
-          alt="Habla! Logo"
-          style={{ height: "125px", width: "125px", objectFit: "contain" }} // Adjust as needed
+          alt="Habla! Logo" className="img-fluid"
+          style={{ maxWidth: "200px", maxHeight:"50px",  height: "auto" }}
         />
 
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
@@ -241,8 +369,8 @@ const Navbar = () => {
 
           {/* Notifications */}
           <div className="d-flex align-items-center gap-3">
-            <button className="btn btn-outline-light position-relative" title="Notifications" onClick={() => {
-              setOpenRequests(!openRequests);
+            <button className="btn btn-outline-light position-relative" title="Notifications" onClick={(e) => {
+              setOpenRequests((prev) => !prev);
               setOpenMessages(false); // Close notifications dropdown if open
             }}
               style={{ border: "none", boxShadow: "none", background: "none" }}>
@@ -256,13 +384,80 @@ const Navbar = () => {
 
             {/* Notifications Dropdown */}
             {openRequests && (
-              <div className={styles["nav-auth-card"]}>
-                <p>Incoming Friend Requests</p>
-                {incomingRequests.map((request, index) => (
-                  <div key={index}>
-                    <span>{request.username}</span>
+              <div className={styles["nav-auth-card"]} ref={requestsDropdownRef}>
+                <p style={{ color: "#5A639C", fontSize: "17.6px" }}>Incoming Friend Requests</p>
+                {incomingRequests.map((request) => (
+                  <div key={request.id} className="d-flex align-items-center mb-2" style={{ gap: "0.5rem" }}>
+                    {/* User image or fallback avatar */}
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => router.push(`/users/${request.id}`)}
+                    >
+                      {request.photo ? (
+                        <img
+                          src={request.photo}
+                          alt={request.username ?? ""}
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #9B86BD",
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src="/images/default-user.png" // Path to the generic user image
+                          alt="Default user profile"
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            background: "#E2BBE9",
+                            color: "#5A639C",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: "bold",
+                            fontSize: "1.1rem",
+                            border: "2px solid #9B86BD",
+                          }}
+                        >
+                        </img>
+                      )}
+                    </span>
+                    {/* Username */}
+                    <span
+                      style={{ fontWeight: "bold", cursor: "pointer", color: "#5A639C" }}
+                      onClick={() => router.push(`/users/${request.id}`)}
+                    >
+                      {request.username}
+                    </span>
+                    {/* Accept/Reject buttons */}
+                    <div style={{ display: "flex", gap: "0.0rem", marginLeft: "auto" }}>
+                      <button
+                        className="btn btn-outline-light"
+                        title="Accept"
+                        style={{ marginLeft: "auto", border: "none", boxShadow: "none", background: "none" }}
+                        onClick={() => request.id !== null && handleAcceptRequest(request.id)}
+                      >
+                        <i className="bi bi-check-circle" style={{ color: "#5A639C", fontSize: "1.35rem" }}></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        title="Reject"
+                        style={{ border: "none", boxShadow: "none", background: "none" }}
+                        onClick={() => request.id !== null && handleRejectRequest(request.id)}
+                      >
+                        <i className="bi bi-x-circle" style={{ color: "#5A639C", fontSize: "1.35rem" }}></i>
+                      </button>
+                    </div>
                   </div>
                 ))}
+                {incomingRequests.length === 0 && (
+                  <div style={{ color: "#5A639C", fontStyle: "italic", padding: "0.5rem 0" }}>
+                    You have no current friend requests
+                  </div>)}
                 <button className="btn-secondary" onClick={() => setOpenRequests(false)}>
                   Close
                 </button>
@@ -285,16 +480,69 @@ const Navbar = () => {
 
             {/* Messages Dropdown */}
             {openMessages && (
-              <div className={styles["nav-auth-card"]}>
-                <p>Messages</p>
-                {messages.map((message, index) => (
-                  <div key={index}>
-                    <span>{message.userId} wrote: {message.originalMessage}</span>
+              <div className={styles["nav-auth-card"]} ref={messagesDropdownRef}>
+                <p style={{ color: "#5A639C", fontSize: "17.6px" }}>Messages</p>
+                {messages.map((message) => {  
+                  const sender = users.find(u => u.id === message.userId);
+                  return (
+                  <div key={message.messageId} className="d-flex align-items-center mb-2" style={{ gap: "0.5rem" }}>
+                    {/* User image or fallback avatar */}
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={() => router.push(`/chats/${message.chatId}`)}
+                    >
+                      {sender?.photo ? (
+                        <img
+                          src={sender.photo}
+                          alt={sender.username ?? ""}
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #9B86BD",
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src="/images/default-user.png" // Path to the generic user image
+                          alt="Default user profile"
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            background: "#E2BBE9",
+                            color: "#5A639C",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: "bold",
+                            fontSize: "1.1rem",
+                            border: "2px solid #9B86BD",
+                          }}
+                        >
+                        </img>
+                      )}
+                    </span>
+                    {/* Username */}
+                    <span
+                      style={{ fontWeight: "bold", cursor: "pointer", color: "#5A639C" }}
+                      onClick={() => router.push(`/chats/${message.chatId}`)}
+                    >
+                      {sender?.username}
+                    </span>
+                    {/* Message content */}
+                    <div style={{ display: "flex", gap: "0.0rem", marginLeft: "auto" }}>
+                      <span style={{ color: "#5A639C" }}>{message.originalMessage}</span>
+                    </div>
                   </div>
-                ))}
-                <button className="btn-secondary" onClick={() => setOpenMessages(false)}>
-                  Close
-                </button>
+                );
+            })}  
+
+                {messages.length === 0 && (
+                  <div style={{ color: "#5A639C", fontStyle: "italic", padding: "0.5rem 0" }}>
+                    You have no unread messages
+                  </div>)}
               </div>
             )}
 
@@ -306,7 +554,7 @@ const Navbar = () => {
 
             <div className="bg-light text-dark rounded-circle d-flex justify-content-center align-items-center"
               style={{ width: "32px", height: "32px", fontWeight: "bold" }}>
-              C
+              CD
             </div>
           </div>
         </div>
