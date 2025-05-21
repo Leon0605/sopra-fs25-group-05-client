@@ -108,9 +108,7 @@ const FriendsPage: React.FC = () => {
           style={{
             maxWidth: "900px",
             width: "100%",
-            marginTop: "1rem",
-            display: "flex",
-            flexDirection: "column"
+            marginTop: "1rem"
           }}
         >
         <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Friends</h2>
@@ -245,9 +243,16 @@ const FriendsPage: React.FC = () => {
         </div>
       </div>
       <style jsx>{`
+        .auth-card {
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+        }
         .panels {
           display: flex;
           gap: 1rem;
+          flex: 1;        
+          overflow: hidden;
         }
         .panel {
           flex: 1;
@@ -262,7 +267,8 @@ const FriendsPage: React.FC = () => {
           -webkit-backdrop-filter: blur(10px);
         }
         .panel-list {
-          height: 12rem; /* show 4 items at approx 3rem each */
+          
+          height: min(18rem, 80vh);
           overflow-y: auto;
           padding-right: 0.5rem;
         }
