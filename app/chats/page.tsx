@@ -1,21 +1,7 @@
-"use client";
-
-import useLocalStorage from "@/hooks/useLocalStorage";
-import ChatSummary from "@/components/ChatSummary";
-import Navbar from "@/components/Navbar";
-
-export default function ChatPage() {
-    return (
-        <>
-            <Navbar />
-            <div>
-                <div>
-                    <ChatSummary/>
-                    <div>
-                        {/* default */}
-                    </div>
-                </div>
-            </div>
-        </>
-    );
+export default function ChatDefaultPage() {
+  return (
+    <div className="d-flex justify-content-center align-items-center h-100">
+      <p className="text-muted">Select a chat to start messaging</p>
+    </div>
+  );
 }

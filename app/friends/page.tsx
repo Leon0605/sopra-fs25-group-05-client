@@ -6,7 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { headers } from "next/headers";
+// import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 
 

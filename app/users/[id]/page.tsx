@@ -47,8 +47,6 @@ const UserProfile: React.FC = () => {
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [users, setUsers] = useState<User[] | null>(null);
   const { showAlert } = useAlert();
-  // const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  // const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<DatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);

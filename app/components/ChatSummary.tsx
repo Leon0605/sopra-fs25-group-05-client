@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { Chat } from '@/types/chat';
 import useLocalStorage from "@/hooks/useLocalStorage";
-import styles from "../chats/[id]/page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import styles from "./page.module.css";
 
 interface ChatSummary {
     chatId: string;
-    otherUser: { id: number; username: string; photoUrl?: string };
+    otherUser: { id: number; username: string; photo?: string };
     lastMessage: Message | null;
 }
 
@@ -62,7 +61,7 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
                     const otherUserId = chat.userIds.find((id: number) => id !== userId);
                     console.log("CHATS otherUserId:", otherUserId); // Log the other user's ID
                     // Fetch the other user's info
-                    const otherUser = await apiService.get<{ id: number; username: string; photoUrl?: string }>(
+                    const otherUser = await apiService.get<{ id: number; username: string; photo?: string }>(
                         `users/${otherUserId}`,
                         {
                             headers: {
@@ -121,36 +120,32 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
 
 
     return (
-        <div>
-            <h3>Previous Chats</h3>
-            <div>
+        <div className={styles.summaryContainer}>
+            <p style={{ color: "#5A639C", fontSize: "17.6px", marginTop: "0.2rem", fontWeight: "bold"}}>Previous Chats</p>
                 {chatSummaries.map((summary) => {
-                    const chatColor = getChatColor(Number(summary.chatId));
-
+                    console.log("Chat summary: ", summary)
                     return (
-                        <button
-                            key={summary.chatId}
-                            
-                            onClick={() => router.push(`/chats/${summary.chatId}`)}
-                        >
-                            
-                            <div
-                            >
-                                {summary.otherUser.username.charAt(0).toUpperCase()}
-                            </div>
-
-                            <div>
-                                <span>
-                                    {summary.otherUser.username}
-                                </span>
-                                <span>
-                                    {summary.lastMessage?.timestamp || 'No messages'}
-                                </span>
-                            </div>
-                        </button>
+                        <div
+                      key={summary.chatId}
+                      className={styles.clickableRow}
+                      onClick={() => router.push(`/chats/${summary.chatId}`)}
+                    >
+                      <img
+                        src={summary.otherUser.photo || "/images/default-user.png"}
+                        alt={`${summary.otherUser.username} avatar`}
+                        className="rounded-circle me-2"
+                        style={{ width: "32px", height: "32px", border: "2px solid #9B86BD" }}
+                      />
+                      <span
+                        className="username"
+                        style={{ color: "#5A639C", fontWeight: "bold" }}
+                      >
+                        {summary.otherUser.username}
+                      </span>
+                    </div>
                     );
                 })}
-            </div>
+            
         </div>
     );
 }
