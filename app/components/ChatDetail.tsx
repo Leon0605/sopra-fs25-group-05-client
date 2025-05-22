@@ -37,6 +37,7 @@ const ChatPage: React.FC = () => {
     const stompClientRef = useRef<Client | null>(null);
     const [language, setLanguage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    
 
     const colours = [
         '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -71,6 +72,7 @@ const ChatPage: React.FC = () => {
 
     // Handle adding a flashcard
     const handleAddFlashcard = async (front: string, back: string) => {
+        /*
         try {
             await apiService.post(`/flashcards/${flashcardSetId}`,
                 { contentFront: front, ...(back ? { contentBack: back } : {}) },
@@ -88,7 +90,8 @@ const ChatPage: React.FC = () => {
         } catch (err) {
             console.error("Failed to add flashcard:", err);
             alert("Error creating flashcard");
-        }
+        }*/
+       
     };
 
     // Send a message
