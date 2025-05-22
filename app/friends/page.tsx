@@ -6,6 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
+// import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 
 
@@ -245,9 +246,16 @@ const FriendsPage: React.FC = () => {
         </div>
       </div>
       <style jsx>{`
+        .auth-card {
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+        }
         .panels {
           display: flex;
           gap: 1rem;
+          flex: 1;        
+          overflow: hidden;
         }
         .panel {
           flex: 1;
@@ -262,7 +270,8 @@ const FriendsPage: React.FC = () => {
           -webkit-backdrop-filter: blur(10px);
         }
         .panel-list {
-          height: 12rem; /* show 4 items at approx 3rem each */
+          
+          height: min(18rem, 80vh);
           overflow-y: auto;
           padding-right: 0.5rem;
         }

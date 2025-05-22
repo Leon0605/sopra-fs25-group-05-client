@@ -47,13 +47,12 @@ const UserProfile: React.FC = () => {
   const { value: userId } = useLocalStorage<number>("userId", 0);
   const [users, setUsers] = useState<User[] | null>(null);
   const { showAlert } = useAlert();
-  // const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  // const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const datePickerRef = useRef<DatePicker | null>(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
   const [isFriend, setIsFriend] = useState(false);
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
+  const passWordPopupRef = useRef<HTMLDivElement>(null);
 
   const languageMap: { [key: string]: string } = {
     en: "English",
@@ -130,7 +129,9 @@ const UserProfile: React.FC = () => {
 
       } catch (error) {
         console.error("Failed to fetch user:", error);
-        showAlert("Failed to fetch user data from server.", "danger");
+        alert("Failed to fetch user data from server. Redirecting to login.");
+        // redirect to login page
+        router.push("/login");
       } finally {
         setLoading(false);
       }
@@ -142,16 +143,23 @@ const UserProfile: React.FC = () => {
   }, [apiService, id, userId]);
 
 
-  // const showAlert = (message: string, type: "success" | "danger") => {
-  //   setAlertMessage(message);
-  //   setAlertType(type);
+  // useEffect so password popup closes if uses clicks outside the element
+  useEffect(() => {
+    if (!isPasswordFormVisible) return;
 
-  //   // Automatically dismiss the alert after 3 seconds
-  //   setTimeout(() => {
-  //     setAlertMessage(null);
-  //     setAlertType(null);
-  //   }, 3000);
-  // };
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        passWordPopupRef.current &&
+        !passWordPopupRef.current.contains(target)
+      ) {
+        setIsPasswordFormVisible(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isPasswordFormVisible]);
 
   const handleNotificationsToggle = (checked: boolean) => {
     setNotificationsEnabled(checked);
@@ -399,10 +407,10 @@ const UserProfile: React.FC = () => {
   }
 
   return (
-    <div style={{ width: "500px" }}>
+    <>
       <Navbar />
-      <div className="card-container">
-        <div className="auth-card" style={{scale:"0.6", maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "-5rem" }}>
+      <div className="card-container" style={{ marginTop: "75px" }}>
+        <div className="auth-card" style={{ maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "0rem" }}>
           <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
           <div style={{ position: "relative", display: "inline-block" }}>
             <div
@@ -628,12 +636,15 @@ const UserProfile: React.FC = () => {
                   marginBottom: "30px",
                 }}>
                   <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
-                    <button onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} className="btn-secondary">{isPasswordFormVisible ? "Cancel" : "Change Password"}</button>
+                    {!isPasswordFormVisible && (
+                      <button onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} 
+                      className="btn-secondary">Change Password</button>
+                    )}
                     <button onClick={() => router.back()} className="btn-secondary">Go back</button>
                   </div>
 
                   {isPasswordFormVisible && (
-                    <div className="passwordChange">
+                    <div className="passwordChange" ref={passWordPopupRef}>
                       <form onSubmit={handlePasswordChange}>
                         <div>
                           <label htmlFor="oldPassword">Password:</label>
@@ -783,7 +794,7 @@ const UserProfile: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

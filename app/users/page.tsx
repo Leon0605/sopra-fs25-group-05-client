@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
             </div>
   
             <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
-              <button onClick={() => router.back()} className="btn-secondary">Go to Main Page</button>
+              <button onClick={() => router.push("/main")} className="btn-secondary">Go to Main Page</button>
             </div>
           </>
         )}
