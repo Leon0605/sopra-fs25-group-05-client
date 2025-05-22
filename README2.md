@@ -212,6 +212,20 @@ If there are any compiler errors the deployment will fail, therefore you should 
 
 ## Roadmap
 
-## Authors and acknowledgements
+## Authors and acknowledgments
+### Authors
 
+- Christopher Robert Traill: Team Leader, Frontend Developer
+- Nikola Pavlovic: Backend Developer
+- Andy de Vantéry: Frontend Developer
+- Leon Matteo Schwager: Backend Developer
+
+### Acknowledgments
+This project was developed as part of the [Software Engineering Lab FS25](https://hasel.dev/teachings/fs25-sopra/) at the University of Zurich.
+
+Special thanks to our teaching assistant Ambros Eberhard for his continuous feedback and guidance throughout the project.
 ## License
+
+This project is licensed under the Apache License 2.0.
+You are free to use, modify, and distribute this software, provided that proper attribution is given and all conditions of the license are met.
+For more information, see the [LICENSE](https://github.com/Leon0605/sopra-fs25-group-05-server/blob/main/LICENSE) file.
