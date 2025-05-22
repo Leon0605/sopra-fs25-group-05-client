@@ -21,7 +21,7 @@ Our secondary goal was to utilize the chats for language learning by providing a
 
 If you are using MacOS, Linux or WSL(Windows-Subsystem-Linux), you can skip
 directly to the
-[installation part](https://github.com/Leon0605/sopra-fs25-group-05-client/blob/main/README.md#installation)
+[installation part](#installation)
 
 #### Windows
 
@@ -179,7 +179,7 @@ Depending on if you want to use the deployed server or server running local you 
 
 Analog for devUrl if using developement mode
 
-Important: certain features (like uploading a profile picture) only work when using the deployed Server
+> **Important:** certain features (like uploading a profile picture) only work when using the deployed Server
 
 
 #### Browser
@@ -205,7 +205,7 @@ The best way to test the frontend is to run it locally and manually test the wan
 To test the WebSockets on a single device it is recommended to use a standard and a incognito browser tab.
 
 ### Deployment
-To deploy a new version you have to commit fully functional code (without errors) to the main branch on github. This will automatically try to deploy the newest commit to vercel.
+To deploy a new version you have to commit fully functional code (without errors) to the [main branch](https://github.com/Leon0605/sopra-fs25-group-05-client/tree/main) on github. This will automatically try to deploy the newest commit to vercel.
 If there are any compiler errors the deployment will fail, therefore you should build the product first locally to account for possible errors and avoid deployment failure. This is configured in the [github workflow files](https://github.com/Leon0605/sopra-fs25-group-05-client/tree/main/.github/workflows)
 
 ## Illustrations
