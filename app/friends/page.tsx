@@ -22,6 +22,28 @@ const FriendsPage: React.FC = () => {
   const [pendingRequests, setPendingRequests] = useState<User[]>([]);
   const [friendSearch, setFriendSearch] = useState<string>("");
 
+  
+  const displayedFriends = friends
+    .filter(user =>
+      user.username?.toLowerCase().includes(friendSearch.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (!friendSearch) {
+        if (a.status=== "ONLINE"&& b.status !== "ONLINE") {
+          return -1;
+        }
+        if (a.status!== "ONLINE"&& b.status === "ONLINE") {
+          return 1;
+        }
+        return 0;
+      }
+  
+      const query= friendSearch.toLowerCase();
+      const aIndex= (a.username?? "").toLowerCase().indexOf(query);
+      const bIndex= (b.username??"").toLowerCase().indexOf(query);
+      return aIndex -bIndex;
+    });
+
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -126,31 +148,32 @@ const FriendsPage: React.FC = () => {
               />
             </div>
             <div className="panel-list">
-              {friends.length > 0 ? (
-                friends
-                  .filter((user) => user.username?.toLowerCase().includes(friendSearch.toLowerCase()))
-                  .map((user) => (
-                    <div
-                      key={user.id}
-                      className="clickable-row d-flex align-items-center mb-2 p-2"
-                      onClick={() => router.push(`/users/${user.id}`)}
-                    >
-                      <img
-                        src={user.photo || "/images/default-user.png"}
-                        alt={`${user.username} avatar`}
-                        className="rounded-circle me-2"
-                        style={{ width: "32px", height: "32px" }}
-                      />
-                      <span
-                        className="username"
-                        style={{ color: "#5A639C", fontWeight: "bold" }}
-                      >
-                        {user.username}
-                      </span>
-                    </div>
-                  ))
-              ) : (
+              {!friends.length ? (
                 <p className="text-muted">You have no friends yet.</p>
+              ) : displayedFriends.length > 0 ? (
+                displayedFriends.map((user) => (
+                  <div
+                    key={user.id}
+                    className="clickable-row d-flex align-items-center mb-2 p-2"
+                    onClick={() => router.push(`/users/${user.id}`)}
+                  >
+                    <img
+                      src={user.photo || "/images/default-user.png"}
+                      alt={`${user.username} avatar`}
+                      className="rounded-circle me-2"
+                      style={{ width: "3vw", height: "3vw" }}
+                    />
+                    <span
+                      className="username"
+                      style={{ color: "#5A639C", fontWeight: "bold" }}
+                    >
+                      {user.username}
+                    </span>
+                    <span className={`status-dot ${user.status === 'ONLINE' ? 'online' : 'offline'}`} />
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted">No friends match your search.</p>
               )}
             </div>
           </div>
@@ -173,14 +196,16 @@ const FriendsPage: React.FC = () => {
                         src={user.photo || "/images/default-user.png"}
                         alt={`${user.username} avatar`}
                         className="rounded-circle me-2"
-                        style={{ width: "32px", height: "32px" }}
+                        style={{ width: "3vw", height: "3vw" }}
                       />
+                     
                       <span
                         className="username"
                         style={{ color: "#5A639C", fontWeight: "bold" }}
                       >
                         {user.username}
                       </span>
+                     
                     </div>
                     <div className="d-flex gap-2">
                       <button
@@ -193,7 +218,7 @@ const FriendsPage: React.FC = () => {
                         className="btn btn-danger btn-sm"
                         onClick={() => handleRequest(user.id? user.id: 0, "false")}
                       >
-                        Deny
+                       Deny
                       </button>
                     </div>
                   </div>
@@ -205,7 +230,7 @@ const FriendsPage: React.FC = () => {
           </div>
           <div className="panel">
             <div className="panel-header">
-              <h4 style={{ color: "#5A639C" }}>Pending Friend Requests</h4>
+          <h4 style={{ color: "#5A639C" }}>Pending Friend Requests</h4>
             </div>
             <div className="panel-list">
               {pendingRequests.length > 0 ? (
@@ -222,8 +247,8 @@ const FriendsPage: React.FC = () => {
                         src={user.photo || "/images/default-user.png"}
                         alt={`${user.username} avatar`}
                         className="rounded-circle me-2"
-                        style={{ width: "32px", height: "32px" }}
-                      />
+                        style={{ width: "3vw", height: "3vw" }}
+                    />
                       <span
                         className="username"
                         style={{ color: "#5A639C", fontWeight: "bold" }}
@@ -243,6 +268,13 @@ const FriendsPage: React.FC = () => {
         </div>
       </div>
       <style jsx>{`
+        .status-dot {
+          display: inline-block;
+          width: 0.6vw;
+          height: 0.6vw;
+          border-radius: 50%;
+          margin-left: 0.5rem;
+        }
         .auth-card {
           max-height: 80vh;
           display: flex;
@@ -328,6 +360,19 @@ const FriendsPage: React.FC = () => {
         }
         .search-input::placeholder {
           color: rgba(90, 99, 156, 0.7);
+        }
+        .status-dot {
+          display: inline-block;
+          width: 0.6vw;
+          height: 0.6vw;
+          border-radius: 50%;
+          margin-right: 0.5rem;
+        }
+        .status-dot.online {
+          background-color: green;
+        }
+        .status-dot.offline {
+          background-color: yellow;
         }
       `}</style>
     </>
