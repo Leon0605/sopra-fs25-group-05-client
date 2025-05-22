@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import DatePicker from "react-datepicker";
+import { Chat } from "@/types/chat";
 import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
@@ -221,7 +222,18 @@ const UserProfile: React.FC = () => {
       showAlert("Failed to upload profile photo", "danger");
     }
   };
+  const redirectToChat = async () => {
+      const chats = await apiService.get<Chat[]>("chats", {
+        headers: { userId: String(userId) },
+      })
 
+      const privateChat = chats.find((chat) => {
+        const ids = chat.userIds || [];
+        return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
+      })
+
+      router.push("/chats/"+privateChat.chatId)
+  }
   const handleDeletePhoto = async () => {
     try {
       await apiService.delete(`users/${id}/photo`, {
@@ -747,15 +759,15 @@ const UserProfile: React.FC = () => {
                 <div className="auth-buttons" >
                   <button
                     className="btn-secondary"
-                    disabled={friendRequestSent || isFriend}
-                    onClick={handleSendFriendRequest}
+                    disabled={friendRequestSent}
+                    onClick={() => {if(isFriend){redirectToChat()} else{handleSendFriendRequest()}}}
                   // style={{
                   //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                   //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                   // }}
                   >
                     {isFriend
-                      ? "Already Friends"
+                      ? "Go to Chat"
                       : friendRequestSent
                         ? "Friend Request Sent"
                         : "Send Friend Request"}
@@ -772,8 +784,8 @@ const UserProfile: React.FC = () => {
               <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
                 <button
                   className="btn-secondary"
-                  disabled={friendRequestSent || isFriend}
-                  onClick={handleSendFriendRequest}
+                  disabled={isFriend || friendRequestSent}
+                  onClick={() => {handleSendFriendRequest();}}
                 // style={{
                 //   backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
                 //   color: "#5A639C",
