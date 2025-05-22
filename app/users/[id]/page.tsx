@@ -231,8 +231,16 @@ const UserProfile: React.FC = () => {
         const ids = chat.userIds || [];
         return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
       })
-
-      router.push("/chats/"+privateChat.chatId)
+      if (privateChat == null){
+        console.log("reached")
+        const newChat = await apiService.post<string>("/chats", {
+          userIds: [user.id!, userId!],
+          chatName: null
+        })
+        router.push("/chats/"+newChat)
+      } else {
+        router.push("/chats/" + privateChat.chatId)
+      }
   }
   const handleDeletePhoto = async () => {
     try {
@@ -246,7 +254,7 @@ const UserProfile: React.FC = () => {
       });
       setUser(updatedUser);
     } catch (error) {
-      showAlert("Failed to delete photo", "danger");
+      showAlert("Failed to delete photo", error);
     }
   }
 
@@ -711,8 +719,8 @@ const UserProfile: React.FC = () => {
             )}
             {/* End user views their own profile */}
 
-            {/* User views friend or not-private page */}
-            {(user.id !== userId) && (isFriend || user.privacy !== "private") && (
+            {/* User views friend page */}
+            {(user.id !== userId) && (isFriend) && (
               <div>
 
                 <div className="mb-3 row align-items-center">
@@ -778,6 +786,76 @@ const UserProfile: React.FC = () => {
               </div>
             )}
             {/* End user views friend or not-private page */}
+            {/* start user views public page */}
+            {(user.id !== userId) && (user.privacy !== "private") && (
+                <div>
+
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Birthday:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px" }}>
+                      {user.birthday || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Language:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.language || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Learning Language:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.learningLanguage || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Privacy:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {user.privacy}
+                    </span>
+                    </div>
+                  </div>
+
+                  <div className="auth-buttons" >
+                    <button
+                        className="btn-secondary"
+                        disabled={friendRequestSent}
+                        onClick={() => {handleSendFriendRequest()}}
+                        // style={{
+                        //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                        //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                        // }}
+                    >
+                      {friendRequestSent
+                          ? "Friend Request Sent"
+                          : "Send Friend Request"}
+                    </button>
+                    <button
+                    className="btn-secondary"
+                    onClick={() => redirectToChat()}
+                    >
+                      Go to Chat
+                    </button>
+
+                    <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+                  </div>
+                </div>
+            )}
 
             {/* User views not-friend or private page */}
             {(user.id !== userId) && (!isFriend && user.privacy === "private") && (
