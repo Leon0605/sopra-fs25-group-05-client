@@ -45,6 +45,7 @@ const Navbar = () => {
   const [chatIds, setChatIds] = useState<string[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  const [pendingAlerts, setPendingAlerts] = useState<Message[]>([]);
 
   const fetchLoggedInUser = async () => {
     try {
@@ -169,59 +170,6 @@ const Navbar = () => {
     }
   };
 
-  //   const fetchUnreadMessages = async (chatIds: string[]) => {
-  //     console.log("Fetching messages for chat IDs:", chatIds);
-  //     try {
-  //       if (!token) {
-  //         console.error("Token is missing");
-  //         return;
-  //       }
-
-  //       // Step 1: Collect new messages in a Map
-  //       const newMessageMap = new Map<string, Message>();
-
-  //       for (const chatId of chatIds) {
-  //         const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${userId}/notifications`);
-  //         console.log(`Fetched unread messages for chat ID ${chatId}:`, fetchedMessages);
-
-  //         // Only add messages not sent by the logged-in user
-  //         fetchedMessages
-  //           .filter(msg => msg.userId !== loggedInUser?.id)
-  //           .forEach(msg => {
-  //             if (msg.messageId !== undefined) {
-  //               newMessageMap.set(msg.messageId, msg);
-  //             }
-  //           });
-  //       // for (const msg of fetchedMessages.filter(msg => msg.userId !== loggedInUser?.id)) {
-  //       //   if (msg.messageId !== undefined) {
-  //       //     newMessageMap.set(msg.messageId, msg); 
-  //       //   }
-  //       // }
-  //     }
-
-  //       // Step 2: Merge with existing messages
-  //       setMessages(prevMessages => {
-  //       const existingIds = new Set(prevMessages.map(m => m.messageId));
-  //       const newUniqueMessages = Array.from(newMessageMap.values()).filter(
-  //         msg => !existingIds.has(msg.messageId)
-  //       );
-  //       return [...prevMessages, ...newUniqueMessages];
-  //     });
-
-  //     console.log("Merged unique unread messages");
-  //   } catch (error: unknown) {
-  //     console.error("Failed to fetch messages:", error);
-  //     if (typeof error === "object" && error !== null && "response" in error) {
-  //       const response = (error as { response: { status: number } }).response;
-
-  //       if (response.status === 404) {
-  //         alert("Chat not found. Redirecting to the main page...");
-  //         router.push("/main");
-  //       }
-  //     }
-  //   }
-  // };
-
   // Function to handle accepting a friend request
   const handleAcceptRequest = async (senderId: number) => {
     if (!userId) return;
@@ -320,7 +268,7 @@ const Navbar = () => {
         req => !prev.some(prevReq => prevReq.id === req.id)
       );
       newRequests.forEach(req => {
-        if (notificationsEnabled) {
+        if (notificationsEnabledRef.current) {
           showAlert(`New friend request from ${req.username}`, "success");
           console.log("New friend request:", req);
         }
@@ -333,6 +281,8 @@ const Navbar = () => {
 
   useEffect(() => {
     notificationsEnabledRef.current = notificationsEnabled;
+    console.log("NotificationsEnabledRef.current line 284:", notificationsEnabledRef.current);
+    console.log("Notifications enabled (useEffect):", notificationsEnabled);
   }, [notificationsEnabled]);
 
   // useEffect for dropdown close
@@ -393,22 +343,50 @@ const Navbar = () => {
       );
       newMessages.forEach(msg => {
         const sender = users.find(u => u.id === msg.userId);
-        if (notificationsEnabled) {
-          showAlert(
-            `New message from ${sender?.username}: ${msg.originalMessage}`,
-            "success"
-          );
+        console.log("NotificationsEnabledRef.current line 396:", notificationsEnabledRef.current)
+        if (notificationsEnabledRef.current) {
+          if (sender) {
+            showAlert(
+              `New message from ${sender?.username}: ${msg.originalMessage}`,
+              "success"
+            );
+          } else {
+            // Sender not loaded yet, queue the alert
+            setPendingAlerts(prev => [...prev, msg]);
+          }
         }
       });
     }
-
     // Update previous ref for next comparison
     prevMessagesRef.current = messages;
-  }, [messages, notificationsEnabled, users]);
+  }, [messages, users]);
+
+  // pending alerts in the event that sender was not loaded in previous useEffect (lines 387-413)
+  useEffect(() => {
+    if (!notificationsEnabledRef.current) return;
+    if (pendingAlerts.length === 0) return;
+
+    setPendingAlerts(prevPending => {
+      const stillPending: Message[] = [];
+      prevPending.forEach(msg => {
+        const sender = users.find(u => u.id === msg.userId);
+        if (sender) {
+          showAlert(
+            `New message from ${sender.username}: ${msg.originalMessage}`,
+            "success"
+          );
+        } else {
+          stillPending.push(msg);
+        }
+      });
+      return stillPending; // Only keep those still missing a sender
+    });
+  }, [users]);
 
   useEffect(() => {
     if (!token || !loggedInUser) return;
-    
+    console.log("Notifications enabled (live):", notificationsEnabled);
+
     fetchChatIds();
     fetchRequests();
 
@@ -420,13 +398,13 @@ const Navbar = () => {
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [token, loggedInUser]);
+  }, [token, loggedInUser, notificationsEnabled]);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed" style={{ zIndex: 1050 }}>
       <div className="container-fluid">
         <img
-          src="@/../../images/HablaLogo.png"
+          src="../images/HablaLogo.png"
           alt="Habla! Logo" className="img-fluid"
           style={{ maxWidth: "200px", maxHeight: "50px", height: "auto" }}
         />
@@ -647,7 +625,7 @@ const Navbar = () => {
 
           </div>
         </div>
-        {alertMessage && notificationsEnabled && (
+        {alertMessage && (
           <div
             className={`bubble-message ${alertType}`}
             style={{
