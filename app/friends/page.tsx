@@ -6,7 +6,6 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 
 
@@ -107,13 +106,14 @@ const FriendsPage: React.FC = () => {
           className="auth-card"
           style={{
             maxWidth: "900px",
+            maxHeight:"28rem",
             width: "100%",
-            marginTop: "1rem",
+            marginTop: "90px",
             display: "flex",
             flexDirection: "column"
           }}
         >
-        <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Friends</h2>
+        <h2 style={{ color: "#5A639C", marginBottom: "1rem" }}>Friends</h2>
 
         <div className="panels">
           <div className="panel">

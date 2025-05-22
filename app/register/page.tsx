@@ -24,6 +24,14 @@ const Register: React.FC = () => {
     const formData = new FormData(event.currentTarget);
     const values = Object.fromEntries(formData.entries());
 
+    const username = values.username?.toString().trim();
+
+
+    if (!username || username.length > 32) {
+      alert("Username cannot be longer than 32 characters.");
+      return;
+    }
+
     try {
       const response = await apiService.post<User>("/users", values);
       if (response.token) setToken(response.token);

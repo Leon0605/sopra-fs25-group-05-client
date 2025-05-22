@@ -208,7 +208,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed">
       <div className="container-fluid">
         <img
-          src="../images/HablaLogo.png"
+          src="@/../../images/HablaLogo.png"
           alt="Habla! Logo"
           style={{ height: "125px", width: "125px", objectFit: "contain" }} // Adjust as needed
         />

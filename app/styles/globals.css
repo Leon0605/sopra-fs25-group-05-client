@@ -61,7 +61,7 @@ body {
 
 .auth-card {
   background-color: #E2BBE9;
-  padding: 2.2rem;
+  padding: 2rem;
   border-radius: 2.5rem;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
   width: 100%;
@@ -336,3 +336,21 @@ body {
 .flip-card-back {
   transform: rotateX(180deg);
 }
+
+
+/* Rocket animation */
+@keyframes floatRocket {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.floating-rocket {
+  animation: floatRocket 3s ease-in-out infinite;
+  pointer-events: none; /* So it doesn't interfere with drag/drop */
+}
+
+

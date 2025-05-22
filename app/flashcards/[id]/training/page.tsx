@@ -7,6 +7,8 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Flashcard } from "@/types/flashcard";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Navbar from "@/components/Navbar";
+
 
 const FlashcardTraining: React.FC = () => {
   const router = useRouter();
@@ -177,18 +179,20 @@ const handleAnswer = async (isKnown: boolean) => {
 
   if (showSetup) {
 return (
-  <div className="auth-card mx-auto" style={{ maxWidth: "500px" }}>
-    <h2 className="mb-3">Training Setup</h2>
+  <div className="auth-card mx-auto" style={{ maxWidth: "500px", marginTop:"12vh", paddingTop:"10px", paddingBottom:"10px" }}>
+    <Navbar />
+    <h2 className="mb-2">Training Setup</h2>
 
     {/* Total cards */}
-    <p className="text-start mb-3 " style={{ color: "#5A639C", fontWeight: "bold"}}>
+    <p className="text-start mb-2 " style={{ color: "#5A639C", fontWeight: "bold"}}>
       Total Cards: {flashcards.length}
     </p>
+
     <hr style={{ borderTop: "3px solid #9B86BD" }} />
 
     {/* Direction Options */}
     <div className="mb-1">
-      <label className="d-flex align-items-start gap-2">
+      <label className="d-flex align-items-start gap-">
         <input
           type="radio"
           name="direction"
@@ -274,8 +278,10 @@ return (
   }
 
   return (
-    <div className="container-fluid min-vh-100 py-4 px-5" style={{ color: "white" }}>
-      <div className="mb-4 justify-content-between d-flex">
+    
+    <div className="container-fluid min-vh-100 py-4 px-5" style={{ color: "white"}}>
+      <Navbar />
+      <div className="mb-4 justify-content-between d-flex mt-5">
         <h4 style={{ fontWeight: "bold", fontSize: "1.6rem" }}>
           Round {roundNumber} — Card {currentIndex + 1} of {currentCards.length}
         </h4>
@@ -285,7 +291,7 @@ return (
       </div>
 
       <div className="d-flex flex-column align-items-center justify-content-center" 
-        style={{ color:"black", marginTop: "90px" }}>
+        style={{ color:"black", marginTop: "8%" }}>
 
         {!roundCompleted && !trainingCompleted && (
           <>

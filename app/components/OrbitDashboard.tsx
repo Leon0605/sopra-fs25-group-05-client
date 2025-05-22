@@ -46,16 +46,80 @@ const OrbitDashboard: React.FC<OrbitDashboardProps> = ({
   }, [users]);
 
   return (
-    <div className={styles.orbitContainer}>
+    <div className={styles.orbitContainer} style={{ marginTop: "-170px"}}>
       {/* Center User */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50px",                // tweak this to sit above or on orbit
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <svg width="300" height="50">
+          <defs>
+            <path
+              id="orbitTextPath"
+              d="M 50,80 A 100,40 0 0,1 250,80"
+              fill="transparent"
+            />
+          </defs>
+          <text fill="#9B86BD" fontSize="18" fontWeight="bold">
+            <textPath href="#orbitTextPath" startOffset="50%" textAnchor="middle">
+              User profile
+            </textPath>
+          </text>
+        </svg>
+      </div>
       <div
         className={styles.centerUser}
         onClick={() => onUserClick(currentUser, true)}
         title="Go to your profile"
         >
-        <div className={styles.avatar}>👤</div>
+        {currentUser.photo ? (
+          <img
+            src={currentUser.photo}
+            alt={currentUser.username ?? "User"}
+            className={styles.avatarImageLarge}
+          />
+        ) : (
+          <img
+            src={currentUser.photo || "/images/default-user.png"}
+            alt={currentUser.username ?? "User"}
+            className={styles.avatarImageLarge}
+          />
+        )}
         <p>{currentUser.username}</p>
-        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          top: "-40px",                // tweak this to sit above or on orbit
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none", 
+          zIndex: 0,
+        }}
+      >
+        <svg width="300" height="100">
+          <defs>
+            <path
+              id="orbitTextPath"
+              d="M 50,80 A 100,40 0 0,1 250,80"
+              fill="transparent"
+            />
+          </defs>
+          <text fill="#9B86BD" fontSize="18" fontWeight="bold">
+            <textPath href="#orbitTextPath" startOffset="50%" textAnchor="middle">
+              Friends
+            </textPath>
+          </text>
+        </svg>
+      </div>
+
+
 
 
       {/* Friends in Orbit */}
@@ -65,11 +129,20 @@ const OrbitDashboard: React.FC<OrbitDashboardProps> = ({
             key={user.id}
             className={styles.orbitItem}
             onClick={() => onUserClick(user)}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("application/json", JSON.stringify(user));
+            }}
           >
-            <div className="orbitItemInner">
-              <div className={styles.avatar}>👤</div>
-              <p>{user.username}</p>
-            </div>
+<div className={styles.orbitItemInner}>
+  <img
+    src={user.photo || "/images/default-user.png"}
+    alt={user.username ?? "User"}
+    className={styles.avatarImage}
+  />
+  <p className={styles.orbitUsername}>{user.username}</p>
+</div>
+
           </li>
         ))}
       </ul>

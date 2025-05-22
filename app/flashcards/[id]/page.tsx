@@ -5,10 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { Flashcard } from "@/types/flashcard";
-import { FlashcardSet } from "@/types/flashcardSet";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSearchParams } from "next/navigation";
+import Navbar from "@/components/Navbar";
+
 
 const FlashcardSetPage: React.FC = () => {
   const { id: flashcardSetId } = useParams();
@@ -243,7 +244,9 @@ setFlashcards(updatedFlashcards);
 
   return (
   <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
-    <div className="auth-card" style={{ maxWidth: "800px", width: "100%" }}>
+    <Navbar />
+    
+    <div className="auth-card" style={{ maxWidth: "800px", width: "100%", marginTop:"12vh", paddingTop:"10px" }}>
       <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>Flashcards</h2>
 
       {/* Scrollable flashcard list */}
@@ -285,7 +288,25 @@ setFlashcards(updatedFlashcards);
                       </p>
                       <p>{card.contentBack}</p>
                     </div>
-                    <div className="col-md d-flex align-items-center">
+
+                    {isEditing ? (
+                      <div className="col-md d-flex justify-content-end gap-2 mt-2">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() =>
+                            handleEditCard(card.flashcardId, card.contentFront, card.contentBack)
+                          }
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDeleteCard(card.flashcardId)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ): (<div className="col-md d-flex align-items-center">
                       <span
                         className="badge"
                         style={{
@@ -307,27 +328,8 @@ setFlashcards(updatedFlashcards);
                           ? "✗ Wrong"
                           : "? Not Trained"}
                       </span>
-                    </div>
-
-
-                    {isEditing && (
-                      <div className="col-md d-flex justify-content-end gap-2 mt-2">
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() =>
-                            handleEditCard(card.flashcardId, card.contentFront, card.contentBack)
-                          }
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeleteCard(card.flashcardId)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                    </div>)
+                    }
                   </div>
                 </div>
               </div>

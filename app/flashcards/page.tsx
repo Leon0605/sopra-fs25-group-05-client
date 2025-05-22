@@ -7,6 +7,8 @@ import { User } from "@/types/user";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { FlashcardSet } from "@/types/flashcardSet";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Navbar from "@/components/Navbar";
+
 
 const Flashcards: React.FC = () => {
   const router = useRouter();
@@ -109,17 +111,19 @@ const Flashcards: React.FC = () => {
 
   return (
     <div className="card-container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="auth-card" style={{ width: "100%", maxWidth: "10o00px", maxHeight: "800px" }}>
+      <Navbar />
+
+      <div className="auth-card" style={{ width: "100%", maxHeight: "800px", marginTop:"12vh"}}>
         <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Flashcard Sets</h2>
   
         {flashcardSets.length > 0 ? (
           <div
             style={{
-              maxHeight: "300px",
+              maxHeight: "250px",
               minHeight: "10px",
               overflowY: "auto",
               overflowX: "hidden",
-              marginBottom: "1rem",
+              marginBottom: "0rem",
               paddingRight: "8px",
               width: "100%",
               whiteSpace: "normal",
@@ -149,11 +153,11 @@ const Flashcards: React.FC = () => {
                 onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
                 <div 
-                  className="col-sm-4 fw-bold"   
+                  className="col-sm-3 fw-bold"   
                   style={{
                     wordWrap: "break-word",
                     whiteSpace: "normal",
-                    maxWidth:"200px",
+                    maxWidth:"250px",
                     color:"#5A639C",
                   }}>{set.flashcardSetName}
                 </div>
@@ -170,7 +174,7 @@ const Flashcards: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="col-md-4 flex" style={{whiteSpace: "nowrap"}}>
+                <div className="col-md-5 flex" style={{whiteSpace: "nowrap"}}>
                   <div style={{ fontSize: "0.9rem", color: "#5A639C" }}>
                     Not Trained: <strong>{set.statistic.NotTrained.toFixed(1)}%</strong>
                   </div>

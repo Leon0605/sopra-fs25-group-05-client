@@ -6,6 +6,8 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Navbar from "@/components/Navbar";
+
 
 
 const Dashboard: React.FC = () => {
@@ -60,6 +62,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="card-container">
+          <Navbar />
       <div className="auth-card" style={{ maxWidth: "700px", width: "100%", marginTop: "1rem" }}>
         <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Search Page</h2>
   
