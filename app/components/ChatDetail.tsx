@@ -286,7 +286,7 @@ const ChatPage: React.FC = () => {
                                     )}
                                 </div>
                                 {/* Add Flashcard Button */}
-                                {message.originalMessage !== message.translatedMessage && (
+                                {(
                                 <button
                                     className={styles["flashcard-btn-circle"]}
                                     onClick={() => openFlashcardModal(message.originalMessage, message.translatedMessage)}
