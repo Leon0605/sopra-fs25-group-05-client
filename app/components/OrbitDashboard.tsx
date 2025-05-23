@@ -24,7 +24,7 @@ useEffect(() => {
   const animate = (now: number) => {
     const elapsed = now - start;
     const rotation = (elapsed / 1000) * 5;
-    const radiusVw = 26; // radius in viewport width units
+    const radiusVw = 25; // radius in viewport width units
     const total = users.length;
 
     if (orbitRef.current) {

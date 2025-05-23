@@ -73,7 +73,6 @@ const FriendsPage: React.FC = () => {
           
           const pendingIds = currentUser?.sentFriendRequestsList || [];
           const pending = users.filter((u) => pendingIds.includes(u.id || 0));
-          console.log(pending)
           
           setUsers(users);
           setFriends(friendsData);
