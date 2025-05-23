@@ -140,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
 
       const newMessageMap = new Map<string, Message>();
 
-      for (const chatId of filteredChatIds) {
+      for (const {} of filteredChatIds) {
         const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${userId}/notifications`);
 
         fetchedMessages

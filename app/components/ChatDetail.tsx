@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
@@ -44,14 +44,6 @@ const ChatPage: React.FC = () => {
     const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
     const [front, setFront] = useState("");
     const [back, setBack] = useState("");
-
-    
-
-    const colours = [
-        '#2196F3', '#32c787', '#00BCD4', '#ff5652',
-        '#ffc107', '#ff85af', '#FF9800', '#39bbb0', "#A1FF33", "#33A1FF",
-    ];
-    const userColors: { [key: string]: string } = {};
 
     useEffect(() => {
         setHasMounted(true);

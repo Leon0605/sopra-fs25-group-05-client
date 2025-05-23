@@ -288,7 +288,7 @@ const UserProfile: React.FC = () => {
         });
       setUser(updatedUser);
     } catch (err) {
-      showAlert("Failed to update learning language: ${err}", "danger");
+      showAlert(`Failed to update learning language: ${err}`, "danger");
     } finally {
       setLearningLanguageLoading(false);
     }
