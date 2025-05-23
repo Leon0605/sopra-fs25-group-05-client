@@ -121,7 +121,7 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
 
     return (
         <div className={styles.summaryContainer}>
-            <p style={{ color: "#5A639C", fontSize: "17.6px", marginTop: "0.2rem", fontWeight: "bold"}}>Previous Chats</p>
+            <p className={styles.previousHeader}>Previous Chats</p>
                 {chatSummaries.map((summary) => {
                     console.log("Chat summary: ", summary)
                     return (

@@ -37,7 +37,7 @@ const ChatPage: React.FC = () => {
     const stompClientRef = useRef<Client | null>(null);
     const [language, setLanguage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
-    
+
 
     const colours = [
         '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -91,7 +91,7 @@ const ChatPage: React.FC = () => {
             console.error("Failed to add flashcard:", err);
             alert("Error creating flashcard");
         }*/
-       
+
     };
 
     // Send a message
@@ -262,14 +262,15 @@ const ChatPage: React.FC = () => {
                 <ul className={styles["message-area"]}>
                     {messages.map((message) => {
                         const user = users?.find((user) => user.id === message.userId);
-                        const userColor = getUserColor(message.userId);
                         return (
                             <li key={message.messageId} className={styles["chat-message"]}>
-                                <div className={styles["avatar-username"]}>
-                                    <i style={{ backgroundColor: userColor,  fontStyle: "normal", fontWeight: "bold" }}>
-                                        {(user?.username?.[0] || "?").toUpperCase()}
-                                    </i>
-                                    <span className={styles["username"]}>
+                                <div style={{ marginRight: "15px" }}>
+                                    <img src={user?.photo || "/images/default-user.png"}
+                                        alt={`${user?.username} avatar`}
+                                        className="rounded-circle me-2"
+                                        style={{ width: "32px", height: "32px", border: "2px solid #9B86BD" }} />
+                                    <span className="username"
+                                        style={{ color: "#5A639C", fontWeight: "bold" }}>
                                         {user?.username || "Anonymous"}
                                     </span>
                                 </div>
@@ -277,19 +278,19 @@ const ChatPage: React.FC = () => {
                                     <p className={styles["original"]}>{message.originalMessage}</p>
                                     {message.originalMessage !== message.translatedMessage && (
                                         <p className={styles["translation"]}>{message.translatedMessage}</p>
-                                        
+
                                     )}
                                 </div>
                                 {/* Add Flashcard Button */}
                                 {message.originalMessage !== message.translatedMessage && (
-                                <button
-                                    type="button"
-                                    className={styles["flashcard-btn-circle"]}
-                                    title="Add as Flashcard"
-                                    onClick={() => handleAddFlashcard(message.originalMessage, message.translatedMessage)}
-                                >
-                                    <i className="bi bi-plus-circle"></i>
-                                </button>
+                                    <button
+                                        type="button"
+                                        className={styles["flashcard-btn-circle"]}
+                                        title="Add as Flashcard"
+                                        onClick={() => handleAddFlashcard(message.originalMessage, message.translatedMessage)}
+                                    >
+                                        <i className="bi bi-plus-circle"></i>
+                                    </button>
                                 )}
                                 {/* Message Status */}
                                 <div className={styles["timestamp"]}>
