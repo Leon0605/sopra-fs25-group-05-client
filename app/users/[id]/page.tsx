@@ -54,30 +54,15 @@ const UserProfile: React.FC = () => {
   const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
   const [isPasswordFormVisible, setIsPasswordFormVisible] = useState(false);
   const passWordPopupRef = useRef<HTMLDivElement>(null);
+  const [languageLoading, setLanguageLoading] = useState(false);
+  const [, setLearningLanguageLoading] = useState(false);
 
   const languageMap: { [key: string]: string } = {
     en: "English",
-    ar: "Arabic",
-    bg: "Bulgarian",
-    hr: "Croatian",
-    cs: "Czech",
-    da: "Danish",
-    nl: "Dutch",
-    et: "Estonian",
-    fi: "Finnish",
     fr: "French",
     de: "German",
-    el: "Greek",
     it: "Italian",
-    ja: "Japanese",
-    ko: "Korean",
-    mi: "Maori",
-    pt: "Portuguese",
-    ru: "Russian",
     es: "Spanish",
-    sv: "Swedish",
-    tr: "Turkish",
-    uk: "Ukrainian",
 
     // Add more as needed
   };
@@ -223,27 +208,27 @@ const UserProfile: React.FC = () => {
     }
   };
   const redirectToChat = async () => {
-      if(!user){
-        return;
-      }
-      const chats = await apiService.get<Chat[]>("chats", {
-        headers: { userId: String(userId) },
-      })
+    if (!user) {
+      return;
+    }
+    const chats = await apiService.get<Chat[]>("chats", {
+      headers: { userId: String(userId) },
+    })
 
-      const privateChat = chats.find((chat) => {
-        const ids = chat.userIds || [];
-        return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
+    const privateChat = chats.find((chat) => {
+      const ids = chat.userIds || [];
+      return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
+    })
+    if (privateChat == null) {
+      const newChat = await apiService.post<Response>("/chats", {
+        userIds: [user.id!, userId!],
+        chatName: null
       })
-      if (privateChat == null){
-        const newChat = await apiService.post<Response>("/chats", {
-          userIds: [user.id!, userId!],
-          chatName: null
-        })
-        const newChatId = await newChat.text();
-        router.push("/chats/"+newChatId)
-      } else {
-        router.push("/chats/" + privateChat.chatId)
-      }
+      const newChatId = await newChat.text();
+      router.push("/chats/" + newChatId)
+    } else {
+      router.push("/chats/" + privateChat.chatId)
+    }
   }
   const handleDeletePhoto = async () => {
     try {
@@ -266,6 +251,10 @@ const UserProfile: React.FC = () => {
     if (!user || user.id !== userId) return;
     const newLanguage = event.target.value;
     setLanguage(newLanguage);
+
+    setLanguageLoading(true);
+    showAlert("Updating language...", "success");
+
     try {
       await apiService.put(`users/${id}`, { language: newLanguage });
       showAlert("Language updated successfully", "success");
@@ -281,12 +270,18 @@ const UserProfile: React.FC = () => {
       setUser(updatedUser);
     } catch (err) {
       showAlert(`Failed to update language: ${err}`, "danger");
+    } finally {
+      setLanguageLoading(false);
     }
   };
 
   const handleLearningLanguageChange = async (event: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
     if (!user || user.id !== userId) return;
     const newLearningLanguage = event.target.value;
+    
+    setLearningLanguageLoading(true);
+    showAlert("Updating learning language...", "success");
+
     try {
       await apiService.put(`users/${id}`, { learningLanguage: newLearningLanguage });
       showAlert(`Your learning language was successfully updated`, "success");
@@ -301,8 +296,9 @@ const UserProfile: React.FC = () => {
         });
       setUser(updatedUser);
     } catch (err) {
-      console.error("Failed to update learning language:", err);
       showAlert("Failed to update learning language", "danger");
+    } finally {
+      setLearningLanguageLoading(false);
     }
   };
 
@@ -431,7 +427,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar notificationsEnabled={notificationsEnabled} />
       <div className="card-container" style={{ marginTop: "75px" }}>
         <div className="auth-card" style={{ maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "0rem" }}>
           <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
@@ -601,7 +597,7 @@ const UserProfile: React.FC = () => {
                     <select className="form-select"
                       value={language}
                       onChange={handleLanguageChange}
-                      disabled={user.id !== userId}
+                      disabled={user.id !== userId || languageLoading}
                     >
                       {Object.entries(languageMap).map(([code, name]) => (
                         <option key={code} value={code} style={{ color: "black" }}>
@@ -625,10 +621,11 @@ const UserProfile: React.FC = () => {
                         borderRadius: "8px",
                       }}
                     >
-                      <option value="en" style={{ color: "black" }}>English</option>
-                      <option value="fr" style={{ color: "black" }}>French</option>
-                      <option value="de" style={{ color: "black" }}>German</option>
-                      <option value="es" style={{ color: "black" }}>Spanish</option>
+                      {Object.entries(languageMap).map(([code, name]) => (
+                        <option key={code} value={code} style={{ color: "black" }}>
+                          {name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -660,8 +657,8 @@ const UserProfile: React.FC = () => {
                 }}>
                   <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
                     {!isPasswordFormVisible && (
-                      <button onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)} 
-                      className="btn-secondary">Change Password</button>
+                      <button onClick={() => setIsPasswordFormVisible(!isPasswordFormVisible)}
+                        className="btn-secondary">Change Password</button>
                     )}
                     <button onClick={() => router.back()} className="btn-secondary">Go back</button>
                   </div>
@@ -771,7 +768,7 @@ const UserProfile: React.FC = () => {
                   <button
                     className="btn-secondary"
                     disabled={friendRequestSent}
-                    onClick={() => {if(isFriend){redirectToChat()} else{handleSendFriendRequest()}}}
+                    onClick={() => { if (isFriend) { redirectToChat() } else { handleSendFriendRequest() } }}
                   // style={{
                   //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                   //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
@@ -791,73 +788,73 @@ const UserProfile: React.FC = () => {
             {/* End user views friend or not-private page */}
             {/* start user views public page */}
             {(user.id !== userId) && (user.privacy !== "private") && (!isFriend) && (
-                <div>
+              <div>
 
-                  <div className="mb-3 row align-items-center">
-                    <label className="col-sm-4 col-form-label text-nowrap">
-                      Birthday:
-                    </label>
-                    <div className="col-sm-8 d-flex justify-content-end">
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Birthday:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px" }}>
                       {user.birthday || "Not Set"}
                     </span>
-                    </div>
                   </div>
-                  <div className="mb-3 row align-items-center">
-                    <label className="col-sm-4 col-form-label text-nowrap">
-                      Language:
-                    </label>
-                    <div className="col-sm-8 d-flex justify-content-end">
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
                       {languageMap[user.language] || user.language || "Not Set"}
                     </span>
-                    </div>
                   </div>
-                  <div className="mb-3 row align-items-center">
-                    <label className="col-sm-4 col-form-label text-nowrap">
-                      Learning Language:
-                    </label>
-                    <div className="col-sm-8 d-flex justify-content-end">
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Learning Language:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
                       {languageMap[user.language] || user.learningLanguage || "Not Set"}
                     </span>
-                    </div>
                   </div>
-                  <div className="mb-3 row align-items-center">
-                    <label className="col-sm-4 col-form-label text-nowrap">
-                      Privacy:
-                    </label>
-                    <div className="col-sm-8 d-flex justify-content-end">
+                </div>
+                <div className="mb-3 row align-items-center">
+                  <label className="col-sm-4 col-form-label text-nowrap">
+                    Privacy:
+                  </label>
+                  <div className="col-sm-8 d-flex justify-content-end">
                     <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
                       {user.privacy}
                     </span>
-                    </div>
-                  </div>
-
-                  <div className="auth-buttons" >
-                    <button
-                        className="btn-secondary"
-                        disabled={friendRequestSent}
-                        onClick={() => {handleSendFriendRequest()}}
-                        // style={{
-                        //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                        //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
-                        // }}
-                    >
-                      {friendRequestSent
-                          ? "Friend Request Sent"
-                          : "Send Friend Request"}
-                    </button>
-                    <button
-                    className="btn-secondary"
-                    onClick={() => redirectToChat()}
-                    >
-                      Go to Chat
-                    </button>
-
-                    <button onClick={() => router.back()} className="btn-secondary">Go back</button>
                   </div>
                 </div>
+
+                <div className="auth-buttons" >
+                  <button
+                    className="btn-secondary"
+                    disabled={friendRequestSent}
+                    onClick={() => { handleSendFriendRequest() }}
+                  // style={{
+                  //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                  //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                  // }}
+                  >
+                    {friendRequestSent
+                      ? "Friend Request Sent"
+                      : "Send Friend Request"}
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    onClick={() => redirectToChat()}
+                  >
+                    Go to Chat
+                  </button>
+
+                  <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+                </div>
+              </div>
             )}
 
             {/* User views not-friend or private page */}
@@ -866,7 +863,7 @@ const UserProfile: React.FC = () => {
                 <button
                   className="btn-secondary"
                   disabled={isFriend || friendRequestSent}
-                  onClick={() => {handleSendFriendRequest();}}
+                  onClick={() => { handleSendFriendRequest(); }}
                 // style={{
                 //   backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
                 //   color: "#5A639C",

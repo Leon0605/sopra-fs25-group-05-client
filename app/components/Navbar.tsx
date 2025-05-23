@@ -7,10 +7,11 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import styles from "./Navbar.module.css";
-
+import type { NavbarProps } from "@/types/navbarProps";
 import { User } from "@/types/user";
-import { Chat } from "@/types/chat"; // Import the UserChatDTO type
+import { Chat } from "@/types/chat";
 import { useAlert } from "@/components/alertContext";
+import { usePathname } from "next/navigation";
 
 interface Message {
   messageId?: string;
@@ -23,7 +24,7 @@ interface Message {
   status: "read" | "unread";
 }
 
-const Navbar = () => {
+const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
   const router = useRouter();
   const apiService = useApi();
   const chatIdsRef = useRef<string[]>([]);
@@ -31,11 +32,9 @@ const Navbar = () => {
   const [openMessages, setOpenMessages] = useState(false);
   const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
   const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertType, setAlertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
+  const [alertMessage] = useState<string | null>(null);
+  const [alertType] = useState<"success" | "danger" | null>(null); // For success or error alerts
   const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
-  const { value: notificationsEnabled, set: setNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
-  const notificationsEnabledRef = useRef(notificationsEnabled);
   const requestsDropdownRef = useRef<HTMLDivElement>(null);
   const messagesDropdownRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,6 +45,8 @@ const Navbar = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [pendingAlerts, setPendingAlerts] = useState<Message[]>([]);
+  const pathname = usePathname();
+  const didMount = useRef(false);
 
   const fetchLoggedInUser = async () => {
     try {
@@ -124,6 +125,15 @@ const Navbar = () => {
 
   const fetchUnreadMessages = async (chatIds: string[]) => {
     console.log("Fetching messages for chat IDs:", chatIds);
+    // Example: "/chats/bf8b704c-368c-41ef-96a6-6d9a317959d1"
+    const currentChatId = pathname.startsWith("/chats/") ? pathname.split("/chats/")[1] : null;
+    console.log("Current chat ID:", currentChatId);
+
+    const filteredChatIds = currentChatId
+      ? chatIds.filter(id => id !== currentChatId)
+      : chatIds;
+
+    console.log("Fetching messages for chat IDs (excluding current):", filteredChatIds);
 
     try {
       if (!token || !loggedInUser?.id) {
@@ -133,7 +143,7 @@ const Navbar = () => {
 
       const newMessageMap = new Map<string, Message>();
 
-      for (const chatId of chatIds) {
+      for (const chatId of filteredChatIds) {
         const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${userId}/notifications`);
         console.log(`Fetched unread messages for chat ID ${chatId}:`, fetchedMessages);
 
@@ -188,7 +198,9 @@ const Navbar = () => {
       );
       // Optionally refresh the requests list or show a success alert
       fetchRequests();
-      showAlert("Friend request accepted!", "success");
+      if (notificationsEnabled) {
+        showAlert("Friend request accepted!", "success");
+      }
     } catch (error) {
       console.error("Failed to accept friend request:", error);
       showAlert("Failed to accept friend request.", "danger");
@@ -212,7 +224,9 @@ const Navbar = () => {
         }
       );
       // Optionally refresh the requests list or show a success alert
-      showAlert("Friend request rejected.", "success");
+      if (notificationsEnabled) {
+        showAlert("Friend request rejected.", "success");
+      }
     } catch (error) {
       console.error("Failed to accept friend request:", error);
       showAlert(`Oops, something went wrong: ${error}.`, "danger");
@@ -260,6 +274,8 @@ const Navbar = () => {
 
   // useEffect for displaying notifications
   useEffect(() => {
+    if (!didMount.current) return;
+
     const prev = prevIncomingRequestsRef.current;
 
     // Compare lengths and IDs
@@ -268,7 +284,7 @@ const Navbar = () => {
         req => !prev.some(prevReq => prevReq.id === req.id)
       );
       newRequests.forEach(req => {
-        if (notificationsEnabledRef.current) {
+        if (notificationsEnabled) {
           showAlert(`New friend request from ${req.username}`, "success");
           console.log("New friend request:", req);
         }
@@ -279,11 +295,6 @@ const Navbar = () => {
     prevIncomingRequestsRef.current = incomingRequests;
   }, [incomingRequests]);
 
-  useEffect(() => {
-    notificationsEnabledRef.current = notificationsEnabled;
-    console.log("NotificationsEnabledRef.current line 284:", notificationsEnabledRef.current);
-    console.log("Notifications enabled (useEffect):", notificationsEnabled);
-  }, [notificationsEnabled]);
 
   // useEffect for dropdown close
   useEffect(() => {
@@ -334,6 +345,8 @@ const Navbar = () => {
 
   // useEffect for displaying incoming messages
   useEffect(() => {
+    if (!didMount.current) return;
+
     const prev = prevMessagesRef.current;
 
     // Only show alert if there are new unread messages
@@ -343,8 +356,8 @@ const Navbar = () => {
       );
       newMessages.forEach(msg => {
         const sender = users.find(u => u.id === msg.userId);
-        console.log("NotificationsEnabledRef.current line 396:", notificationsEnabledRef.current)
-        if (notificationsEnabledRef.current) {
+        console.log("NotificationsEnabled line 361:", notificationsEnabled)
+        if (notificationsEnabled) {
           if (sender) {
             showAlert(
               `New message from ${sender?.username}: ${msg.originalMessage}`,
@@ -363,7 +376,7 @@ const Navbar = () => {
 
   // pending alerts in the event that sender was not loaded in previous useEffect (lines 387-413)
   useEffect(() => {
-    if (!notificationsEnabledRef.current) return;
+    if (!didMount.current) return;
     if (pendingAlerts.length === 0) return;
 
     setPendingAlerts(prevPending => {
@@ -371,10 +384,12 @@ const Navbar = () => {
       prevPending.forEach(msg => {
         const sender = users.find(u => u.id === msg.userId);
         if (sender) {
-          showAlert(
-            `New message from ${sender.username}: ${msg.originalMessage}`,
-            "success"
-          );
+          if (notificationsEnabled) {
+            showAlert(
+              `New message from ${sender.username}: ${msg.originalMessage}`,
+              "success"
+            );
+          }
         } else {
           stillPending.push(msg);
         }
@@ -384,7 +399,7 @@ const Navbar = () => {
   }, [users]);
 
   useEffect(() => {
-    if (!token || !loggedInUser) return;
+    if (!didMount.current || !token || !loggedInUser) return;
     console.log("Notifications enabled (live):", notificationsEnabled);
 
     fetchChatIds();
@@ -399,6 +414,11 @@ const Navbar = () => {
 
     return () => clearInterval(interval);
   }, [token, loggedInUser, notificationsEnabled]);
+
+  // dedicated useEffect to mark that mounted
+  useEffect(() => {
+    didMount.current = true;
+  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed" style={{ zIndex: 1050 }}>
