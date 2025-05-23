@@ -30,19 +30,9 @@ interface Message {
     status: "read" | "unread";
 }
 
-const colours = [
-    '#2196F3', '#32c787', '#00BCD4', '#ff5652',
-    '#ffc107', '#ff85af', '#FF9800', '#39bbb0', "#A1FF33", "#33A1FF",
-];
-const userColors: { [key: string]: string } = {};
-
-export default function ContactList({ selectedUserId }: { selectedUserId?: number }) {
+export default function ContactList({  }: { selectedUserId?: number }) {
     const router = useRouter();
     const apiService = useApi();
-    const [chatIds, setChatIds] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { value: userId } = useLocalStorage<number>("userId", 0);
-    const [messages, setMessages] = useState<Message[]>([]);
     const [chatSummaries, setChatSummaries] = useState<ChatSummary[]>([]);
     const { value: token } = useLocalStorage<string>("token", "");
 
@@ -117,17 +107,8 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
         }
     };
 
-    // Assign a color to a user
-    const getChatColor = (userId: number): string => {
-        if (userColors[userId]) return userColors[userId];
-        const color = colours[userId % colours.length];
-        userColors[userId] = color;
-        return color;
-    };
-
     useEffect(() => {
         if (!token) return;
-        setLoading(true);
         fetchChatIdsAndUsers(token);
     }, [apiService, token]);
 

@@ -12,6 +12,8 @@ import { User } from "@/types/user";
 import { Chat } from "@/types/chat";
 import { useAlert } from "@/components/alertContext";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+
 
 interface Message {
   messageId?: string;
@@ -436,25 +438,25 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
         <div className="collapse navbar-collapse justify-content-between" id="navbarContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link fs-4" href="/main">Main</a>
+              <Link className="nav-link fs-4" href="/main">Main</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link fs-4" href="/chats">Chats</a>
+              <Link className="nav-link fs-4" href="/chats">Chats</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link fs-4" href="/friends">Friends</a>
+              <Link className="nav-link fs-4" href="/friends">Friends</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link fs-4" href="/users">Users</a>
+              <Link className="nav-link fs-4" href="/users">Users</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link fs-4" href={"/flashcards"}>Flash Cards</a>
+              <Link className="nav-link fs-4" href={"/flashcards"}>Flash Cards</Link>
             </li>
           </ul>
 
           {/* Notifications */}
           <div className="d-flex align-items-center gap-3">
-            <button className="btn btn-outline-light position-relative" title="Notifications" onClick={(e) => {
+            <button className="btn btn-outline-light position-relative" title="Notifications" onClick={() => {
               setOpenRequests((prev) => !prev);
               setOpenMessages(false); // Close notifications dropdown if open
             }}
