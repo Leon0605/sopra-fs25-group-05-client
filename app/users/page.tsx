@@ -14,7 +14,8 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
-  
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const {value: userId} = useLocalStorage<number>("userId", 0);
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   
@@ -27,7 +28,7 @@ const Dashboard: React.FC = () => {
       if (hasMounted && !token) {
         router.push("/login");
       }
-    }, [hasMounted, token]);
+    }, [hasMounted, token,userId]);
     
   useEffect(() => {
     const fetchUsers = async () => {
@@ -36,7 +37,7 @@ const Dashboard: React.FC = () => {
         // thus we can simply assign it to our users variable.
         const users: User[] = await apiService.get<User[]>("/users");
         setUsers(users);
-        console.log("Fetched users:", users);
+        
       } catch (error) {
         if (error instanceof Error) {
           alert(`Something went wrong while fetching users:\n${error.message}`);
@@ -52,6 +53,10 @@ const Dashboard: React.FC = () => {
   // if the dependency array is left away, the useEffect will run on every state change. Since we do a state change to users in the useEffect, this results in an infinite loop.
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
 
+  const filteredUsers = (users ?? []).filter(
+    (u) => u.id !== userId && u.username?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!hasMounted || !token || !users) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -61,45 +66,133 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="card-container">
-          <Navbar />
-      <div className="auth-card" style={{ maxWidth: "700px", width: "100%", marginTop: "1rem" }}>
+    <>
+      <Navbar />
+      <div
+        className="card-container"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100vw",
+          height: "100vh",
+          padding: "0",
+          boxSizing: "border-box"
+        }}
+      >
+        <div
+          className="auth-card"
+          style={{
+            width: "85vw",
+            maxWidth: "1200px",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            height: "75vh",     
+            boxSizing: "border-box",
+            overflow: "visible",
+          }}
+        >
         <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>Search Page</h2>
+        <input
+          type="text"
+          placeholder="Search for users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: "25vw",
+            maxWidth: "400px",
+            padding: "0.75rem 1rem",
+            margin: "0 auto 1rem",
+            borderRadius: "0.75rem",
+            background: "rgba(255, 255, 255, 0.25)",
+            border: "1px solid rgba(255, 255, 255, 0.4)",
+            backdropFilter: "blur(8px)",
+            color: "#5A639C",
+            outline: "none",
+            fontSize: "1rem",
+            boxSizing: "border-box"
+          }}
+        />
   
         {users && (
           <>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {users.map((user) => (
+            <div
+              style={{
+                display: "grid",
+                padding: "0.5rem 0",
+                width: "100%",
+                gridTemplateColumns: "repeat(5, 1fr)",
+                gridAutoRows: "8rem",
+                gap: "1rem",
+                overflowY: "auto",
+                overflowX: "visible",
+                height: "calc(2 * 8rem + 2rem)",
+              }}
+            >
+              {filteredUsers.map((user) => (
                 <div
                   key={user.id}
                   onClick={() => router.push(`/users/${user.id}`)}
+                  onMouseEnter={(e) =>{
+                    e.currentTarget.style.transform = "translateY(-3px)";
+                  }}
+                  onMouseLeave={(e) =>{
+                    e.currentTarget.style.transform= "none";
+                  }}
                   style={{
-                    backgroundColor: "#E2BBE9",
-                    border: "3px solid #9B86BD",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                    overflow: "hidden",
+                    boxSizing: "border-box",
+                    background: "rgba(255, 255, 255, 0.15)",
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
                     borderRadius: "1rem",
-                    padding: "1rem 1.5rem",
+                    padding: "1rem",
                     color: "#5A639C",
                     fontWeight: "bold",
                     fontSize: "1.1rem",
                     cursor: "pointer",
-                    transition: "background-color 0.2s ease",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                    backdropFilter: "blur(8px)"
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d9a8e0")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#E2BBE9")}
                 >
-                  👤 {user.username} <span style={{ fontWeight: "normal", fontSize: "0.9rem" }}>(ID: {user.id})</span>
+                <img
+                  src={user.photo || "/images/default-user.png"}
+                  alt={`${user.username} avatar`}
+                  style={{
+                      width: "3vw",
+                      height: "3vw",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      marginBottom: "0.5rem"
+                    }}
+                  />
+                <span
+                  style={{
+                      display: "block",
+                      width: "100%",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textAlign: "center",
+                      fontSize: "1.2vw",
+                    }}
+                  >
+                 {user.username}
+                  </span>
                 </div>
               ))}
             </div>
-  
-            <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
-              <button onClick={() => router.push("/main")} className="btn-secondary">Go to Main Page</button>
-            </div>
           </>
         )}
+        </div>
       </div>
-    </div>
-  );  
+    </>
+  );
 };
 
 export default Dashboard;

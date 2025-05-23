@@ -267,14 +267,15 @@ const ChatPage: React.FC = () => {
                 <ul className={styles["message-area"]}>
                     {messages.map((message) => {
                         const user = users?.find((user) => user.id === message.userId);
-                        const userColor = getUserColor(message.userId);
                         return (
                             <li key={message.messageId} className={styles["chat-message"]}>
-                                <div className={styles["avatar-username"]}>
-                                    <i style={{ backgroundColor: userColor,  fontStyle: "normal", fontWeight: "bold" }}>
-                                        {(user?.username?.[0] || "?").toUpperCase()}
-                                    </i>
-                                    <span className={styles["username"]}>
+                                <div style={{ marginRight: "15px" }}>
+                                    <img src={user?.photo || "/images/default-user.png"}
+                                        alt={`${user?.username} avatar`}
+                                        className="rounded-circle me-2"
+                                        style={{ width: "32px", height: "32px", border: "2px solid #9B86BD" }} />
+                                    <span className="username"
+                                        style={{ color: "#5A639C", fontWeight: "bold" }}>
                                         {user?.username || "Anonymous"}
                                     </span>
                                 </div>
@@ -282,7 +283,7 @@ const ChatPage: React.FC = () => {
                                     <p className={styles["original"]}>{message.originalMessage}</p>
                                     {message.originalMessage !== message.translatedMessage && (
                                         <p className={styles["translation"]}>{message.translatedMessage}</p>
-                                        
+
                                     )}
                                 </div>
                                 {/* Add Flashcard Button */}

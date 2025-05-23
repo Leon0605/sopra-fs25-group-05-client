@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import DatePicker from "react-datepicker";
+import { Chat } from "@/types/chat";
 import { getApiDomain } from "@/utils/domain";
 import "react-datepicker/dist/react-datepicker.css";
 import { useParams, useRouter } from "next/navigation";
@@ -216,12 +217,34 @@ const UserProfile: React.FC = () => {
       }
 
       setUser(updatedUser);
-    } catch (error) {
-      console.error("Failed to upload photo:", error);
+    } catch (Error) {
+      console.error("Failed to upload photo:", Error);
       showAlert("Failed to upload profile photo", "danger");
     }
   };
+  const redirectToChat = async () => {
+      if(!user){
+        return;
+      }
+      const chats = await apiService.get<Chat[]>("chats", {
+        headers: { userId: String(userId) },
+      })
 
+      const privateChat = chats.find((chat) => {
+        const ids = chat.userIds || [];
+        return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
+      })
+      if (privateChat == null){
+        const newChat = await apiService.post<Response>("/chats", {
+          userIds: [user.id!, userId!],
+          chatName: null
+        })
+        const newChatId = await newChat.text();
+        router.push("/chats/"+newChatId)
+      } else {
+        router.push("/chats/" + privateChat.chatId)
+      }
+  }
   const handleDeletePhoto = async () => {
     try {
       await apiService.delete(`users/${id}/photo`, {
@@ -234,7 +257,7 @@ const UserProfile: React.FC = () => {
       });
       setUser(updatedUser);
     } catch (error) {
-      showAlert("Failed to delete photo", "danger");
+      showAlert(`Failed to delete profile photo (${error})`, "danger");
     }
   }
 
@@ -301,7 +324,7 @@ const UserProfile: React.FC = () => {
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
-      showAlert("Failed to update privacy setting", "danger");
+      showAlert(`Failed to update privacy setting ${err}`, "danger");
     }
   };
 
@@ -699,8 +722,8 @@ const UserProfile: React.FC = () => {
             )}
             {/* End user views their own profile */}
 
-            {/* User views friend or not-private page */}
-            {(user.id !== userId) && (isFriend || user.privacy !== "private") && (
+            {/* User views friend page */}
+            {(user.id !== userId) && (isFriend) && (
               <div>
 
                 <div className="mb-3 row align-items-center">
@@ -747,15 +770,15 @@ const UserProfile: React.FC = () => {
                 <div className="auth-buttons" >
                   <button
                     className="btn-secondary"
-                    disabled={friendRequestSent || isFriend}
-                    onClick={handleSendFriendRequest}
+                    disabled={friendRequestSent}
+                    onClick={() => {if(isFriend){redirectToChat()} else{handleSendFriendRequest()}}}
                   // style={{
                   //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                   //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
                   // }}
                   >
                     {isFriend
-                      ? "Already Friends"
+                      ? "Go to Chat"
                       : friendRequestSent
                         ? "Friend Request Sent"
                         : "Send Friend Request"}
@@ -766,14 +789,84 @@ const UserProfile: React.FC = () => {
               </div>
             )}
             {/* End user views friend or not-private page */}
+            {/* start user views public page */}
+            {(user.id !== userId) && (user.privacy !== "private") && (!isFriend) && (
+                <div>
+
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Birthday:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px" }}>
+                      {user.birthday || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Language:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.language || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Learning Language:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {languageMap[user.language] || user.learningLanguage || "Not Set"}
+                    </span>
+                    </div>
+                  </div>
+                  <div className="mb-3 row align-items-center">
+                    <label className="col-sm-4 col-form-label text-nowrap">
+                      Privacy:
+                    </label>
+                    <div className="col-sm-8 d-flex justify-content-end">
+                    <span className="form-control-plaintext text-end" style={{ color: "#5A639C", fontSize: "17.6px", textTransform: "capitalize" }}>
+                      {user.privacy}
+                    </span>
+                    </div>
+                  </div>
+
+                  <div className="auth-buttons" >
+                    <button
+                        className="btn-secondary"
+                        disabled={friendRequestSent}
+                        onClick={() => {handleSendFriendRequest()}}
+                        // style={{
+                        //   backgroundColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                        //   borderColor: friendRequestSent || isFriend ? "#ccc" : "#87CEEB",
+                        // }}
+                    >
+                      {friendRequestSent
+                          ? "Friend Request Sent"
+                          : "Send Friend Request"}
+                    </button>
+                    <button
+                    className="btn-secondary"
+                    onClick={() => redirectToChat()}
+                    >
+                      Go to Chat
+                    </button>
+
+                    <button onClick={() => router.back()} className="btn-secondary">Go back</button>
+                  </div>
+                </div>
+            )}
 
             {/* User views not-friend or private page */}
             {(user.id !== userId) && (!isFriend && user.privacy === "private") && (
               <div className="auth-buttons" style={{ justifyContent: "space-between" }}>
                 <button
                   className="btn-secondary"
-                  disabled={friendRequestSent || isFriend}
-                  onClick={handleSendFriendRequest}
+                  disabled={isFriend || friendRequestSent}
+                  onClick={() => {handleSendFriendRequest();}}
                 // style={{
                 //   backgroundColor: friendRequestSent || isFriend ? "#E2BBE9" : "#87CEEB",
                 //   color: "#5A639C",
