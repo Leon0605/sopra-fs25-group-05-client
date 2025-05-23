@@ -29,7 +29,7 @@ const Flashcards: React.FC = () => {
 
     const fetchSets = async () => {
       try {
-        console.log("sent token:", token);
+
         const result = await apiService.get<FlashcardSet[]>("flashcards", {
           headers: {
             Authorization: token,
@@ -75,7 +75,6 @@ const Flashcards: React.FC = () => {
     }
   
     try {
-      console.log("Creating set:", name, "with token:", token);
   
       await apiService.post("flashcards",
         { flashcardSetName: name },

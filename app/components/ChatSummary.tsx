@@ -47,7 +47,6 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
     const { value: token } = useLocalStorage<string>("token", "");
 
     const fetchChatIdsAndUsers = async (token: string) => {
-        console.log("CHATS token:", token); // Log the token to the console
         const userId = Number(localStorage.getItem("userId"));
         if (!userId || !token) {
             console.error("User ID or token is missing");
@@ -58,13 +57,11 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
             const chats = await apiService.get<Chat[]>("chats", {
                 headers: { userId: userId.toString() },
             });
-            console.log("CHATS fetched chat IDs (line 65):", chats); // Log the fetched data to the console
 
             const summaries: ChatSummary[] = await Promise.all(
                 chats.map(async (chat) => {
                     // Find the other user's ID
                     const otherUserId = chat.userIds.find((id: number) => id !== userId);
-                    console.log("CHATS otherUserId:", otherUserId); // Log the other user's ID
                     // Fetch the other user's info
                     const otherUser = await apiService.get<{ id: number; username: string; photo?: string }>(
                         `users/${otherUserId}`,
@@ -139,7 +136,6 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
         <div className={styles.summaryContainer}>
             <p className={styles.previousHeader}>Previous Chats</p>
                 {chatSummaries.map((summary) => {
-                    console.log("Chat summary: ", summary)
                     return (
                         <div
                         key={summary.chatId}

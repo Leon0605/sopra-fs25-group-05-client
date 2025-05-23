@@ -92,7 +92,6 @@ const UserProfile: React.FC = () => {
             "Content-Type": "application/json",
           },
         });
-        console.log("Fetched user data:", profileUserData);
 
         profileUserData.privacy = profileUserData.privacy || "private"; // Default to "private" if undefined
 
@@ -159,8 +158,6 @@ const UserProfile: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Log the file type for debugging
-    console.log("File type:", file.type);
 
     // Check if the file is a PNG
     if (file.type !== "image/png") {
@@ -170,12 +167,6 @@ const UserProfile: React.FC = () => {
 
     const formData = new FormData();
     formData.append("photo", file);
-
-    // Log the file and FormData before sending
-    console.log("Uploading photo for user:", user.id);
-    console.log("File details:", file);
-    console.log("Posting data to:", `users/${id}/photo`);
-    console.log("FormData contents:", formData.get("photo"));
 
     try {
       const response = await fetch(`${getApiDomain()}users/${id}/photo`, {
@@ -350,7 +341,6 @@ const UserProfile: React.FC = () => {
 
     try {
       const newBirthday = date ? dayjs(date).format("YYYY-MM-DD") : null; // Convert Date to Dayjs and format
-      console.log("Selected date:", newBirthday);
 
       await apiService.put(`users/${id}`, { birthday: newBirthday });
       // Show a success alert
