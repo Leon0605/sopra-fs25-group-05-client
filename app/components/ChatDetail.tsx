@@ -392,27 +392,34 @@ const ChatPage: React.FC = () => {
                     <button
                         className="btn-primary"
                         onClick={async () => {
-                        if (!selectedSetId || !front.trim()) return;
-                        try {
+                            if (!selectedSetId) {
+                            alert("Please choose a flashcard set or create one on the Flashcard page.");
+                            return;
+                            }
+                            if (!front.trim()) {
+                            alert("Front side cannot be empty.");
+                            return;
+                            }
+                            try {
                             await apiService.post(`/flashcards/${selectedSetId}`, {
-                            contentFront: front,
-                            ...(back ? { contentBack: back } : {}),
+                                contentFront: front,
+                                ...(back ? { contentBack: back } : {}),
                             }, {
-                            headers: {
+                                headers: {
                                 Authorization: token,
                                 "Content-Type": "application/json",
-                            },
+                                },
                             });
                             alert("Flashcard added!");
                             setShowModal(false);
-                        } catch (err) {
+                            } catch (err) {
                             console.error("Failed to add flashcard:", err);
                             alert("Something went wrong.");
-                        }
+                            }
                         }}
-                    >
+                        >
                         Confirm
-                    </button>
+                        </button>
                     </div>
                 </div>
                 </div>

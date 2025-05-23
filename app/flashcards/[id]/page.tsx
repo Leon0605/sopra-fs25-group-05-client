@@ -247,7 +247,7 @@ setFlashcards(updatedFlashcards);
     <Navbar />
     
     <div className="auth-card" style={{ maxWidth: "800px", width: "100%", marginTop:"12vh", paddingTop:"10px" }}>
-      <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>Flashcards</h2>
+    <h2 style={{ color: "#5A639C", marginBottom: "0.5rem" }}>{setName}</h2>
 
       {/* Scrollable flashcard list */}
       <div
