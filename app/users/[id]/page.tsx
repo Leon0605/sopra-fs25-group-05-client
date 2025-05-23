@@ -217,8 +217,8 @@ const UserProfile: React.FC = () => {
       }
 
       setUser(updatedUser);
-    } catch (error) {
-      console.error("Failed to upload photo:", error);
+    } catch (Error) {
+      console.error("Failed to upload photo:", Error);
       showAlert("Failed to upload profile photo", "danger");
     }
   };
@@ -257,7 +257,7 @@ const UserProfile: React.FC = () => {
       });
       setUser(updatedUser);
     } catch (error) {
-      showAlert("Failed to delete photo", error);
+      showAlert(`Failed to delete profile photo (${error})`, "danger");
     }
   }
 
@@ -324,7 +324,7 @@ const UserProfile: React.FC = () => {
       setUser(updatedUser);
     } catch (err) {
       console.error("Failed to update privacy setting:", err);
-      showAlert("Failed to update privacy setting", "danger");
+      showAlert(`Failed to update privacy setting ${err}`, "danger");
     }
   };
 
