@@ -95,7 +95,6 @@ const ChatPage: React.FC = () => {
             userId: Number(userId),
         };
 
-        console.log("Message to be sent:", message);
         stompClientRef.current.publish({
             destination: `/app/MessageHandler`,
             body: JSON.stringify(message),
@@ -109,7 +108,6 @@ const ChatPage: React.FC = () => {
     const handleIncomingMessage = (message: string) => {
         try {
             const parsedMessage = JSON.parse(message) as Message;
-            console.log("Parsed incoming message:", parsedMessage);
             setMessages((prev) => [...prev, parsedMessage]);
         } catch (error) {
             console.error("Failed to parse message:", error);
@@ -120,7 +118,6 @@ const ChatPage: React.FC = () => {
     const fetchUsers = async () => {
         try {
             const users: User[] = await apiService.get<User[]>("users");
-            console.log("Fetched users:", users);
             setUsers(users);
         } catch (error) {
             console.error("Failed to fetch users:", error);
@@ -145,28 +142,21 @@ const ChatPage: React.FC = () => {
     const setupWebSocket = () => {
         // Use SockJS for the WebSocket connection
         const socket = new SockJS(`${getApiDomain()}ws`);
-        console.log("Socket: ", socket);
-        console.log("WebSocket URL:", `${getApiDomain()}ws`);
         const stompClient = new Client({
             webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
-            debug: (str) => console.log(str),
             onConnect: () => {
-                console.log("Connected to WebSocket");
                 setIsConnected(true);
                 stompClientRef.current = stompClient;
 
                 // Retrieve the user's language preference
                 const userId = localStorage.getItem("userId");
                 const currentUser = users?.find((user) => user.id === Number(userId));
-                console.log(currentUser?.id)
-                console.log(currentUser?.language)
 
                 stompClient.subscribe(`/topic/${language}/${chatId}`, (message) => {
                     if (message.body) handleIncomingMessage(message.body);
                 });
             },
             onDisconnect: () => {
-                console.log("Disconnected from WebSocket");
                 setIsConnected(false);
             },
         });
@@ -180,7 +170,6 @@ const ChatPage: React.FC = () => {
         try {
             const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${chatId}/${userId}`);
             setMessages(fetchedMessages);
-            console.log("Fetched messages:", fetchedMessages);
         } catch (error: unknown) {
             console.error("Failed to fetch messages:", error);
             if (error instanceof Error) {

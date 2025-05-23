@@ -26,27 +26,6 @@ const Dashboard: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
 
 
-
-  const handleLogout = async () => {
-    try {
-      if (userId && userId !== 0) {
-        await apiService.post<void>("/logout", null, {
-          headers: {
-            userId: String(userId),
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Logout failed:", error);
-      alert("Logout failed");
-    } finally {
-      clearToken();
-      clearUserId();
-      clearNotificationsEnabled();
-      router.push("/login");
-    }
-  };
-
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -180,12 +159,12 @@ const Dashboard: React.FC = () => {
           }
         }
 
-        const newChatId = await apiService.post<string>("chats", {
+        const newChatId = await apiService.post<Response>("chats", {
           userIds: groupToUse,
           chatName,
         });
-
-        router.push(`chats/${newChatId}`);
+        const newChatIdText = await newChatId.text();
+        router.push(`chats/${newChatIdText}`);
       }
     } catch (err) {
       console.error("Failed to fetch or create chat:", err);
