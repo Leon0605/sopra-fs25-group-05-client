@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+
 import DatePicker from "react-datepicker";
 import { Chat } from "@/types/chat";
 import { getApiDomain } from "@/utils/domain";
@@ -396,8 +397,8 @@ const UserProfile: React.FC = () => {
     try {
       setLoading(true);
 
-      // Replace this with your API call logic
-      console.log("Changing password:", { oldPassword, newPassword });
+     
+      
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -432,6 +433,60 @@ const UserProfile: React.FC = () => {
   return (
     <>
       <Navbar />
+      <style jsx global>{`
+        .info-tooltip-container {
+          display: inline-block;
+          position: relative;
+        }
+        .info-circle {
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          width: 22px;
+          height: 22px;
+          background: #9b86bd;
+          color: white;
+          border-radius: 50%;
+          font-weight: bold;
+          font-size: 16px;
+          margin-left: 10px;
+          cursor: pointer;
+          transition: background 0.2s;
+          border: 1.5px solid #5A639C;
+        }
+        .info-circle:hover {
+          background: #7a6bb5;
+        }
+        .info-tooltip {
+          visibility: hidden;
+          opacity: 0;
+          background: white;
+          color: #5A639C;
+          text-align: left;
+          border-radius: 10px;
+          border: 1.5px solid #9b86bd;
+          padding: 12px 16px;
+          position: absolute;
+          left: 30px;
+          top: 0;
+          z-index: 99;
+          width: 230px;
+          /* Damit der Text umbricht und die Box in der Höhe wächst */
+          white-space: normal;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          box-shadow: 0 4px 16px rgba(120, 80, 170, 0.13);
+          font-size: 15px;
+          transition: opacity 0.2s, visibility 0.2s;
+          pointer-events: none;
+        }
+        .info-tooltip-container:hover .info-tooltip,
+        .info-tooltip-container:focus-within .info-tooltip {
+          visibility: visible;
+          opacity: 1;
+          pointer-events: auto;
+        }
+      `}</style>
       <div className="card-container" style={{ marginTop: "75px" }}>
         <div className="auth-card" style={{ maxWidth: "900px", maxHeight: "900px", width: "100%", marginTop: "0rem" }}>
           <h2 style={{ color: "#5A639C", marginBottom: "2rem" }}>{user.username}</h2>
@@ -596,7 +651,15 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label text-nowrap">Language:</label>
+                  <label className="col-sm-4 col-form-label text-nowrap" style={{ display: "flex", alignItems: "center" }}>
+                    Language:
+                    <span className="info-tooltip-container">
+                      <span className="info-circle">?</span>
+                      <span className="info-tooltip">
+                        Select the language you prefer to read and write. Incoming messages will be automatically translated into this language.
+                      </span>
+                    </span>
+                  </label>
                   <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
                       value={language}
@@ -613,7 +676,15 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label text-nowrap">Learning language:</label>
+                  <label className="col-sm-4 col-form-label text-nowrap" style={{ display: "flex", alignItems: "center" }}>
+                    Learning language:
+                    <span className="info-tooltip-container">
+                      <span className="info-circle">?</span>
+                      <span className="info-tooltip">
+                        Select the language you want to learn. This determines the target language into which your flashcards will be translated.
+                      </span>
+                    </span>
+                  </label>
                   <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
                       value={user.learningLanguage || "en"}
@@ -634,7 +705,16 @@ const UserProfile: React.FC = () => {
                 </div>
 
                 <div className="mb-3 row">
-                  <label className="col-sm-4 col-form-label text-nowrap">Privacy:</label>
+                  <label className="col-sm-4 col-form-label text-nowrap" style={{ display: "flex", alignItems: "center" }}>
+                    Privacy:
+                    <span className="info-tooltip-container">
+                      <span className="info-circle">?</span>
+                      <span className="info-tooltip">
+                        <b>Private</b>: Only friends can view your profile and start chats with you.<br/>
+                        <b>Open</b>: All users can view your profile and initiate chats.
+                      </span>
+                    </span>
+                  </label>
                   <div className="col-sm-8 d-flex justify-content-end">
                     <select className="form-select"
                       value={user.privacy || "open"}
