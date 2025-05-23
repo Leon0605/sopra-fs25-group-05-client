@@ -235,12 +235,12 @@ const UserProfile: React.FC = () => {
         return ids.length === 2 && ids.includes(user.id!) && ids.includes(userId!)
       })
       if (privateChat == null){
-        console.log("reached")
-        const newChat = await apiService.post<string>("/chats", {
+        const newChat = await apiService.post<Response>("/chats", {
           userIds: [user.id!, userId!],
           chatName: null
         })
-        router.push("/chats/"+newChat)
+        const newChatId = await newChat.text();
+        router.push("/chats/"+newChatId)
       } else {
         router.push("/chats/" + privateChat.chatId)
       }
@@ -790,7 +790,7 @@ const UserProfile: React.FC = () => {
             )}
             {/* End user views friend or not-private page */}
             {/* start user views public page */}
-            {(user.id !== userId) && (user.privacy !== "private") && (
+            {(user.id !== userId) && (user.privacy !== "private") && (!isFriend) && (
                 <div>
 
                   <div className="mb-3 row align-items-center">
