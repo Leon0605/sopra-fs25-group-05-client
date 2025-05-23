@@ -116,7 +116,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
 
       // const data = await response.json();
       const ids = chatids.map((chat: { chatId: string }) => chat.chatId);
-      console.log("Fetched chat IDs:", ids); // Log the fetched data to the console
       setChatIds(ids); // Assume the API returns an array of UserChatDTO objects
     } catch (error) {
       console.error("Error fetching chats:", error);
@@ -124,16 +123,12 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
   };
 
   const fetchUnreadMessages = async (chatIds: string[]) => {
-    console.log("Fetching messages for chat IDs:", chatIds);
     // Example: "/chats/bf8b704c-368c-41ef-96a6-6d9a317959d1"
     const currentChatId = pathname.startsWith("/chats/") ? pathname.split("/chats/")[1] : null;
-    console.log("Current chat ID:", currentChatId);
 
     const filteredChatIds = currentChatId
       ? chatIds.filter(id => id !== currentChatId)
       : chatIds;
-
-    console.log("Fetching messages for chat IDs (excluding current):", filteredChatIds);
 
     try {
       if (!token || !loggedInUser?.id) {
@@ -145,7 +140,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
 
       for (const chatId of filteredChatIds) {
         const fetchedMessages: Message[] = await apiService.get<Message[]>(`chats/${userId}/notifications`);
-        console.log(`Fetched unread messages for chat ID ${chatId}:`, fetchedMessages);
 
         fetchedMessages
           .filter(msg => msg.userId !== loggedInUser.id) // ✅ Filter messages not sent by logged-in user
@@ -164,10 +158,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
         );
         return [...prevMessages, ...newUniqueMessages];
       });
-
-      console.log("Merged unique unread messages from others");
     } catch (error: unknown) {
-      console.error("Failed to fetch messages:", error);
 
       if (typeof error === "object" && error !== null && "response" in error) {
         const response = (error as { response: { status: number } }).response;
@@ -286,7 +277,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
       newRequests.forEach(req => {
         if (notificationsEnabled) {
           showAlert(`New friend request from ${req.username}`, "success");
-          console.log("New friend request:", req);
         }
       });
     }
@@ -356,7 +346,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
       );
       newMessages.forEach(msg => {
         const sender = users.find(u => u.id === msg.userId);
-        console.log("NotificationsEnabled line 361:", notificationsEnabled)
         if (notificationsEnabled) {
           if (sender) {
             showAlert(
@@ -400,7 +389,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationsEnabled }) => {
 
   useEffect(() => {
     if (!didMount.current || !token || !loggedInUser) return;
-    console.log("Notifications enabled (live):", notificationsEnabled);
 
     fetchChatIds();
     fetchRequests();
