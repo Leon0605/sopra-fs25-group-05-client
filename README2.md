@@ -2,8 +2,7 @@
 
 ## Introduction
 Our primary goal for this project was to create a chat app, that would enable users that don't speak the same language to effortlessly chat with each other by integrating a translation service into the chat itself thus allowing to overcome language barriers.
-Our secondary goal was to utilize the chats for language learning by providing a flashcards that can be created from real messages sent.
-
+Our secondary goal was to utilize the chats for language learning by providing a flashcards that can be created from real messages sent. In this way, users are able to directly target their language learning towards phrases and areas of interest they are likely to encounter in the real world.
 
 ## Technologies
 - Vercel for deployment
@@ -11,9 +10,27 @@ Our secondary goal was to utilize the chats for language learning by providing a
 - WebSockets for real time chatting
 
 ## High-level Components
+- The Navbar (app/components/Navbar.tsx) is a navigation component which site across all pages for a logged in user. It's functions are to provide consistent navigation across all pages and to provide almost real time notifications (friend requests and incoming messages). The Navbar takes a prop of notificationsEnabled which helps configure 'real-time' notifications for users. Friend requests and incoming messages can be retrieved through the bell and envelope icons, which provide drop-downs for each category.
+The notificationsEnabled status on the Navbar can only be set on the /users/[id] page for the logged-in user. The toggle allows users to choose if they want to receive pop-up friend requests and message notifications - these settings also flow through to other pages (such as /main, /flashcards). 
+
+- The context for the alert is derived from ./alertContext.tsx. This sets the alert formatting, positioning and timing for the alert messages across subsequent pages. There are two categories of alerts: 'success' messages are displayed with a light pink background and 'danger' messages (representing errors in processing) are shown with a red background. 
+
+- Formatting for the chats and chats/[id] page is implemented through .chats/layout.tsx. This provides the layout which is a function of the components /components/ChatSummary.tsx and /components/ChatDetail.tsx. The ChatSummary.tsx component provides an efficient mechanism for navigating to prior chats with other users. By simply clicking on the desired chat, the entire chat message history (and translations if applicable) are loaded in the ChatDetails.tsx pane.
+
+- ChatDetail.tsx is critical for the functioning of the exchange of real-time messages which are implemented through a websocket interface, sockjs.
+
+- The ChatDetail.tsx page implements a real-time chat interface for users. It features:
+
+*WebSocket Integration:* Using SockJS and STOMP for real-time message delivery and updates, subscribing to chat topics based on user language and chat ID.
+*Message Display:* Shows a scrollable list of chat messages, including sender profile pictures, usernames, original and translated messages (if the users are messaging in different languages), timestamps, and message status (sent/read).
+*Message Input:* Provides a form for sending new messages, which are published to the server via WebSocket.
+*Flashcard Integration:* Allows users to add chat messages as flashcards to their study sets via a modal dialog, supporting selection of flashcard sets and front/back content editing.
+*Usability:* Automatically scrolls to the newest message, and provides feedback for actions like adding flashcards.
+
+The flashcards and training pages provide components which allow users of Habla! to create flashcards either manually or directly from within chats (using specific chat messages and translations). 
 
 
-## Launch & Deployment
+
 ### Set-Up
 
 
@@ -41,8 +58,7 @@ installation, therefore, save and close all your other work and programs
 
 3. If you experience any issues, try re-running the script a couple of times. If
    the installation remains unsuccessful, follow this
-   [youtube tutorial](https://youtu.be/GIYOoMDfmkM) or post your question in the
-   OLAT forum
+   [youtube tutorial](https://youtu.be/GIYOoMDfmkM).
 
 ---
 4. After successful installation, you can open WSL/Ubuntu. You will need to choose a username and password, although no characters will be shown on the screen when typing the password but the system recognizes your input, no worries :) After these four steps your setup should look similar to this
@@ -204,9 +220,62 @@ And to run the code locally:
 The best way to test the frontend is to run it locally and manually test the wanted feature. 
 To test the WebSockets on a single device it is recommended to use a standard and a incognito browser tab.
 
-### Deployment
-To deploy a new version you have to commit fully functional code (without errors) to the [main branch](https://github.com/Leon0605/sopra-fs25-group-05-client/tree/main) on github. This will automatically try to deploy the newest commit to vercel.
-If there are any compiler errors the deployment will fail, therefore you should build the product first locally to account for possible errors and avoid deployment failure. This is configured in the [github workflow files](https://github.com/Leon0605/sopra-fs25-group-05-client/tree/main/.github/workflows)
+
+### Launch & Deployment
+Within the Linux subsystem, run the following commands on your computer.
+1. Clone the Repository:
+```shell
+   git clone https://github.com/Leon0605/sopra-fs25-group-05-client.git
+   cd sopra-fs25-group-05-client
+   ```
+
+2. Install node.js and npm:
+```shell 
+   sudo apt update
+   sudo apt install nodejs npm
+   ```
+
+3. Install dependencies:
+```shell
+   npm install
+   ```
+
+4. Configuration of backend domain:
+The domain.ts file requires different endpoints for development and production. The /utils/domain.ts file provides the configuration between the production and development backend addresses as:
+   const prodUrl = process.env.NEXT_PUBLIC_PROD_API_URL ||
+   "https://sopra-fs25-group-05-server.oa.r.appspot.com/"; 
+   const devUrl = "http://localhost:8080/";
+
+5. Run the application in the applicable mode. Running in development mode can be achieved through:
+```shell
+   npm run dev
+   ```
+This will run the application locally on http://localhost:3000
+Alternatively, building in a production environment can be done through: 
+```shell
+   npm run build
+   ```
+Following this, running the production build can be done via:
+```shell
+   npm run start
+   ```
+
+6. Automatic / Manual Deployment
+Pushing updated code to the main branch automatically triggers a deployment to Vercel via GitHub actions. If, for some reason, you would like to ignore errors and warnings prior to automatic deployment, this can be achieved by setting the configuration of the next.config.ts file as below:
+
+const nextConfig: NextConfig = {
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
+};
+
+We recommend building the code locally using 
+```shell
+   npm run build
+   ``` 
+   and addressing any errors or warnings (by ensuring your code passes all tests) prior to deployment. 
 
 ## Illustrations
 
