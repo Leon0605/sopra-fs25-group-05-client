@@ -145,7 +145,6 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
                     </div>
                     );
                 })}
-            
         </div>
     );
 }
