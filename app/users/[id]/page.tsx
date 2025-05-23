@@ -223,6 +223,9 @@ const UserProfile: React.FC = () => {
     }
   };
   const redirectToChat = async () => {
+      if(!user){
+        return;
+      }
       const chats = await apiService.get<Chat[]>("chats", {
         headers: { userId: String(userId) },
       })
