@@ -33,7 +33,7 @@ const Login: React.FC = () => {
       router.push("/main");
     } catch (error) {
       console.error("Login failed:", error);
-      alert("Login failed");
+      alert("Username or password is wrong");
     }    
   };
 

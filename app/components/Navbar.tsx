@@ -404,7 +404,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-gradient-purple shadow position-fixed" style={{ zIndex: 1050 }}>
       <div className="container-fluid">
         <img
-          src="../images/HablaLogo.png"
+          src="/images/HablaLogo.png"
           alt="Habla! Logo" className="img-fluid"
           style={{ maxWidth: "200px", maxHeight: "50px", height: "auto" }}
         />

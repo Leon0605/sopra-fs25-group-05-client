@@ -11,6 +11,8 @@ import SockJS from 'sockjs-client';
 // import Navbar from "../../components/Navbar";
 import styles from "./page.module.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FlashcardSet } from "@/types/flashcardSet";
+
 
 interface Message {
     messageId: string;
@@ -37,6 +39,14 @@ const ChatPage: React.FC = () => {
     const stompClientRef = useRef<Client | null>(null);
     const [language, setLanguage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    //adding flashcards
+    const [showModal, setShowModal] = useState(false);
+    const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
+    const [selectedSetId, setSelectedSetId] = useState<string | null>(null);
+    const [front, setFront] = useState("");
+    const [back, setBack] = useState("");
+
     
 
     const colours = [
@@ -70,29 +80,6 @@ const ChatPage: React.FC = () => {
         return color;
     };
 
-    // Handle adding a flashcard
-    const handleAddFlashcard = async (front: string, back: string) => {
-        /*
-        try {
-            await apiService.post(`/flashcards/${flashcardSetId}`,
-                { contentFront: front, ...(back ? { contentBack: back } : {}) },
-                {
-                    headers: {
-                        Authorization: token,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            const updated = await apiService.get<Flashcard[]>(`/flashcards/${flashcardSetId}`, {
-                headers: { Authorization: token },
-            });
-            setFlashcards(updated);
-        } catch (err) {
-            console.error("Failed to add flashcard:", err);
-            alert("Error creating flashcard");
-        }*/
-       
-    };
 
     // Send a message
     const sendMessage = (content: string) => {
@@ -246,6 +233,24 @@ const ChatPage: React.FC = () => {
         };
     }, [chatId, apiService, language, token, userId]);
 
+    const openFlashcardModal = async (original: string, translation: string) => {
+    setFront(original);
+    setBack(translation);
+
+    try {
+        const sets = await apiService.get<FlashcardSet[]>("/flashcards", {
+        headers: { Authorization: token },
+        });
+        setFlashcardSets(sets);
+        setSelectedSetId(sets[0]?.flashcardSetId ?? null);
+        setShowModal(true);
+    } catch (err) {
+        console.error("Failed to fetch sets:", err);
+        alert("Could not load flashcard sets.");
+    }
+    };
+
+
 
     if (!hasMounted || !token || !users) {
         return (
@@ -283,11 +288,9 @@ const ChatPage: React.FC = () => {
                                 {/* Add Flashcard Button */}
                                 {message.originalMessage !== message.translatedMessage && (
                                 <button
-                                    type="button"
                                     className={styles["flashcard-btn-circle"]}
-                                    title="Add as Flashcard"
-                                    onClick={() => handleAddFlashcard(message.originalMessage, message.translatedMessage)}
-                                >
+                                    onClick={() => openFlashcardModal(message.originalMessage, message.translatedMessage)}
+                                    >
                                     <i className="bi bi-plus-circle"></i>
                                 </button>
                                 )}
@@ -334,6 +337,89 @@ const ChatPage: React.FC = () => {
                     Send
                 </button>
             </form>
+
+
+            {/* flashcard modal */}
+            {showModal && (
+            <div className="modal fade show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="auth-card">
+                    <h2>Add Flashcard</h2>
+                    <div className="mb-3">
+                    <label>Flashcard Set</label>
+                    <select
+                        className="form-select"
+                        value={selectedSetId ?? ""}
+                        onChange={(e) => setSelectedSetId(e.target.value)}
+                    >
+                        {flashcardSets.map((set) => (
+                        <option key={set.flashcardSetId} value={set.flashcardSetId}>
+                            {set.flashcardSetName} ({set.language} → {set.learningLanguage})
+                        </option>
+                        ))}
+                    </select>
+                    </div>
+                    <div className="mb-3">
+                    <label>Front</label>
+                    <input
+                        type="text"
+                        value={front}
+                        onChange={(e) => setFront(e.target.value)}
+                    />
+                    </div>
+                    <div className="mb-3">
+                    <label>Back (optional)</label>
+                    <input
+                        type="text"
+                        value={back}
+                        onChange={(e) => setBack(e.target.value)}
+                    />
+                    </div>
+                    <div className="auth-buttons">
+                    <button
+                        className="btn-secondary"
+                        type="button"
+                        onClick={() => {
+                        const temp = front;
+                        setFront(back);
+                        setBack(temp);
+                        }}
+                    >
+                        Switch Front/Back
+                    </button>
+                    <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                    <button
+                        className="btn-primary"
+                        onClick={async () => {
+                        if (!selectedSetId || !front.trim()) return;
+                        try {
+                            await apiService.post(`/flashcards/${selectedSetId}`, {
+                            contentFront: front,
+                            ...(back ? { contentBack: back } : {}),
+                            }, {
+                            headers: {
+                                Authorization: token,
+                                "Content-Type": "application/json",
+                            },
+                            });
+                            alert("Flashcard added!");
+                            setShowModal(false);
+                        } catch (err) {
+                            console.error("Failed to add flashcard:", err);
+                            alert("Something went wrong.");
+                        }
+                        }}
+                    >
+                        Confirm
+                    </button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            )}
+
+
+
         </>
     );
 };
