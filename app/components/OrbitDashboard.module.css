@@ -1,4 +1,6 @@
 .orbitContainer {
+  top: -10vh;
+  margin-top: 1000px;
   position: relative;
   width: 100%;
   display: flex;
@@ -21,14 +23,14 @@
 }
 
 .centerUser .avatar {
-  width: 100px;
-  height: 100px;
+  width: 6vw;
+  height: 6vw;
   background-color: #9B86BD;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 28px;
+  font-size: 2vw;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
 }
@@ -39,36 +41,31 @@
 }
 
 .centerUser p {
-  margin-top: 5px;
+  margin-top: 0.5vh;
   color: white;
   font-size: 0.8rem;
 }
 
-
-
 .orbit {
   position: relative;
-  width: 300px;
-  height: 300px;
+  width: 24vw;
+  height: 24vw;
   list-style: none;
   padding: 0;
   margin: 0;
   border-radius: 50%;
-  border: 1px dashed rgba(255, 255, 255, 0.3); /* 👈 Debug ring */
+  border: 1px dashed rgba(255, 255, 255, 0.3);
   background-color: transparent;
 }
 
-
 .orbitItem {
   position: absolute;
-  top: 42%;
+  top: 40%;
   left: 42%;
   transform: translate(150, -150);
-  text-align: center;   
-  cursor: pointer;
-  transition: transform 0.3s ease;
+  text-align: center;
   cursor: grab;
-
+  transition: transform 0.3s ease;
 }
 
 .orbitItem:active {
@@ -79,8 +76,6 @@
   transform: scale(1.05);
 }
 
-
-
 .orbitItemInner {
   display: flex;
   flex-direction: column;
@@ -89,27 +84,25 @@
   transition: transform 0.3s ease;
 }
 
-
 .orbitUsername {
-  max-width: 80px;
+  max-width: 6vw;
   word-wrap: break-word;
   white-space: normal;
   text-align: center;
   font-size: 0.75rem;
   color: white;
-  margin-top: 5px;
+  margin-top: 0.5vh;
 }
 
-
 .avatar {
-  width: 50px;
-  height: 50px;
+  width: 4vw;
+  height: 4vw;
   background-color: #e2bbe9;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 2vw;
   margin: 0 auto;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -123,18 +116,17 @@
 }
 
 .avatarImage {
-    will-change: transform;
-
-  width: 60px;
-  height: 60px;
+  will-change: transform;
+  width: 5vw;
+  height: 5vw;
   border-radius: 50%;
   object-fit: cover;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .avatarImageLarge {
-  width: 100px;
-  height: 100px;
+  width: 8vw;
+  height: 8vw;
   border-radius: 50%;
   object-fit: cover;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -150,9 +142,8 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
-
 .orbitItem p {
-  margin-top: 5px;
+  margin-top: 0.5vh;
   color: white;
   font-size: 0.75rem;
 }

@@ -9,10 +9,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import styles from "./page.module.css";
 
 interface ChatSummary {
-    chatId: string;
-    otherUser: { id: number; username: string; photo?: string };
-    lastMessage: Message | null;
+  chatId: string;
+  otherUser: {
+    id: number;
+    username: string;
+    photo?: string;
+  };
+  lastMessage: Message | null;
 }
+
 
 interface Message {
     messageId?: string;
@@ -85,9 +90,20 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
 
                     return {
                         chatId: chat.chatId,
-                        otherUser,
+                        otherUser: {
+                            id: 0,
+                            username: chat.userIds.length >= 3
+                            ? chat.name ?? "Unnamed Group"
+                            : otherUser.username ?? "Unknown",
+
+                            photo: chat.userIds.length >= 3
+                            ? "/images/default-group.png"
+                            : otherUser.photo || "/images/default-user.png",
+                        },
                         lastMessage,
                     };
+
+
                 })
             );
 
@@ -126,10 +142,11 @@ export default function ContactList({ selectedUserId }: { selectedUserId?: numbe
                     console.log("Chat summary: ", summary)
                     return (
                         <div
-                      key={summary.chatId}
-                      className={styles.clickableRow}
-                      onClick={() => router.push(`/chats/${summary.chatId}`)}
-                    >
+                        key={summary.chatId}
+                        className={styles.clickableRow}
+                        onClick={() => router.push(`/chats/${summary.chatId}`)}
+                        >
+
                       <img
                         src={summary.otherUser.photo || "/images/default-user.png"}
                         alt={`${summary.otherUser.username} avatar`}

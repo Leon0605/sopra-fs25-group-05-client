@@ -149,7 +149,6 @@ const Dashboard: React.FC = () => {
       : [...chatGroup, userId]
     ).filter((id): id is number => id !== null);
 
-
     try {
       if (!userId || groupToUse.length < 2) {
         alert("A minimum of two users are necessary for a chat.");
@@ -171,7 +170,21 @@ const Dashboard: React.FC = () => {
       if (existingChat) {
         router.push(`chats/${existingChat.chatId}`);
       } else {
-        const newChatId = await apiService.post<string>("chats", groupToUse);
+        let chatName = "";
+
+        if (groupToUse.length > 2) {
+          chatName = prompt("Enter a name for the group chat:")?.trim() || "";
+          if (!chatName) {
+            alert("Group chat name is required.");
+            return;
+          }
+        }
+
+        const newChatId = await apiService.post<string>("chats", {
+          userIds: groupToUse,
+          chatName,
+        });
+
         router.push(`chats/${newChatId}`);
       }
     } catch (err) {
@@ -179,6 +192,7 @@ const Dashboard: React.FC = () => {
       alert("Error starting chat.");
     }
   };
+
 
 
   if (!hasMounted || !token || !currentUser) {
@@ -191,7 +205,7 @@ const Dashboard: React.FC = () => {
 
 
 return (
-  <div className="container-fluid min-vh-100 py-3 px-5" style={{ color: "white" }}>
+  <div className="container-fluid min-vh-100 py-3 px-5"   style={{ color: "white", overflowX: "hidden", overflowY: "hidden", height: "100vh" }}>
     <Navbar />
 
     <div
@@ -205,17 +219,18 @@ return (
         draggable={false}
         style={{
           position: "fixed",
-          left: "10%",
-          top: "80%",
-          transform: "translateY(-50%)",
-          width: "100px",
+          left: "3vw",           // 2% from left edge of viewport
+          bottom: "0vh",         // 2% from bottom edge of viewport
+          width: "10vw",         // Size also in viewport width
+          maxWidth: "140px",     // Prevent it from growing too large
+          height: "auto",
           cursor: "pointer",
           transition: "transform 0.2s ease",
           zIndex: 10,
         }}
         onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-50%) scale(1.1)")}
         onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(-50%)")}
-        onClick={() => alert("👽 Dont forget to train your vocabulary!")}
+        onClick={() => alert("👽 Dont forget to train with your flashcards!")}
       />
 
       {/* Right drop-zone (Rocket) */}
@@ -241,10 +256,10 @@ return (
         }}
         style={{
           position: "absolute",
-          right: "0%",
-          top: "0%",
-          width: "25%",
-          height: "60%",
+          right: "4vw",             // small fixed margin from right edge
+          top: "3vh",              // distance from top
+          width: "22vw",            // width relative to viewport width
+          height: "55vh",           // height relative to viewport height
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -285,7 +300,7 @@ return (
         </span>
 
         {/* Overlay preview */}
-        {(isDragging || isHovered) && (
+        {(isDragging || isHovered || groupMembers.length > 0) && (
           <div
             style={{
               display: "flex",
@@ -350,7 +365,6 @@ return (
           </div>
         )}
       </div>
-
 
 
       {/* Orbit */}
