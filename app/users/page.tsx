@@ -15,7 +15,7 @@ const Dashboard: React.FC = () => {
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  
+  const {value: userId} = useLocalStorage<number>("userId", 0);
   const [hasMounted, setHasMounted] = useState(false);
   const { value: token } = useLocalStorage<string>("token", "");
   
@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
       if (hasMounted && !token) {
         router.push("/login");
       }
-    }, [hasMounted, token]);
+    }, [hasMounted, token,userId]);
     
   useEffect(() => {
     const fetchUsers = async () => {
@@ -53,8 +53,8 @@ const Dashboard: React.FC = () => {
   // if the dependency array is left away, the useEffect will run on every state change. Since we do a state change to users in the useEffect, this results in an infinite loop.
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
 
-  const filteredUsers = (users ?? []).filter((u) =>
-    u.username?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = (users ?? []).filter(
+    (u) => u.id !== userId && u.username?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (!hasMounted || !token || !users) {
