@@ -29,13 +29,11 @@ const ChatPage: React.FC = () => {
     const params = useParams();
     const chatId = params.id;
     const apiService = useApi();
-    const router = useRouter();
     const { value: token } = useLocalStorage<string>("token", "");
     const [hasMounted, setHasMounted] = useState(false);
     const [users, setUsers] = useState<User[] | null>(null);
     const { value: userId } = useLocalStorage<number>("userId", 0);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [isConnected, setIsConnected] = useState(false);
     const stompClientRef = useRef<Client | null>(null);
     const [language, setLanguage] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -72,13 +70,6 @@ const ChatPage: React.FC = () => {
         }
     }, [hasMounted, token]);
 
-    // Assign a color to a user
-    const getUserColor = (userId: number): string => {
-        if (userColors[userId]) return userColors[userId];
-        const color = colours[userId % colours.length];
-        userColors[userId] = color;
-        return color;
-    };
 
 
     // Send a message
@@ -145,19 +136,13 @@ const ChatPage: React.FC = () => {
         const stompClient = new Client({
             webSocketFactory: () => socket, // Use SockJS as the WebSocket factory
             onConnect: () => {
-                setIsConnected(true);
                 stompClientRef.current = stompClient;
-
-                // Retrieve the user's language preference
-                const userId = localStorage.getItem("userId");
-                const currentUser = users?.find((user) => user.id === Number(userId));
 
                 stompClient.subscribe(`/topic/${language}/${chatId}`, (message) => {
                     if (message.body) handleIncomingMessage(message.body);
                 });
             },
             onDisconnect: () => {
-                setIsConnected(false);
             },
         });
 

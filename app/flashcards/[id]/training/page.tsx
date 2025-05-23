@@ -83,7 +83,7 @@ const FlashcardTraining: React.FC = () => {
     }
 
 
-    let filtered = flashcards.filter((card) => {
+    const filtered = flashcards.filter((card) => {
       if (card.status === "NOTTRAINED" && includeNotTrained) return true;
       if (card.status === "WRONG" && includeWrong) return true;
       if (card.status === "CORRECT" && includeCorrect) return true;

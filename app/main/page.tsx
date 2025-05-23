@@ -17,9 +17,8 @@ const Dashboard: React.FC = () => {
   const [friends, setFriends] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
-  const { clear: clearToken, value: token } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId, value: userId } = useLocalStorage<number>("userId", 0);
-  const { clear: clearNotificationsEnabled } = useLocalStorage<boolean>("notificationsEnabled", false);
+  const { value: token } = useLocalStorage<string>("token", "");
+  const { value: userId } = useLocalStorage<number>("userId", 0);
   const [groupMembers, setGroupMembers] = useState<User[]>([]);
   const [isDraggingOver, setIsDraggingOver] = useState(false); //cursor on rocket
   const [isDragging, setIsDragging] = useState(false); //drag in process
